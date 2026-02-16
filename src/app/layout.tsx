@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
   title: "Balance",
@@ -19,6 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
   themeColor: "#4f46e5",
 };
 
@@ -37,7 +39,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <ServiceWorkerRegistration />
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

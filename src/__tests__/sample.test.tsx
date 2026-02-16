@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import Home from "@/app/page";
+import DashboardPage from "@/app/page";
 
-describe("Home page", () => {
-  it("renders the app title", () => {
-    render(<Home />);
-    expect(screen.getByText("Balance")).toBeInTheDocument();
+describe("Dashboard page", () => {
+  it("renders the welcome heading", () => {
+    render(<DashboardPage />);
+    expect(screen.getByText("Welcome to Balance")).toBeInTheDocument();
   });
 });
