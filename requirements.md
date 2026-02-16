@@ -69,7 +69,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Build the app's layout skeleton: a bottom navigation bar (Dashboard, People, Life Areas, Settings), a top header with the app name, and a scrollable main content area. Use a mobile-first design that works well on phones but is usable on desktop. Create placeholder pages for each nav tab.
 
 ### TASK-003: Set up local database layer with Dexie.js
-- **Status**: pending
+- **Status**: done
 - **Priority**: high
 - **Dependencies**: TASK-001
 - **Description**: Install and configure Dexie.js as the IndexedDB wrapper. Define the database with versioning support. Create a database service module that all components will use to read/write data. Include basic error handling and a hook (e.g., `useDb`) for React components to access the database.
