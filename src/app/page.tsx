@@ -17,8 +17,10 @@ import { CheckInForm } from "@/components/CheckInForm";
 import { ActivityForm } from "@/components/ActivityForm";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { LocationPrompt } from "@/components/LocationPrompt";
+import { PlaceQuickCreate } from "@/components/PlaceQuickCreate";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
+import { useLocation } from "@/hooks/useLocation";
 import type { CheckInType, WeekStartDay } from "@/types/models";
 
 // ---------------------------------------------------------------------------
@@ -149,6 +151,8 @@ export default function DashboardPage() {
   const [showFreeTimeFlow, setShowFreeTimeFlow] = useState(false);
   const [freeTimeInputs, setFreeTimeInputs] = useState<FreeTimeInputs | null>(null);
   const [quickAction, setQuickAction] = useState<QuickAction | null>(null);
+  const [quickCreateLocation, setQuickCreateLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const { loading: imHereLoading, requestPosition } = useLocation();
 
   // Load all data needed for the dashboard
   const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
@@ -322,10 +326,38 @@ export default function DashboardPage() {
     [lifeAreas],
   );
 
-  const handleNewPlace = useCallback(() => {
-    // Navigate to saved places settings to create a new place
-    window.location.href = "/settings/saved-places";
+  const handleNewPlace = useCallback((lat: number, lng: number) => {
+    setQuickCreateLocation({ lat, lng });
   }, []);
+
+  const handleImHere = useCallback(async () => {
+    const pos = await requestPosition();
+    if (pos) {
+      setQuickCreateLocation({ lat: pos.lat, lng: pos.lng });
+    }
+  }, [requestPosition]);
+
+  const handleQuickCreateComplete = useCallback(() => {
+    setQuickCreateLocation(null);
+  }, []);
+
+  const handleQuickCreateCancel = useCallback(() => {
+    setQuickCreateLocation(null);
+  }, []);
+
+  // If the quick-create place flow is active, show it
+  if (quickCreateLocation) {
+    return (
+      <div className="space-y-4">
+        <PlaceQuickCreate
+          lat={quickCreateLocation.lat}
+          lng={quickCreateLocation.lng}
+          onComplete={handleQuickCreateComplete}
+          onCancel={handleQuickCreateCancel}
+        />
+      </div>
+    );
+  }
 
   // If a quick action form is active, show it
   if (quickAction) {
@@ -395,6 +427,37 @@ export default function DashboardPage() {
         onLogActivity={handleLocationActivity}
         onNewPlace={handleNewPlace}
       />
+
+      {/* "I'm here" button for quick place saving */}
+      <button
+        type="button"
+        onClick={handleImHere}
+        disabled={imHereLoading}
+        className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-blue-600"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-gray-900">
+            {imHereLoading ? "Getting location..." : "I\u2019m here"}
+          </p>
+          <p className="text-xs text-gray-500">Save this place for quick logging</p>
+        </div>
+      </button>
 
       {/* "I have free time" button / flow */}
       {showFreeTimeFlow ? (

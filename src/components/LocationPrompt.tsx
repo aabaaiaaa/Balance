@@ -17,8 +17,8 @@ interface LocationPromptProps {
   onLogCheckIn: (contactId: number, placeName: string) => void;
   /** Called when user wants to log an activity at a place linked to a life area. */
   onLogActivity: (lifeAreaId: number, placeName: string) => void;
-  /** Called when user wants to save a new place (not near any known place). */
-  onNewPlace: () => void;
+  /** Called when user wants to save a new place (not near any known place). Receives current GPS coordinates. */
+  onNewPlace: (lat: number, lng: number) => void;
 }
 
 type PromptState =
@@ -42,6 +42,7 @@ export function LocationPrompt({
 }: LocationPromptProps) {
   const [promptState, setPromptState] = useState<PromptState>({ type: "loading" });
   const [selectedPlace, setSelectedPlace] = useState<SavedPlace | null>(null);
+  const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
   const hasChecked = useRef(false);
 
   const savedPlaces = useLiveQuery(
@@ -75,6 +76,7 @@ export function LocationPrompt({
       async (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        setCurrentPosition({ lat, lng });
         const nearbyPlaces = findNearbyPlaces(lat, lng, savedPlaces);
 
         // Passive tracking: update lastVisited and visitCount for all nearby places
@@ -190,8 +192,13 @@ export function LocationPrompt({
           <div className="flex shrink-0 gap-1">
             <button
               type="button"
-              onClick={onNewPlace}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700"
+              onClick={() => {
+                if (currentPosition) {
+                  onNewPlace(currentPosition.lat, currentPosition.lng);
+                }
+              }}
+              disabled={!currentPosition}
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
             >
               Save
             </button>
