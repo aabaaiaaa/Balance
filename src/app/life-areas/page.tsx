@@ -5,12 +5,14 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { LifeAreaCard } from "@/components/LifeAreaCard";
 import { LifeAreaForm } from "@/components/LifeAreaForm";
+import { LifeAreaDetail } from "@/components/LifeAreaDetail";
 import type { WeekStartDay } from "@/types/models";
 
 type ViewState =
   | { mode: "list" }
   | { mode: "add" }
-  | { mode: "edit"; lifeAreaId: number };
+  | { mode: "edit"; lifeAreaId: number }
+  | { mode: "detail"; lifeAreaId: number };
 
 /** Get the start-of-week timestamp based on the user's weekStartDay preference. */
 function getWeekStart(weekStartDay: WeekStartDay): number {
@@ -64,6 +66,16 @@ export default function LifeAreasPage() {
     return map;
   }, [activities]);
 
+  if (view.mode === "detail") {
+    return (
+      <LifeAreaDetail
+        lifeAreaId={view.lifeAreaId}
+        onBack={() => setView({ mode: "list" })}
+        onEdit={(id) => setView({ mode: "edit", lifeAreaId: id })}
+      />
+    );
+  }
+
   if (view.mode === "add") {
     return (
       <LifeAreaForm
@@ -77,8 +89,8 @@ export default function LifeAreasPage() {
     return (
       <LifeAreaForm
         lifeAreaId={view.lifeAreaId}
-        onComplete={() => setView({ mode: "list" })}
-        onCancel={() => setView({ mode: "list" })}
+        onComplete={() => setView({ mode: "detail", lifeAreaId: view.lifeAreaId })}
+        onCancel={() => setView({ mode: "detail", lifeAreaId: view.lifeAreaId })}
       />
     );
   }
@@ -105,7 +117,7 @@ export default function LifeAreasPage() {
               key={area.id}
               area={area}
               hoursThisWeek={hoursPerArea.get(area.id!) ?? 0}
-              onTap={(id) => setView({ mode: "edit", lifeAreaId: id })}
+              onTap={(id) => setView({ mode: "detail", lifeAreaId: id })}
             />
           ))}
         </div>

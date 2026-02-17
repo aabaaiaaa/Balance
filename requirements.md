@@ -105,7 +105,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Create the Life Areas tab showing all life areas as cards. Each card displays: area name, icon, target hours per week, and hours logged this week (with a simple progress bar). Allow users to edit the target hours per week for each area. Allow adding custom life areas and editing/deleting non-default ones. Pre-populate with the five default areas on first launch.
 
 ### TASK-009: Build activity logging within life areas
-- **Status**: pending
+- **Status**: done
 - **Priority**: medium
 - **Dependencies**: TASK-008
 - **Description**: Tapping a life area card opens its detail view. Add a "Log activity" button: description (free text), duration in minutes, date (defaults to now), optional notes. Show a history of recent activities for that area (last 20). Include a weekly summary showing total time spent this week vs. the target. "This week" is calculated using the `weekStartDay` preference from UserPreferences (defaults to Monday).
