@@ -378,23 +378,25 @@ export class PeerConnection {
         return;
       }
 
-      if (this.dataChannel.readyState === "open") {
+      const dc = this.dataChannel;
+
+      if (dc.readyState === "open") {
         resolve();
         return;
       }
 
-      const originalOnOpen = this.dataChannel.onopen;
-      this.dataChannel.onopen = (event) => {
+      const originalOnOpen = dc.onopen;
+      dc.onopen = (event) => {
         if (typeof originalOnOpen === "function") {
-          originalOnOpen.call(this.dataChannel, event);
+          originalOnOpen.call(dc, event);
         }
         resolve();
       };
 
-      const originalOnError = this.dataChannel.onerror;
-      this.dataChannel.onerror = (event) => {
+      const originalOnError = dc.onerror;
+      dc.onerror = (event) => {
         if (typeof originalOnError === "function") {
-          originalOnError.call(this.dataChannel, event);
+          originalOnError.call(dc, event);
         }
         reject(new Error("Data channel error while waiting to open"));
       };

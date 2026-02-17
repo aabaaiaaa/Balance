@@ -47,7 +47,6 @@ export function useDb(): UseDbResult {
 
   useEffect(() => {
     if (db.isOpen()) {
-      setIsReady(true);
       return;
     }
 

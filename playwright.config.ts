@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000";
+const serveDir = process.env.E2E_SERVE_DIR || "out";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -8,7 +11,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL,
     trace: "on-first-retry",
   },
   projects: [
@@ -22,7 +25,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npx serve out -l 3000",
+    command: `npx serve ${serveDir} -l 3000`,
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
