@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { TIER_LABELS, CHECK_IN_TYPE_LABELS } from "@/lib/constants";
+import { findPlaceLabel } from "@/lib/location";
 import { CheckInForm } from "@/components/CheckInForm";
-import type { Contact } from "@/types/models";
+import type { Contact, CheckIn } from "@/types/models";
 
 interface ContactDetailProps {
   contactId: number;
@@ -41,6 +42,20 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
         .then((results) => results.slice(0, 10)),
     [contactId]
   );
+
+  const savedPlaces = useLiveQuery(
+    () => db.savedPlaces.filter((p) => p.deletedAt === null).toArray(),
+    []
+  );
+
+  /** Resolve a check-in's location to a saved place label. */
+  const getCheckInPlaceName = useMemo(() => {
+    if (!savedPlaces || savedPlaces.length === 0) return () => null;
+    return (checkIn: CheckIn): string | null => {
+      if (!checkIn.location) return null;
+      return findPlaceLabel(checkIn.location.lat, checkIn.location.lng, savedPlaces);
+    };
+  }, [savedPlaces]);
 
   if (contact === undefined) {
     return (
@@ -202,24 +217,36 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
           </div>
         ) : (
           <div className="space-y-2">
-            {recentCheckIns.map((checkIn) => (
-              <div
-                key={checkIn.id}
-                className="rounded-xl border border-gray-200 bg-white p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">
-                    {CHECK_IN_TYPE_LABELS[checkIn.type]}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatCheckInDate(checkIn.date, renderTime)}
-                  </span>
+            {recentCheckIns.map((checkIn) => {
+              const placeName = getCheckInPlaceName(checkIn);
+              return (
+                <div
+                  key={checkIn.id}
+                  className="rounded-xl border border-gray-200 bg-white p-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-900">
+                      {CHECK_IN_TYPE_LABELS[checkIn.type]}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatCheckInDate(checkIn.date, renderTime)}
+                    </span>
+                  </div>
+                  {placeName && (
+                    <p className="mt-0.5 flex items-center gap-1 text-[10px] text-gray-400">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                      {placeName}
+                    </p>
+                  )}
+                  {checkIn.notes && (
+                    <p className="mt-1 text-xs text-gray-600">{checkIn.notes}</p>
+                  )}
                 </div>
-                {checkIn.notes && (
-                  <p className="mt-1 text-xs text-gray-600">{checkIn.notes}</p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

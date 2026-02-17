@@ -16,6 +16,7 @@ import { FreeTimeSuggestions } from "@/components/FreeTimeSuggestions";
 import { CheckInForm } from "@/components/CheckInForm";
 import { ActivityForm } from "@/components/ActivityForm";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { LocationPrompt } from "@/components/LocationPrompt";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import type { CheckInType, WeekStartDay } from "@/types/models";
@@ -297,6 +298,35 @@ export default function DashboardPage() {
     setQuickAction(null);
   }, []);
 
+  const handleLocationCheckIn = useCallback(
+    (contactId: number, placeName: string) => {
+      const contact = contacts?.find((c) => c.id === contactId);
+      setQuickAction({
+        type: "check-in",
+        contactId,
+        contactName: contact?.name ?? placeName,
+      });
+    },
+    [contacts],
+  );
+
+  const handleLocationActivity = useCallback(
+    (lifeAreaId: number, placeName: string) => {
+      const area = lifeAreas?.find((a) => a.id === lifeAreaId);
+      setQuickAction({
+        type: "activity",
+        lifeAreaId,
+        lifeAreaName: area?.name ?? placeName,
+      });
+    },
+    [lifeAreas],
+  );
+
+  const handleNewPlace = useCallback(() => {
+    // Navigate to saved places settings to create a new place
+    window.location.href = "/settings/saved-places";
+  }, []);
+
   // If a quick action form is active, show it
   if (quickAction) {
     return (
@@ -358,6 +388,13 @@ export default function DashboardPage() {
 
       {/* Install prompt for mobile users */}
       <InstallPrompt />
+
+      {/* Location-aware quick logging suggestions */}
+      <LocationPrompt
+        onLogCheckIn={handleLocationCheckIn}
+        onLogActivity={handleLocationActivity}
+        onNewPlace={handleNewPlace}
+      />
 
       {/* "I have free time" button / flow */}
       {showFreeTimeFlow ? (

@@ -72,3 +72,28 @@ export function findNearbyPlaces<T extends Pick<SavedPlace, "lat" | "lng" | "rad
 ): T[] {
   return places.filter((place) => isWithinRadius(lat, lng, place));
 }
+
+/**
+ * Find the label of the nearest saved place that contains the given position.
+ *
+ * If the position falls within multiple places, returns the closest one.
+ * Returns null if no saved place matches.
+ */
+export function findPlaceLabel(
+  lat: number,
+  lng: number,
+  places: Pick<SavedPlace, "lat" | "lng" | "radius" | "label">[],
+): string | null {
+  let nearest: { label: string; distance: number } | null = null;
+
+  for (const place of places) {
+    const distance = calculateDistance(lat, lng, place.lat, place.lng);
+    if (distance <= place.radius) {
+      if (!nearest || distance < nearest.distance) {
+        nearest = { label: place.label, distance };
+      }
+    }
+  }
+
+  return nearest?.label ?? null;
+}

@@ -3,11 +3,12 @@
 import { useState, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
+import { findPlaceLabel } from "@/lib/location";
 import { LifeAreaIcon } from "@/components/LifeAreaIcon";
 import { ActivityForm } from "@/components/ActivityForm";
 import { HouseholdTaskList } from "@/components/HouseholdTaskList";
 import { GoalList } from "@/components/GoalList";
-import type { WeekStartDay } from "@/types/models";
+import type { Activity, WeekStartDay } from "@/types/models";
 
 interface LifeAreaDetailProps {
   lifeAreaId: number;
@@ -65,6 +66,20 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
         .then((results) => results.slice(0, 20)),
     [lifeAreaId]
   );
+
+  const savedPlaces = useLiveQuery(
+    () => db.savedPlaces.filter((p) => p.deletedAt === null).toArray(),
+    []
+  );
+
+  /** Resolve an activity's location to a saved place label. */
+  const getActivityPlaceName = useMemo(() => {
+    if (!savedPlaces || savedPlaces.length === 0) return () => null;
+    return (activity: Activity): string | null => {
+      if (!activity.location) return null;
+      return findPlaceLabel(activity.location.lat, activity.location.lng, savedPlaces);
+    };
+  }, [savedPlaces]);
 
   // Weekly summary calculations
   const totalMinutesThisWeek = useMemo(() => {
@@ -256,31 +271,43 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
           </div>
         ) : (
           <div className="space-y-2">
-            {recentActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="rounded-xl border border-gray-200 bg-white p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">
-                    {activity.description}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatActivityDate(activity.date)}
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
-                    {formatDuration(activity.durationMinutes)}
-                  </span>
-                  {activity.notes && (
-                    <span className="truncate text-xs text-gray-600">
-                      {activity.notes}
+            {recentActivities.map((activity) => {
+              const placeName = getActivityPlaceName(activity);
+              return (
+                <div
+                  key={activity.id}
+                  className="rounded-xl border border-gray-200 bg-white p-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-900">
+                      {activity.description}
                     </span>
-                  )}
+                    <span className="text-xs text-gray-500">
+                      {formatActivityDate(activity.date)}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+                      {formatDuration(activity.durationMinutes)}
+                    </span>
+                    {placeName && (
+                      <span className="flex items-center gap-0.5 text-[10px] text-gray-400">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        {placeName}
+                      </span>
+                    )}
+                    {activity.notes && (
+                      <span className="truncate text-xs text-gray-600">
+                        {activity.notes}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
