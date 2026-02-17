@@ -102,7 +102,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
     [expectedTotal, onScan, stopScanner],
   );
 
-  const startScanning = useCallback(async () => {
+  const startScanning = useCallback(() => {
     // Check browser support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setState("error");
@@ -112,52 +112,69 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
       return;
     }
 
+    // Transition to scanning state — the useEffect below will initialise
+    // the Html5Qrcode instance once React has rendered the target div.
     setState("scanning");
+  }, []);
 
-    try {
-      const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID, {
-        verbose: false,
-        formatsToSupport: [0], // QR_CODE format
-      });
-      scannerRef.current = scanner;
+  // Initialise the scanner after the "scanning" state renders the target div
+  useEffect(() => {
+    if (state !== "scanning") return;
 
-      await scanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => handleDecodedText(decodedText),
-        undefined,
-      );
-    } catch (err) {
-      if (!mountedRef.current) return;
+    let cancelled = false;
 
-      const message =
-        err instanceof Error ? err.message.toLowerCase() : String(err);
+    async function initScanner() {
+      try {
+        const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID, {
+          verbose: false,
+          formatsToSupport: [0], // QR_CODE format
+        });
+        scannerRef.current = scanner;
 
-      if (
-        message.includes("permission") ||
-        message.includes("denied") ||
-        message.includes("notallowederror")
-      ) {
-        setState("error");
-        setErrorMessage(
-          "Camera access was denied. To scan QR codes, please allow camera access in your browser settings and try again.",
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => handleDecodedText(decodedText),
+          undefined,
         );
-      } else if (
-        message.includes("notfounderror") ||
-        message.includes("no camera")
-      ) {
-        setState("error");
-        setErrorMessage(
-          "No camera found on this device. You need a camera to scan QR codes.",
-        );
-      } else {
-        setState("error");
-        setErrorMessage(
-          "Could not start the camera. Please check your browser settings and try again.",
-        );
+      } catch (err) {
+        if (cancelled || !mountedRef.current) return;
+
+        const message =
+          err instanceof Error ? err.message.toLowerCase() : String(err);
+
+        if (
+          message.includes("permission") ||
+          message.includes("denied") ||
+          message.includes("notallowederror")
+        ) {
+          setState("error");
+          setErrorMessage(
+            "Camera access was denied. To scan QR codes, please allow camera access in your browser settings and try again.",
+          );
+        } else if (
+          message.includes("notfounderror") ||
+          message.includes("no camera")
+        ) {
+          setState("error");
+          setErrorMessage(
+            "No camera found on this device. You need a camera to scan QR codes.",
+          );
+        } else {
+          setState("error");
+          setErrorMessage(
+            "Could not start the camera. Please check your browser settings and try again.",
+          );
+        }
       }
     }
-  }, [handleDecodedText]);
+
+    initScanner();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state, handleDecodedText]);
 
   const handleRetry = useCallback(() => {
     setErrorMessage(null);
