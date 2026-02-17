@@ -3,6 +3,7 @@ import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { AppShell } from "@/components/AppShell";
+import { AppInitializer } from "@/components/AppInitializer";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeScript } from "@/components/ThemeScript";
 
@@ -55,7 +56,9 @@ export default function RootLayout({
         <ThemeProvider>
           <ServiceWorkerRegistration />
           <UpdatePrompt />
-          <AppShell>{children}</AppShell>
+          <AppInitializer>
+            <AppShell>{children}</AppShell>
+          </AppInitializer>
         </ThemeProvider>
       </body>
     </html>

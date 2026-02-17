@@ -201,7 +201,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: In the Settings page, add a notifications section: toggle notifications on/off globally, choose which types of reminders to receive (contact check-ins, life area imbalance, task reminders). Save preferences locally. Include a "Test notification" button that sends a sample notification immediately.
 
 ### TASK-025: Build onboarding flow for first-time users
-- **Status**: pending
+- **Status**: done
 - **Priority**: medium
 - **Dependencies**: TASK-005, TASK-008, TASK-040
 - **Description**: When the app first opens (no data in local DB), show a guided onboarding: (1) Welcome screen explaining what Balance does, (2) "Add your important people" — prompt to add 3-5 key contacts with tiers (check-in frequency auto-fills from tier defaults, user can adjust), (3) "Set your balance targets" — show the default life areas and let users adjust weekly hour targets, (4) "Choose your week start day" — Monday (default) or Sunday, saved to `weekStartDay` in preferences, (5) "Choose your theme" — Light, Dark, or System (default) with a live preview of each option, saved to `theme` in preferences, (6) "You're all set" — navigate to the dashboard. Allow skipping any step. Mark onboarding complete in user preferences.
