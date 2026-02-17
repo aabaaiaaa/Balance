@@ -15,6 +15,7 @@ A mobile-first web app for busy parents who are stretched thin across work, pare
 - **Location awareness** — Save places, get contextual prompts when you arrive somewhere ("You're near Mum's house — log a visit?"), and track visit history.
 - **Partner sync** — Both partners use the app on their own devices and sync data directly between them via WebRTC. The priority algorithm is partner-aware — if your partner already called Mum this week, her priority drops for you.
 - **Dark mode** — Light, dark, and system-following themes.
+- **Device transfer** — Move all your data to a new device over a direct peer-to-peer connection using QR codes or copy/paste for the handshake.
 - **Backup & restore** — Export all data as JSON. Import on a new device with merge or full replace.
 
 ## Privacy & Architecture
@@ -23,7 +24,7 @@ Balance has **no backend**. There are no servers, no databases, no accounts, and
 
 - All data lives locally in the browser using IndexedDB (via [Dexie.js](https://dexie.org/))
 - Devices sync directly over [WebRTC](https://webrtc.org/) peer-to-peer data channels
-- QR codes are used only for the initial connection handshake — actual data flows over the direct connection with no size limits
+- QR codes (or copy/paste on devices without cameras) are used only for the initial connection handshake — actual data flows over the direct connection with no size limits
 - The app works entirely offline after the first visit (PWA with service worker precaching)
 - Location data stays on-device — no external geocoding or map APIs
 
@@ -83,7 +84,7 @@ npx serve out
 
 ## Deployment
 
-The app deploys automatically to GitHub Pages on push to `main` via the included GitHub Actions workflow (`.github/workflows/deploy.yml`). The workflow runs lint, unit tests, component tests, builds the static export, runs E2E tests against it, and deploys.
+The app deploys automatically to GitHub Pages on push to `master` via the included GitHub Actions workflow (`.github/workflows/nextjs.yml`). The workflow runs lint and tests, then builds the static export and deploys.
 
 To deploy to a different static host, run `npm run build` and upload the `/out` directory. Set the `NEXT_PUBLIC_BASE_PATH` environment variable if hosting under a subdirectory (e.g., `NEXT_PUBLIC_BASE_PATH=/Balance`).
 
@@ -93,9 +94,9 @@ To deploy to a different static host, run `npm run build` and upload the `/out` 
 
 When both devices are on the same Wi-Fi, they connect using local network addresses only. No STUN or TURN servers needed.
 
-1. Device A taps **Start Sync** and shows a QR code
-2. Device B taps **Join Sync** and scans the QR code, then shows its own QR code
-3. Device A scans Device B's QR code — the direct connection opens
+1. Device A taps **Start Sync** and shows a QR code (with a "Copy Code" option for devices without cameras)
+2. Device B taps **Join Sync** and scans the QR code (or pastes the copied code), then shows its own QR code
+3. Device A scans Device B's QR code (or pastes the copied code) — the direct connection opens
 4. Both devices exchange data simultaneously and merge using last-write-wins conflict resolution
 
 ### Remote Network (optional — requires internet)

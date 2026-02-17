@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Balance** is a mobile-first PWA for busy parents to manage relationships, life areas, and personal goals. It is entirely client-side — no backend, no accounts. Data lives in IndexedDB (via Dexie.js) and devices sync peer-to-peer over WebRTC using QR codes for signalling.
+**Balance** is a mobile-first PWA for busy parents to manage relationships, life areas, and personal goals. It is entirely client-side — no backend, no accounts. Data lives in IndexedDB (via Dexie.js) and devices sync peer-to-peer over WebRTC using QR codes or copy/paste for signalling.
 
 ## Build & Development Commands
 
@@ -24,7 +24,7 @@ The build step runs `next build` followed by `node scripts/generate-sw.mjs` to p
 
 ## Static Export & Deployment
 
-The app uses `output: "export"` (fully static, no server). Set `NEXT_PUBLIC_BASE_PATH` for subdirectory hosting (e.g., GitHub Pages). The CI workflow (`.github/workflows/deploy.yml`) deploys to GitHub Pages on push to `main`, running lint, unit tests, component tests, build, then E2E tests before deploying.
+The app uses `output: "export"` (fully static, no server). Set `NEXT_PUBLIC_BASE_PATH` for subdirectory hosting (e.g., GitHub Pages). The CI workflow (`.github/workflows/nextjs.yml`) deploys to GitHub Pages on push to `master`, running lint, tests, then building and deploying.
 
 ## Architecture
 
@@ -41,7 +41,7 @@ The app uses `output: "export"` (fully static, no server). Set `NEXT_PUBLIC_BASE
 - `src/lib/` — Core business logic (pure functions, no React)
 - `src/components/` — React components (all client-side)
 - `src/hooks/` — Custom hooks (`useDb`, `useLocation`, `useReminders`)
-- `src/app/` — Next.js App Router pages (dashboard, people, life-areas, settings, sync)
+- `src/app/` — Next.js App Router pages (dashboard, people, life-areas, settings, settings/saved-places, sync, device-transfer)
 - `e2e/` — Playwright E2E tests
 - `src/__tests__/` — Jest unit tests (`.test.ts`) and component tests (`.test.tsx`)
 
@@ -55,6 +55,11 @@ The app uses `output: "export"` (fully static, no server). Set `NEXT_PUBLIC_BASE
 - **`backup.ts`** — Full data export/import (all 11 entity types, unlike sync which excludes 2).
 - **`location.ts`** — Haversine distance, proximity matching against saved places.
 - **`constants.ts`** — Tier defaults, check-in frequencies, life area seeds, notification thresholds.
+- **`device-id.ts`** — UUID v4 device identifier generation with `crypto.randomUUID()` and fallback.
+- **`qr-multicode.ts`** — Split/reassemble data payloads across multiple QR codes (~1,800 bytes per code).
+- **`register-sw.ts`** — Service worker registration, update detection, and periodic update checks.
+- **`reminders.ts`** — On-open reminder system: priority-based OS notifications with cooldowns, welcome-back summaries.
+- **`seed.ts`** — Idempotent first-launch database seeding (default preferences, life areas, device ID).
 
 ### Data Model
 Every entity extends `SyncFields` (`updatedAt`, `deviceId`, `deletedAt`). Soft deletes are used throughout. The `UserPreferences` table uses a string `id` key (not auto-increment). All other tables use `++id` (auto-increment number).
@@ -66,10 +71,12 @@ Uses Tailwind `class` strategy with a `ThemeProvider` context. `ThemeScript` inj
 `RootLayout` → `ThemeProvider` → `ServiceWorkerRegistration` + `UpdatePrompt` + `AppInitializer` → `AppShell` (Header + BottomNav + content).
 
 ### P2P Sync Flow
-1. Device A creates WebRTC offer → compresses SDP → displays as QR code(s)
-2. Device B scans QR → creates answer → displays as QR code(s)
-3. Device A scans answer → data channel opens
+1. Device A creates WebRTC offer → compresses SDP → displays as QR code(s) with a "Copy Code" option
+2. Device B scans QR (or pastes the copied code) → creates answer → displays as QR code(s) with a "Copy Code" option
+3. Device A scans answer (or pastes the copied code) → data channel opens
 4. Both devices exchange sync payloads simultaneously, merge with last-write-wins
+
+The copy/paste alternative allows signalling on devices without cameras (e.g. desktops). The same flow is used for both sync and device transfer.
 
 ### Testing Conventions
 - **Unit tests** (`*.test.ts`): Pure logic, node environment, mock Dexie with `fake-indexeddb`
