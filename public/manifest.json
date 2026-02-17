@@ -4,7 +4,7 @@
   "description": "Stay intentionally connected with the people who matter and keep your life in balance.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#4f46e5",
   "theme_color": "#4f46e5",
   "orientation": "portrait-primary",
   "categories": ["lifestyle", "productivity"],

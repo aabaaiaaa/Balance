@@ -3,6 +3,8 @@ import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { AppShell } from "@/components/AppShell";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeScript } from "@/components/ThemeScript";
 
 export const metadata: Metadata = {
   title: "Balance",
@@ -31,8 +33,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <ThemeScript />
         <link
           rel="apple-touch-icon"
           href={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/icons/icon-192x192.png`}
@@ -49,9 +52,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <ServiceWorkerRegistration />
-        <UpdatePrompt />
-        <AppShell>{children}</AppShell>
+        <ThemeProvider>
+          <ServiceWorkerRegistration />
+          <UpdatePrompt />
+          <AppShell>{children}</AppShell>
+        </ThemeProvider>
       </body>
     </html>
   );
