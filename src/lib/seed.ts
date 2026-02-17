@@ -34,6 +34,7 @@ export async function seedDatabase(): Promise<void> {
       notificationTypes: { ...DEFAULT_NOTIFICATION_TYPES },
       lastAppOpenTimestamp: null,
       lastNotificationTimestamps: {},
+      syncHistory: [],
     };
     await db.userPreferences.put(prefs);
 

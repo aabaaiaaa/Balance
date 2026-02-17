@@ -3,12 +3,12 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db";
+import { db, deleteDatabase } from "@/lib/db";
 import { LinkPartnerFlow } from "@/components/LinkPartnerFlow";
 import { BackupRestore } from "@/components/BackupRestore";
 import { useTheme } from "@/components/ThemeProvider";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
-import type { Theme } from "@/types/models";
+import type { Theme, WeekStartDay } from "@/types/models";
 
 const themeOptions: { value: Theme; label: string; icon: React.ReactNode }[] = [
   {
@@ -50,13 +50,45 @@ const themeOptions: { value: Theme; label: string; icon: React.ReactNode }[] = [
   },
 ];
 
-function ThemeSelector() {
+const weekStartOptions: { value: WeekStartDay; label: string }[] = [
+  { value: "monday", label: "Monday" },
+  { value: "sunday", label: "Sunday" },
+];
+
+function PreferencesSection() {
   const { theme, setTheme } = useTheme();
+  const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
+  const weekStartDay = prefs?.weekStartDay ?? "monday";
+
+  const handleWeekStartChange = useCallback(async (day: WeekStartDay) => {
+    await db.userPreferences.update("prefs", { weekStartDay: day });
+  }, []);
 
   return (
     <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
       <h3 className="font-medium text-gray-900 dark:text-slate-100">Preferences</h3>
-      <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Theme</p>
+
+      {/* Week start day */}
+      <p className="mt-3 text-sm text-gray-500 dark:text-slate-400">Week starts on</p>
+      <div className="mt-2 flex gap-2">
+        {weekStartOptions.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => handleWeekStartChange(opt.value)}
+            className={`flex flex-1 items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+              weekStartDay === opt.value
+                ? "border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                : "border-gray-200 dark:border-slate-700 bg-white dark:bg-card text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Theme */}
+      <p className="mt-4 text-sm text-gray-500 dark:text-slate-400">Theme</p>
       <div className="mt-2 flex gap-2">
         {themeOptions.map((opt) => (
           <button
@@ -82,9 +114,12 @@ export default function SettingsPage() {
   const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
   const lastSync = prefs?.lastSyncTimestamp;
   const isLinked = !!prefs?.partnerDeviceId;
+  const syncHistory = prefs?.syncHistory ?? [];
 
   const [showLinkFlow, setShowLinkFlow] = useState(false);
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
+  const [showClearDataConfirm, setShowClearDataConfirm] = useState(false);
+  const [showSyncHistory, setShowSyncHistory] = useState(false);
 
   const handleUnlink = useCallback(async () => {
     await db.userPreferences.update("prefs", {
@@ -93,6 +128,12 @@ export default function SettingsPage() {
       lastSyncTimestamp: null,
     });
     setShowUnlinkConfirm(false);
+  }, []);
+
+  const handleClearData = useCallback(async () => {
+    await deleteDatabase();
+    setShowClearDataConfirm(false);
+    window.location.reload();
   }, []);
 
   // Show the link partner flow full-screen
@@ -252,6 +293,47 @@ export default function SettingsPage() {
             Sync with Partner
           </Link>
         )}
+
+        {/* Sync history */}
+        {syncHistory.length > 0 && (
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setShowSyncHistory(!showSyncHistory)}
+              className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 transition-colors"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`transition-transform ${showSyncHistory ? "rotate-90" : ""}`}
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              Sync history ({syncHistory.length})
+            </button>
+            {showSyncHistory && (
+              <ul className="mt-2 space-y-1">
+                {syncHistory.map((ts) => (
+                  <li key={ts} className="text-xs text-gray-400 dark:text-slate-500">
+                    {new Date(ts).toLocaleDateString(undefined, {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Saved Places section */}
@@ -291,10 +373,49 @@ export default function SettingsPage() {
           Export a full backup of your data or restore from a previous backup.
         </p>
         <BackupRestore />
+
+        <div className="mt-4 border-t border-gray-200 dark:border-slate-700 pt-4">
+          {!showClearDataConfirm ? (
+            <button
+              type="button"
+              onClick={() => setShowClearDataConfirm(true)}
+              className="text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:text-red-700 dark:hover:text-red-300"
+            >
+              Clear all local data
+            </button>
+          ) : (
+            <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-3">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                This will permanently delete all your data including contacts,
+                check-ins, activities, goals, and preferences. This action
+                cannot be undone.
+              </p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                Consider exporting a backup first.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleClearData}
+                  className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 active:bg-red-800"
+                >
+                  Delete Everything
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowClearDataConfirm(false)}
+                  className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Preferences section */}
-      <ThemeSelector />
+      <PreferencesSection />
 
       {/* About section */}
       <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">

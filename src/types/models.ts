@@ -170,4 +170,6 @@ export interface UserPreferences {
   lastAppOpenTimestamp: number | null;
   /** Map of item keys to last notification timestamp to avoid repeat notifications within 24h. */
   lastNotificationTimestamps: Record<string, number>;
+  /** History of past sync timestamps (most recent first, capped at 20 entries). */
+  syncHistory: number[];
 }

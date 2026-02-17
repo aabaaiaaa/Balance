@@ -300,10 +300,13 @@ export async function performSync(
   const summary = await mergeSyncPayload(incoming);
   summary.totalSent = outgoing.totalRecords;
 
-  // 7. Update lastSyncTimestamp
+  // 7. Update lastSyncTimestamp and sync history
   const syncTimestamp = Date.now();
+  const existingHistory = prefs.syncHistory ?? [];
+  const syncHistory = [syncTimestamp, ...existingHistory].slice(0, 20);
   await db.userPreferences.update("prefs", {
     lastSyncTimestamp: syncTimestamp,
+    syncHistory,
   });
 
   // 8. Send completion acknowledgement

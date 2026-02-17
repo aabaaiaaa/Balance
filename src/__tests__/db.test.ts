@@ -474,6 +474,7 @@ describe("BalanceDatabase", () => {
         notificationTypes: { contactCheckIns: true, lifeAreaImbalance: true, taskReminders: true },
         lastAppOpenTimestamp: null,
         lastNotificationTimestamps: {},
+        syncHistory: [],
       };
       await db.userPreferences.put(prefs);
 
@@ -499,6 +500,7 @@ describe("BalanceDatabase", () => {
         notificationTypes: { contactCheckIns: true, lifeAreaImbalance: true, taskReminders: true },
         lastAppOpenTimestamp: null,
         lastNotificationTimestamps: {},
+        syncHistory: [],
       };
       await db.userPreferences.put(prefs);
       await db.userPreferences.put({ ...prefs, theme: "dark" });
