@@ -27,6 +27,7 @@ import type {
   Activity,
   HouseholdTask,
   Goal,
+  DateNight,
   SnoozedItem,
   SnoozedItemType,
   ContactTier,
@@ -91,7 +92,10 @@ export interface ScoringData {
   activities: Activity[];
   householdTasks: HouseholdTask[];
   goals: Goal[];
+  dateNights: DateNight[];
   snoozedItems: SnoozedItem[];
+  /** Date night target frequency in days (from UserPreferences). */
+  dateNightFrequencyDays?: number;
 }
 
 /** Options for running the priority algorithm. */
@@ -540,6 +544,91 @@ export const goalScorer: ItemScorer = {
   },
 };
 
+/**
+ * Date night scorer.
+ *
+ * Scores based on how overdue the next date night is compared to the
+ * user's preferred frequency (dateNightFrequencyDays, default 14).
+ *
+ * Date nights score higher than most other items when past their target
+ * frequency to surface prominently on the dashboard.
+ *
+ * Score = (daysSinceLastDateNight / frequencyDays) * BASE_WEIGHT
+ * BASE_WEIGHT is set high (6.0) so overdue date nights rank above
+ * most contacts and tasks.
+ *
+ * Partner-aware: if the partner logged a date night recently (within
+ * the frequency window), both partners already benefited — the scorer
+ * naturally picks this up since DateNight records sync between devices.
+ */
+export const dateNightScorer: ItemScorer = {
+  type: "date-night",
+  score(data: ScoringData, ctx: ScoringContext): ScoredItem[] {
+    const frequencyDays = data.dateNightFrequencyDays ?? 14;
+    if (frequencyDays <= 0) return [];
+
+    // Check if date night is snoozed (uses synthetic ID 0)
+    const snoozedSet = buildSnoozedSet(data.snoozedItems, ctx.now);
+    if (isSnoozed(snoozedSet, "date-night", 0)) return [];
+
+    // Find the Partner Time life area name
+    const areaName = (() => {
+      for (const area of data.lifeAreas) {
+        if (area.deletedAt === null) {
+          const lower = area.name.toLowerCase();
+          if (lower.includes("partner")) {
+            return area.name;
+          }
+        }
+      }
+      return "Partner Time";
+    })();
+
+    // Find the most recent non-deleted date night
+    const activeDateNights = data.dateNights.filter((dn) => dn.deletedAt === null);
+    const lastDateNight = activeDateNights.reduce<DateNight | null>(
+      (latest, dn) => (!latest || dn.date > latest.date ? dn : latest),
+      null,
+    );
+
+    const daysSinceLast = lastDateNight
+      ? (ctx.now - lastDateNight.date) / (1000 * 60 * 60 * 24)
+      : Infinity;
+
+    const overdueRatio = daysSinceLast / frequencyDays;
+
+    // Only suggest when at least 50% through the frequency window
+    if (overdueRatio < 0.5) return [];
+
+    // High base weight so date nights surface prominently when overdue
+    const BASE_WEIGHT = 6.0;
+    const score = overdueRatio * BASE_WEIGHT;
+
+    const daysSinceRounded = daysSinceLast === Infinity ? null : Math.floor(daysSinceLast);
+
+    const reason =
+      daysSinceRounded === null
+        ? "You haven\u2019t had a date night yet"
+        : daysSinceRounded === 0
+          ? "You had a date night today"
+          : `Last date night was ${daysSinceRounded} day${daysSinceRounded === 1 ? "" : "s"} ago`;
+
+    // Use a synthetic ID of 0 — there's only ever one "plan a date night" item
+    return [
+      {
+        key: "date-night:0",
+        type: "date-night",
+        title: "Plan a date night",
+        reason,
+        score,
+        itemId: 0,
+        estimatedMinutes: getTimeEstimate("date-night"),
+        lifeArea: areaName,
+      },
+    ];
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Configurable time estimate defaults (in minutes)
 // ---------------------------------------------------------------------------
@@ -564,6 +653,8 @@ const timeEstimateDefaults: Record<string, number> = {
   "household-task": 30,
   // Goals default to a single work session
   goal: 30,
+  // Date nights are typically a full evening out
+  "date-night": 120,
 };
 
 /** Get the default time estimate for an item type and optional sub-type. */
@@ -676,6 +767,7 @@ registerScorer(contactScorer);
 registerScorer(lifeAreaScorer);
 registerScorer(householdTaskScorer);
 registerScorer(goalScorer);
+registerScorer(dateNightScorer);
 
 // ---------------------------------------------------------------------------
 // Core algorithm

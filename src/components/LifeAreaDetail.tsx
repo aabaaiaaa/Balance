@@ -8,6 +8,7 @@ import { LifeAreaIcon } from "@/components/LifeAreaIcon";
 import { ActivityForm } from "@/components/ActivityForm";
 import { HouseholdTaskList } from "@/components/HouseholdTaskList";
 import { GoalList } from "@/components/GoalList";
+import { DateNightSection } from "@/components/DateNightSection";
 import type { Activity, WeekStartDay } from "@/types/models";
 
 interface LifeAreaDetailProps {
@@ -105,6 +106,13 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
     if (!area) return false;
     const lower = area.name.toLowerCase();
     return lower.includes("personal") && lower.includes("goal");
+  }, [area]);
+
+  // Show date night section for Partner Time-type life areas
+  const isPartnerTimeArea = useMemo(() => {
+    if (!area) return false;
+    const lower = area.name.toLowerCase();
+    return lower.includes("partner");
   }, [area]);
 
   if (area === undefined) {
@@ -250,6 +258,11 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
       {/* Goal list (shown only for Personal Goals-type life areas) */}
       {isPersonalGoalsArea && (
         <GoalList lifeAreaId={lifeAreaId} />
+      )}
+
+      {/* Date night section (shown only for Partner Time-type life areas) */}
+      {isPartnerTimeArea && (
+        <DateNightSection />
       )}
 
       {/* Activity history */}

@@ -129,7 +129,7 @@ export interface SavedPlace extends SyncFields {
   visitCount: number;
 }
 
-export type SnoozedItemType = "contact" | "task" | "goal";
+export type SnoozedItemType = "contact" | "task" | "goal" | "date-night";
 
 export interface SnoozedItem extends SyncFields {
   id?: number;

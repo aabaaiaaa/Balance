@@ -225,7 +225,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: On each priority item in the dashboard, add contextual quick actions so users can act without navigating away: "Call" button that opens the phone dialer (using `tel:` link if phone number stored on the contact), "Log it" button that opens an inline check-in or activity form as a bottom sheet/modal, "Snooze" button that creates a `SnoozedItem` record (from TASK-004) with `snoozedUntil` set to 24 hours from now — the priority algorithm (TASK-011) already excludes snoozed items. Clean up expired `SnoozedItem` records on app open. These reduce friction for time-poor users.
 
 ### TASK-029: Implement recurring partner date-night reminders
-- **Status**: pending
+- **Status**: done
 - **Priority**: low
 - **Dependencies**: TASK-012, TASK-021, TASK-011
 - **Description**: Add a special "date night" feature under Partner Time using the `DateNight` and `DateNightIdea` models from TASK-004, and the `dateNightFrequencyDays` preference (already defined in TASK-004, defaults to 14). Build a date-night section accessible from the Partner Time life area and the dashboard: log date nights with a date and optional notes, show how long since the last one. Register a `DateNight` scorer with the priority algorithm (TASK-011) so it surfaces prominently when overdue — date nights should score higher than most other items when past their target frequency. If a partner is linked, both see date night records after syncing. Include a small ideas bank: users can add date ideas (stored as `DateNightIdea` records) and tap a "Surprise me" button to pick one at random.

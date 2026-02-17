@@ -19,12 +19,13 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { LocationPrompt } from "@/components/LocationPrompt";
 import { PlaceQuickCreate } from "@/components/PlaceQuickCreate";
 import { PartnerActivityFeed } from "@/components/PartnerActivityFeed";
+import { DateNightForm } from "@/components/DateNightForm";
 import { WelcomeBackBanner } from "@/components/WelcomeBackBanner";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import { useLocation } from "@/hooks/useLocation";
 import { useReminders } from "@/hooks/useReminders";
-import type { CheckInType, WeekStartDay, SnoozedItemType, Contact } from "@/types/models";
+import type { CheckInType, WeekStartDay, SnoozedItemType, Contact, DateNight } from "@/types/models";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -32,7 +33,8 @@ import type { CheckInType, WeekStartDay, SnoozedItemType, Contact } from "@/type
 
 type QuickAction =
   | { type: "check-in"; contactId: number; contactName: string }
-  | { type: "activity"; lifeAreaId: number; lifeAreaName: string };
+  | { type: "activity"; lifeAreaId: number; lifeAreaName: string }
+  | { type: "date-night" };
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -93,6 +95,7 @@ function toSnoozedItemType(scoredType: string): SnoozedItemType | null {
     case "contact": return "contact";
     case "household-task": return "task";
     case "goal": return "goal";
+    case "date-night": return "date-night";
     default: return null;
   }
 }
@@ -229,6 +232,9 @@ export default function DashboardPage() {
   const goals = useLiveQuery(() =>
     db.goals.filter((g) => g.deletedAt === null).toArray(),
   );
+  const dateNights = useLiveQuery(() =>
+    db.dateNights.filter((dn) => dn.deletedAt === null).toArray(),
+  );
   const snoozedItems = useLiveQuery(() =>
     db.snoozedItems.filter((s) => s.deletedAt === null).toArray(),
   );
@@ -244,6 +250,7 @@ export default function DashboardPage() {
     activities === undefined ||
     householdTasks === undefined ||
     goals === undefined ||
+    dateNights === undefined ||
     snoozedItems === undefined ||
     prefs === undefined;
 
@@ -270,9 +277,11 @@ export default function DashboardPage() {
       activities: activities ?? [],
       householdTasks: householdTasks ?? [],
       goals: goals ?? [],
+      dateNights: dateNights ?? [],
       snoozedItems: snoozedItems ?? [],
+      dateNightFrequencyDays: prefs?.dateNightFrequencyDays ?? 14,
     };
-  }, [isLoading, contacts, checkIns, lifeAreas, activities, householdTasks, goals, snoozedItems]);
+  }, [isLoading, contacts, checkIns, lifeAreas, activities, householdTasks, goals, dateNights, snoozedItems, prefs]);
 
   // Run on-open reminder check (welcome back banner + OS notifications)
   const { welcomeBack } = useReminders({ data: scoringData, prefs });
@@ -342,6 +351,8 @@ export default function DashboardPage() {
           lifeAreaId: item.itemId,
           lifeAreaName: area?.name ?? "Activity",
         });
+      } else if (item.type === "date-night") {
+        setQuickAction({ type: "date-night" });
       }
     },
     [contacts, lifeAreas],
@@ -452,13 +463,20 @@ export default function DashboardPage() {
             <span className="text-sm font-medium text-gray-500 dark:text-slate-400">
               {quickAction.type === "check-in"
                 ? `Log check-in with ${quickAction.contactName}`
-                : `Log activity for ${quickAction.lifeAreaName}`}
+                : quickAction.type === "date-night"
+                  ? "Log a date night"
+                  : `Log activity for ${quickAction.lifeAreaName}`}
             </span>
           </div>
 
           {quickAction.type === "check-in" ? (
             <CheckInForm
               contactId={quickAction.contactId}
+              onComplete={handleQuickActionComplete}
+              onCancel={handleQuickActionCancel}
+            />
+          ) : quickAction.type === "date-night" ? (
+            <DateNightForm
               onComplete={handleQuickActionComplete}
               onCancel={handleQuickActionCancel}
             />

@@ -11,6 +11,7 @@ import {
   lifeAreaScorer,
   householdTaskScorer,
   goalScorer,
+  dateNightScorer,
   TIER_WEIGHTS,
   PARTNER_DISCOUNT_FACTOR,
   getTimeEstimate,
@@ -30,6 +31,7 @@ import type {
   Activity,
   HouseholdTask,
   Goal,
+  DateNight,
   SnoozedItem,
 } from "@/types/models";
 
@@ -127,6 +129,7 @@ function emptyData(): ScoringData {
     activities: [],
     householdTasks: [],
     goals: [],
+    dateNights: [],
     snoozedItems: [],
   };
 }
@@ -833,9 +836,10 @@ describe("lifeAreaScorer", () => {
 // ---------------------------------------------------------------------------
 
 describe("calculatePriorities", () => {
-  it("returns empty array when no data", () => {
+  it("returns date-night item when no other data (date night scorer always active)", () => {
     const results = calculatePriorities(emptyData(), { now: NOW });
-    expect(results).toEqual([]);
+    // The date-night scorer produces an item even with no date nights (suggesting the first one)
+    expect(results.every((r) => r.type === "date-night")).toBe(true);
   });
 
   it("returns items sorted by score descending", () => {
@@ -974,9 +978,9 @@ describe("calculatePriorities", () => {
     registerScorer(custom);
 
     const results = calculatePriorities(emptyData(), { now: NOW });
-    expect(results).toHaveLength(1);
-    expect(results[0].type).toBe("custom");
-    expect(results[0].score).toBe(100);
+    const customResults = results.filter((r) => r.type === "custom");
+    expect(customResults).toHaveLength(1);
+    expect(customResults[0].score).toBe(100);
 
     unregisterScorer("custom");
   });
@@ -1683,5 +1687,215 @@ describe("getFilteredSuggestions", () => {
 
     // Only the household task is a scored item, and it's 120 min, too long
     expect(results.filter((r) => r.type === "household-task")).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DateNight scorer
+// ---------------------------------------------------------------------------
+
+function makeDateNight(
+  overrides: Partial<DateNight> & { id: number },
+): DateNight {
+  return {
+    date: NOW,
+    notes: "",
+    ideaUsed: null,
+    updatedAt: NOW,
+    deviceId: "device-a",
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+describe("dateNightScorer", () => {
+  it("scores when no date nights exist (never had one)", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      lifeAreas: [makeLifeArea({ id: 1, name: "Partner Time" })],
+    };
+
+    const results = dateNightScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(1);
+    expect(results[0].key).toBe("date-night:0");
+    expect(results[0].title).toBe("Plan a date night");
+    expect(results[0].reason).toContain("haven\u2019t had a date night yet");
+    expect(results[0].score).toBeGreaterThan(0);
+  });
+
+  it("scores higher when overdue (past target frequency)", () => {
+    const data14DaysAgo: ScoringData = {
+      ...emptyData(),
+      dateNights: [makeDateNight({ id: 1, date: NOW - 21 * DAY_MS })],
+      dateNightFrequencyDays: 14,
+    };
+
+    const data7DaysAgo: ScoringData = {
+      ...emptyData(),
+      dateNights: [makeDateNight({ id: 1, date: NOW - 10 * DAY_MS })],
+      dateNightFrequencyDays: 14,
+    };
+
+    const ctx: ScoringContext = {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    };
+
+    const overdue = dateNightScorer.score(data14DaysAgo, ctx);
+    const dueSoon = dateNightScorer.score(data7DaysAgo, ctx);
+
+    expect(overdue).toHaveLength(1);
+    expect(dueSoon).toHaveLength(1);
+    expect(overdue[0].score).toBeGreaterThan(dueSoon[0].score);
+  });
+
+  it("does not score when date night was very recent (under 50% of frequency)", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      dateNights: [makeDateNight({ id: 1, date: NOW - 3 * DAY_MS })],
+      dateNightFrequencyDays: 14,
+    };
+
+    const results = dateNightScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("scores higher than most other items when overdue", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      contacts: [
+        makeContact({
+          id: 1,
+          name: "Friend",
+          tier: "close-friends",
+          checkInFrequencyDays: 14,
+          lastCheckIn: NOW - 21 * DAY_MS,
+        }),
+      ],
+      dateNights: [makeDateNight({ id: 1, date: NOW - 21 * DAY_MS })],
+      dateNightFrequencyDays: 14,
+    };
+
+    const ctx: ScoringContext = {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    };
+
+    const dateNightResults = dateNightScorer.score(data, ctx);
+    const contactResults = contactScorer.score(data, ctx);
+
+    expect(dateNightResults).toHaveLength(1);
+    expect(contactResults).toHaveLength(1);
+    expect(dateNightResults[0].score).toBeGreaterThan(contactResults[0].score);
+  });
+
+  it("excludes soft-deleted date nights", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      dateNights: [
+        makeDateNight({ id: 1, date: NOW - 1 * DAY_MS, deletedAt: NOW }),
+      ],
+      dateNightFrequencyDays: 14,
+    };
+
+    const results = dateNightScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    // Deleted date night doesn't count — scorer should produce a result as if no date night exists
+    expect(results).toHaveLength(1);
+    expect(results[0].reason).toContain("haven\u2019t had a date night yet");
+  });
+
+  it("excludes snoozed date night", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      dateNights: [],
+      snoozedItems: [
+        makeSnoozedItem({ id: 1, itemId: 0, itemType: "date-night", snoozedUntil: NOW + DAY_MS }),
+      ],
+      dateNightFrequencyDays: 14,
+    };
+
+    const results = dateNightScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("uses the dateNightFrequencyDays from data", () => {
+    const dataShort: ScoringData = {
+      ...emptyData(),
+      dateNights: [makeDateNight({ id: 1, date: NOW - 10 * DAY_MS })],
+      dateNightFrequencyDays: 7, // overdue (10 > 7)
+    };
+
+    const dataLong: ScoringData = {
+      ...emptyData(),
+      dateNights: [makeDateNight({ id: 1, date: NOW - 10 * DAY_MS })],
+      dateNightFrequencyDays: 30, // not yet due (10/30 = 0.33 < 0.5)
+    };
+
+    const ctx: ScoringContext = {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    };
+
+    const shortResults = dateNightScorer.score(dataShort, ctx);
+    const longResults = dateNightScorer.score(dataLong, ctx);
+
+    expect(shortResults).toHaveLength(1);
+    expect(longResults).toHaveLength(0);
+  });
+
+  it("uses 120-minute default time estimate", () => {
+    expect(getTimeEstimate("date-night")).toBe(120);
+  });
+
+  it("finds the most recent date night as the reference", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      dateNights: [
+        makeDateNight({ id: 1, date: NOW - 30 * DAY_MS }),
+        makeDateNight({ id: 2, date: NOW - 3 * DAY_MS }), // most recent
+        makeDateNight({ id: 3, date: NOW - 20 * DAY_MS }),
+      ],
+      dateNightFrequencyDays: 14,
+    };
+
+    const results = dateNightScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    // Most recent is 3 days ago — 3/14 = 0.21 < 0.5, so shouldn't suggest
+    expect(results).toHaveLength(0);
   });
 });

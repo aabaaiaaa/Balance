@@ -11,6 +11,7 @@ import {
 } from "@/lib/priority";
 import { CheckInForm } from "@/components/CheckInForm";
 import { ActivityForm } from "@/components/ActivityForm";
+import { DateNightForm } from "@/components/DateNightForm";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import type { CheckInType } from "@/types/models";
@@ -26,7 +27,8 @@ interface FreeTimeSuggestionsProps {
 
 type ActiveAction =
   | { type: "check-in"; contactId: number; contactName: string }
-  | { type: "activity"; lifeAreaId: number; lifeAreaName: string };
+  | { type: "activity"; lifeAreaId: number; lifeAreaName: string }
+  | { type: "date-night" };
 
 // ---------------------------------------------------------------------------
 // Helper: format minutes for display
@@ -149,6 +151,9 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
   const goals = useLiveQuery(() =>
     db.goals.filter((g) => g.deletedAt === null).toArray(),
   );
+  const dateNights = useLiveQuery(() =>
+    db.dateNights.filter((dn) => dn.deletedAt === null).toArray(),
+  );
   const snoozedItems = useLiveQuery(() =>
     db.snoozedItems.filter((s) => s.deletedAt === null).toArray(),
   );
@@ -162,6 +167,7 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
     activities === undefined ||
     householdTasks === undefined ||
     goals === undefined ||
+    dateNights === undefined ||
     snoozedItems === undefined ||
     prefs === undefined;
 
@@ -176,7 +182,9 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
       activities: activities ?? [],
       householdTasks: householdTasks ?? [],
       goals: goals ?? [],
+      dateNights: dateNights ?? [],
       snoozedItems: snoozedItems ?? [],
+      dateNightFrequencyDays: prefs?.dateNightFrequencyDays ?? 14,
     };
 
     const allSuggestions = getFilteredSuggestions(data, {
@@ -200,6 +208,7 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
     activities,
     householdTasks,
     goals,
+    dateNights,
     snoozedItems,
     prefs,
     inputs,
@@ -250,6 +259,8 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
             lifeAreaName: item.lifeArea ?? "DIY/Household",
           });
         }
+      } else if (item.type === "date-night") {
+        setActiveAction({ type: "date-night" });
       }
     },
     [contacts, lifeAreas, goals, householdTasks],
@@ -280,13 +291,20 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
           <span className="text-sm text-gray-400 dark:text-slate-500">
             {activeAction.type === "check-in"
               ? `Log check-in with ${activeAction.contactName}`
-              : `Log activity for ${activeAction.lifeAreaName}`}
+              : activeAction.type === "date-night"
+                ? "Log a date night"
+                : `Log activity for ${activeAction.lifeAreaName}`}
           </span>
         </div>
 
         {activeAction.type === "check-in" ? (
           <CheckInForm
             contactId={activeAction.contactId}
+            onComplete={handleActionComplete}
+            onCancel={handleActionCancel}
+          />
+        ) : activeAction.type === "date-night" ? (
+          <DateNightForm
             onComplete={handleActionComplete}
             onCancel={handleActionCancel}
           />
