@@ -17,9 +17,11 @@
   "dependencies": {
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",
+    "html5-qrcode": "^2.3.8",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-qr-code": "^2.0.18"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
