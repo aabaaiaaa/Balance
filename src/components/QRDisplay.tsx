@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import QRCode from "react-qr-code";
 import { splitIntoChunks } from "@/lib/qr-multicode";
 
@@ -21,8 +21,19 @@ interface QRDisplayProps {
 export function QRDisplay({ data, size = 256, label }: QRDisplayProps) {
   const chunks = useMemo(() => splitIntoChunks(data), [data]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const isMulti = chunks.length > 1;
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(data);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API may not be available
+    }
+  }, [data]);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -79,6 +90,14 @@ export function QRDisplay({ data, size = 256, label }: QRDisplayProps) {
           </div>
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="text-sm font-medium text-indigo-600 dark:text-indigo-400 transition-colors hover:text-indigo-700 dark:hover:text-indigo-300"
+      >
+        {copied ? "Copied!" : "Copy Code"}
+      </button>
     </div>
   );
 }

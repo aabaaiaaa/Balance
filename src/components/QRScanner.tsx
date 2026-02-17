@@ -6,6 +6,7 @@ import { parseChunk, reassembleChunks } from "@/lib/qr-multicode";
 
 type ScannerState =
   | "prompt" // asking the user to grant camera permission
+  | "paste" // manual paste input mode
   | "scanning" // camera active, scanning for QR codes
   | "complete" // all chunks received (multi-code) or single code scanned
   | "error"; // unrecoverable error (denied permission, unsupported browser, etc.)
@@ -27,6 +28,7 @@ const SCANNER_ELEMENT_ID = "qr-scanner-region";
 export function QRScanner({ onScan, onCancel }: QRScannerProps) {
   const [state, setState] = useState<ScannerState>("prompt");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pasteValue, setPasteValue] = useState("");
 
   // Multi-code tracking
   const [expectedTotal, setExpectedTotal] = useState<number | null>(null);
@@ -234,6 +236,64 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
               Cancel
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setState("paste")}
+            className="w-full text-sm font-medium text-indigo-600 dark:text-indigo-400 transition-colors hover:text-indigo-700 dark:hover:text-indigo-300 py-2"
+          >
+            Paste a code instead
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Paste state — manual code entry
+  if (state === "paste") {
+    return (
+      <div className="flex flex-col items-center gap-4 px-4 text-center">
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+            Paste Connection Code
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-slate-300">
+            Paste the code copied from the other device.
+          </p>
+        </div>
+
+        <textarea
+          value={pasteValue}
+          onChange={(e) => setPasteValue(e.target.value)}
+          placeholder="Paste code here..."
+          className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          rows={4}
+          aria-label="Connection code"
+        />
+
+        <div className="flex w-full flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              const trimmed = pasteValue.trim();
+              if (trimmed) {
+                onScan(trimmed);
+              }
+            }}
+            disabled={!pasteValue.trim()}
+            className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-40"
+          >
+            Connect
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPasteValue("");
+              setState("prompt");
+            }}
+            className="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
+          >
+            Back
+          </button>
         </div>
       </div>
     );

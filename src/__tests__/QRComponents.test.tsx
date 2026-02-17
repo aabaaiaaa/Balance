@@ -120,6 +120,23 @@ describe("QRDisplay", () => {
     expect(screen.queryByText(/Code \d+ of/)).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Next QR code")).not.toBeInTheDocument();
   });
+
+  it("copies data to clipboard when Copy Code is clicked", async () => {
+    const user = userEvent.setup();
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+
+    render(<QRDisplay data="test-sdp-data" />);
+
+    await user.click(screen.getByText("Copy Code"));
+
+    expect(writeText).toHaveBeenCalledWith("test-sdp-data");
+    expect(screen.getByText("Copied!")).toBeInTheDocument();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -223,6 +240,55 @@ describe("QRScanner", () => {
     render(<QRScanner onScan={mockOnScan} />);
 
     // Should still show the prompt initially
+    expect(screen.getByText("Camera Access Needed")).toBeInTheDocument();
+  });
+
+  it("shows paste input when 'Paste a code instead' is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(<QRScanner onScan={mockOnScan} onCancel={mockOnCancel} />);
+
+    await user.click(screen.getByText("Paste a code instead"));
+
+    expect(screen.getByText("Paste Connection Code")).toBeInTheDocument();
+    expect(screen.getByLabelText("Connection code")).toBeInTheDocument();
+    expect(screen.getByText("Connect")).toBeInTheDocument();
+    expect(screen.getByText("Back")).toBeInTheDocument();
+  });
+
+  it("calls onScan with pasted text when Connect is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(<QRScanner onScan={mockOnScan} onCancel={mockOnCancel} />);
+
+    await user.click(screen.getByText("Paste a code instead"));
+
+    const textarea = screen.getByLabelText("Connection code");
+    await user.type(textarea, "pasted-sdp-data");
+    await user.click(screen.getByText("Connect"));
+
+    expect(mockOnScan).toHaveBeenCalledWith("pasted-sdp-data");
+  });
+
+  it("disables Connect button when paste input is empty", async () => {
+    const user = userEvent.setup();
+
+    render(<QRScanner onScan={mockOnScan} onCancel={mockOnCancel} />);
+
+    await user.click(screen.getByText("Paste a code instead"));
+
+    expect(screen.getByText("Connect")).toBeDisabled();
+  });
+
+  it("returns to prompt when Back is clicked from paste view", async () => {
+    const user = userEvent.setup();
+
+    render(<QRScanner onScan={mockOnScan} onCancel={mockOnCancel} />);
+
+    await user.click(screen.getByText("Paste a code instead"));
+    expect(screen.getByText("Paste Connection Code")).toBeInTheDocument();
+
+    await user.click(screen.getByText("Back"));
     expect(screen.getByText("Camera Access Needed")).toBeInTheDocument();
   });
 });
