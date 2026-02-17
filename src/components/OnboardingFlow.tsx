@@ -34,7 +34,7 @@ const TOTAL_STEPS = 6;
 function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100">
+      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
         <svg
           width="40"
           height="40"
@@ -44,19 +44,19 @@ function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-indigo-600"
+          className="text-indigo-600 dark:text-indigo-400"
         >
           <circle cx="12" cy="12" r="10" />
           <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
           <path d="M2 12h20" />
         </svg>
       </div>
-      <h2 className="text-2xl font-bold text-gray-900">Welcome to Balance</h2>
-      <p className="mt-3 max-w-sm text-sm text-gray-500">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Welcome to Balance</h2>
+      <p className="mt-3 max-w-sm text-sm text-gray-500 dark:text-slate-400">
         Balance helps you stay intentionally connected with the people who
         matter, take care of yourself, and make the most of your free time.
       </p>
-      <p className="mt-2 max-w-sm text-sm text-gray-500">
+      <p className="mt-2 max-w-sm text-sm text-gray-500 dark:text-slate-400">
         Let&apos;s set things up in a few quick steps.
       </p>
       <button
@@ -69,7 +69,7 @@ function WelcomeStep({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
       <button
         type="button"
         onClick={onSkip}
-        className="mt-3 text-sm text-gray-400 transition-colors hover:text-gray-600"
+        className="mt-3 text-sm text-gray-400 dark:text-slate-500 transition-colors hover:text-gray-600 dark:hover:text-slate-300"
       >
         Skip setup
       </button>
@@ -170,14 +170,14 @@ function AddContactsStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Add your important people</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Add your important people</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Who do you want to stay in touch with? Add 3-5 key contacts to get started.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>
       )}
 
       {/* Added contacts list */}
@@ -186,18 +186,18 @@ function AddContactsStep({
           {contacts.map((c, i) => (
             <div
               key={i}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card px-3 py-2"
             >
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{c.name}</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   {TIER_LABELS[c.tier]} &middot; every {c.checkInFrequencyDays}d
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => handleRemoveContact(i)}
-                className="ml-2 text-xs text-gray-400 transition-colors hover:text-red-500"
+                className="ml-2 text-xs text-gray-400 dark:text-slate-500 transition-colors hover:text-red-500"
                 aria-label={`Remove ${c.name}`}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -211,9 +211,9 @@ function AddContactsStep({
       )}
 
       {/* Add contact form */}
-      <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
+      <div className="space-y-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <div>
-          <label htmlFor="onboarding-contact-name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="onboarding-contact-name" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Name
           </label>
           <input
@@ -222,7 +222,7 @@ function AddContactsStep({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Mum, Dave, Sarah"
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-surface focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -233,14 +233,14 @@ function AddContactsStep({
         </div>
 
         <div>
-          <label htmlFor="onboarding-contact-tier" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="onboarding-contact-tier" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Relationship
           </label>
           <select
             id="onboarding-contact-tier"
             value={tier}
             onChange={(e) => handleTierChange(e.target.value as ContactTier)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-surface px-3 py-2 text-gray-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           >
             {TIER_ORDER.map((t) => (
               <option key={t} value={t}>
@@ -251,7 +251,7 @@ function AddContactsStep({
         </div>
 
         <div>
-          <label htmlFor="onboarding-contact-freq" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="onboarding-contact-freq" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Check-in every
           </label>
           <div className="mt-1 flex items-center gap-2">
@@ -270,16 +270,16 @@ function AddContactsStep({
                   setFrequencyManual(true);
                 }
               }}
-              className="block w-20 rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="block w-20 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 bg-white dark:bg-surface focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
-            <span className="text-sm text-gray-600">days</span>
+            <span className="text-sm text-gray-600 dark:text-slate-300">days</span>
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleAddContact}
-          className="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-100 active:bg-indigo-200"
+          className="w-full rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 px-4 py-2.5 text-sm font-medium text-indigo-700 dark:text-indigo-300 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900 active:bg-indigo-200 dark:active:bg-indigo-800"
         >
           + Add Contact
         </button>
@@ -290,7 +290,7 @@ function AddContactsStep({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
         >
           Back
         </button>
@@ -311,7 +311,7 @@ function AddContactsStep({
         <button
           type="button"
           onClick={onSkip}
-          className="text-sm text-gray-400 transition-colors hover:text-gray-600"
+          className="text-sm text-gray-400 dark:text-slate-500 transition-colors hover:text-gray-600 dark:hover:text-slate-300"
         >
           Skip this step
         </button>
@@ -423,7 +423,7 @@ function BalanceTargetsStep({
   if (lifeAreas === undefined) {
     return (
       <div className="space-y-6">
-        <p className="text-sm text-gray-400">Loading life areas...</p>
+        <p className="text-sm text-gray-400 dark:text-slate-500">Loading life areas...</p>
       </div>
     );
   }
@@ -431,32 +431,32 @@ function BalanceTargetsStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Set your balance targets</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Set your balance targets</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           How many hours per week do you want to spend on each area? You can always
           change these later.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>
       )}
 
       <div className="space-y-3">
         {lifeAreas.map((area) => (
           <div
             key={area.id}
-            className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4"
+            className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
               {areaIcons[area.icon] ?? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 dark:text-slate-500">
                   <circle cx="12" cy="12" r="10" />
                 </svg>
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-900">{area.name}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{area.name}</p>
             </div>
             <div className="flex items-center gap-1.5">
               <input
@@ -465,10 +465,10 @@ function BalanceTargetsStep({
                 step={0.5}
                 value={getTarget(area)}
                 onChange={(e) => area.id != null && handleTargetChange(area.id, e.target.value)}
-                className="w-16 rounded-lg border border-gray-300 px-2 py-1.5 text-center text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                className="w-16 rounded-lg border border-gray-300 dark:border-slate-600 px-2 py-1.5 text-center text-sm text-gray-900 dark:text-slate-100 bg-white dark:bg-surface focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                 aria-label={`Hours per week for ${area.name}`}
               />
-              <span className="text-xs text-gray-500">h/wk</span>
+              <span className="text-xs text-gray-500 dark:text-slate-400">h/wk</span>
             </div>
           </div>
         ))}
@@ -479,7 +479,7 @@ function BalanceTargetsStep({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
         >
           Back
         </button>
@@ -496,7 +496,7 @@ function BalanceTargetsStep({
         <button
           type="button"
           onClick={onSkip}
-          className="text-sm text-gray-400 transition-colors hover:text-gray-600"
+          className="text-sm text-gray-400 dark:text-slate-500 transition-colors hover:text-gray-600 dark:hover:text-slate-300"
         >
           Skip this step
         </button>
@@ -536,8 +536,8 @@ function WeekStartDayStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Choose your week start day</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Choose your week start day</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           When does your week begin? This affects weekly balance targets and summaries.
         </p>
       </div>
@@ -548,28 +548,28 @@ function WeekStartDayStep({
           onClick={() => setDay("monday")}
           className={`flex-1 rounded-xl border-2 px-4 py-6 text-center transition-colors ${
             day === "monday"
-              ? "border-indigo-600 bg-indigo-50"
-              : "border-gray-200 bg-white hover:border-gray-300"
+              ? "border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950"
+              : "border-gray-200 dark:border-slate-700 bg-white dark:bg-card hover:border-gray-300 dark:hover:border-slate-600"
           }`}
         >
-          <p className={`text-lg font-semibold ${day === "monday" ? "text-indigo-700" : "text-gray-900"}`}>
+          <p className={`text-lg font-semibold ${day === "monday" ? "text-indigo-700 dark:text-indigo-300" : "text-gray-900 dark:text-slate-100"}`}>
             Monday
           </p>
-          <p className="mt-1 text-xs text-gray-500">Most common</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">Most common</p>
         </button>
         <button
           type="button"
           onClick={() => setDay("sunday")}
           className={`flex-1 rounded-xl border-2 px-4 py-6 text-center transition-colors ${
             day === "sunday"
-              ? "border-indigo-600 bg-indigo-50"
-              : "border-gray-200 bg-white hover:border-gray-300"
+              ? "border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950"
+              : "border-gray-200 dark:border-slate-700 bg-white dark:bg-card hover:border-gray-300 dark:hover:border-slate-600"
           }`}
         >
-          <p className={`text-lg font-semibold ${day === "sunday" ? "text-indigo-700" : "text-gray-900"}`}>
+          <p className={`text-lg font-semibold ${day === "sunday" ? "text-indigo-700 dark:text-indigo-300" : "text-gray-900 dark:text-slate-100"}`}>
             Sunday
           </p>
-          <p className="mt-1 text-xs text-gray-500">US standard</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">US standard</p>
         </button>
       </div>
 
@@ -578,7 +578,7 @@ function WeekStartDayStep({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
         >
           Back
         </button>
@@ -595,7 +595,7 @@ function WeekStartDayStep({
         <button
           type="button"
           onClick={onSkip}
-          className="text-sm text-gray-400 transition-colors hover:text-gray-600"
+          className="text-sm text-gray-400 dark:text-slate-500 transition-colors hover:text-gray-600 dark:hover:text-slate-300"
         >
           Skip this step
         </button>
@@ -665,8 +665,8 @@ function ThemeStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Choose your theme</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Choose your theme</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Pick a look that suits you. The preview updates live as you tap.
         </p>
       </div>
@@ -679,28 +679,28 @@ function ThemeStep({
             onClick={() => setTheme(opt.value)}
             className={`flex w-full items-center gap-4 rounded-xl border-2 px-4 py-4 text-left transition-colors ${
               theme === opt.value
-                ? "border-indigo-600 bg-indigo-50"
-                : "border-gray-200 bg-white hover:border-gray-300"
+                ? "border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950"
+                : "border-gray-200 dark:border-slate-700 bg-white dark:bg-card hover:border-gray-300 dark:hover:border-slate-600"
             }`}
           >
             <div
               className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
                 theme === opt.value
-                  ? "bg-indigo-100 text-indigo-600"
-                  : "bg-gray-100 text-gray-500"
+                  ? "bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
+                  : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"
               }`}
             >
               {opt.icon}
             </div>
             <div>
-              <p className={`text-sm font-semibold ${theme === opt.value ? "text-indigo-700" : "text-gray-900"}`}>
+              <p className={`text-sm font-semibold ${theme === opt.value ? "text-indigo-700 dark:text-indigo-300" : "text-gray-900 dark:text-slate-100"}`}>
                 {opt.label}
               </p>
-              <p className="text-xs text-gray-500">{opt.description}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{opt.description}</p>
             </div>
             {theme === opt.value && (
               <div className="ml-auto">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600 dark:text-indigo-400">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
@@ -714,7 +714,7 @@ function ThemeStep({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
         >
           Back
         </button>
@@ -730,7 +730,7 @@ function ThemeStep({
         <button
           type="button"
           onClick={onSkip}
-          className="text-sm text-gray-400 transition-colors hover:text-gray-600"
+          className="text-sm text-gray-400 dark:text-slate-500 transition-colors hover:text-gray-600 dark:hover:text-slate-300"
         >
           Skip this step
         </button>
@@ -766,7 +766,7 @@ function AllSetStep({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+      <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
         <svg
           width="40"
           height="40"
@@ -776,13 +776,13 @@ function AllSetStep({
           strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-green-600"
+          className="text-green-600 dark:text-green-400"
         >
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </div>
-      <h2 className="text-2xl font-bold text-gray-900">You&apos;re all set!</h2>
-      <p className="mt-3 max-w-sm text-sm text-gray-500">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">You&apos;re all set!</h2>
+      <p className="mt-3 max-w-sm text-sm text-gray-500 dark:text-slate-400">
         Your Balance app is ready. You can always update your contacts, life areas,
         and preferences from the app.
       </p>
@@ -797,7 +797,7 @@ function AllSetStep({
       <button
         type="button"
         onClick={onBack}
-        className="mt-3 text-sm text-gray-400 transition-colors hover:text-gray-600"
+        className="mt-3 text-sm text-gray-400 dark:text-slate-500 transition-colors hover:text-gray-600 dark:hover:text-slate-300"
       >
         Go back
       </button>
@@ -817,10 +817,10 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
           key={i}
           className={`h-1.5 rounded-full transition-all ${
             i === current
-              ? "w-6 bg-indigo-600"
+              ? "w-6 bg-indigo-600 dark:bg-indigo-400"
               : i < current
-                ? "w-1.5 bg-indigo-300"
-                : "w-1.5 bg-gray-200"
+                ? "w-1.5 bg-indigo-300 dark:bg-indigo-700"
+                : "w-1.5 bg-gray-200 dark:bg-slate-700"
           }`}
         />
       ))}

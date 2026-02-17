@@ -11,9 +11,9 @@ interface HouseholdTaskListProps {
 }
 
 const PRIORITY_BADGE: Record<TaskPriority, string> = {
-  high: "bg-red-50 text-red-700",
-  medium: "bg-amber-50 text-amber-700",
-  low: "bg-green-50 text-green-700",
+  high: "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300",
+  medium: "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300",
+  low: "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -161,7 +161,7 @@ export function HouseholdTaskList({ lifeAreaId }: HouseholdTaskListProps) {
 
   if (showForm) {
     return (
-      <section className="rounded-xl border border-gray-200 bg-white p-4">
+      <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <HouseholdTaskForm
           lifeAreaId={lifeAreaId}
           taskId={editingTaskId}
@@ -178,10 +178,10 @@ export function HouseholdTaskList({ lifeAreaId }: HouseholdTaskListProps) {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Tasks
           {activeCount > 0 && (
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
+            <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">
               ({activeCount})
             </span>
           )}
@@ -192,7 +192,7 @@ export function HouseholdTaskList({ lifeAreaId }: HouseholdTaskListProps) {
             setEditingTaskId(undefined);
             setShowForm(true);
           }}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+          className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
         >
           + Add task
         </button>
@@ -200,8 +200,8 @@ export function HouseholdTaskList({ lifeAreaId }: HouseholdTaskListProps) {
 
       {/* Active tasks */}
       {activeCount === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-400">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+          <p className="text-sm text-gray-400 dark:text-slate-500">
             No tasks yet. Add one to get started.
           </p>
         </div>
@@ -226,7 +226,7 @@ export function HouseholdTaskList({ lifeAreaId }: HouseholdTaskListProps) {
           <button
             type="button"
             onClick={() => setShowDone(!showDone)}
-            className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600"
+            className="flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
           >
             <svg
               width="14"
@@ -282,13 +282,13 @@ function TaskCard({
   const [showActions, setShowActions] = useState(false);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3">
+    <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3">
       <div className="flex items-start gap-3">
         {/* Checkbox to complete */}
         <button
           type="button"
           onClick={() => onComplete(task)}
-          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-gray-300 transition-colors hover:border-green-400 hover:bg-green-50"
+          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-gray-300 dark:border-slate-600 transition-colors hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
           aria-label={`Mark "${task.title}" as done`}
         >
           {task.status === "in-progress" && (
@@ -298,18 +298,18 @@ function TaskCard({
 
         {/* Task content */}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-900">{task.title}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{task.title}</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${PRIORITY_BADGE[task.priority]}`}
             >
               {task.priority}
             </span>
-            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+            <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-medium text-gray-600 dark:text-slate-300">
               ~{formatMinutes(task.estimatedMinutes)}
             </span>
             {task.status === "in-progress" && (
-              <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+              <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:text-indigo-300">
                 {STATUS_LABELS[task.status]}
               </span>
             )}
@@ -321,7 +321,7 @@ function TaskCard({
           <button
             type="button"
             onClick={() => setShowActions(!showActions)}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
             aria-label="Task actions"
           >
             <svg
@@ -345,7 +345,7 @@ function TaskCard({
                 onClick={() => setShowActions(false)}
                 aria-label="Close menu"
               />
-              <div className="absolute right-0 top-8 z-20 w-36 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 top-8 z-20 w-36 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card py-1 shadow-lg">
                 {task.status === "pending" && (
                   <button
                     type="button"
@@ -353,7 +353,7 @@ function TaskCard({
                       onSetInProgress(task);
                       setShowActions(false);
                     }}
-                    className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                   >
                     Start
                   </button>
@@ -364,7 +364,7 @@ function TaskCard({
                     onEdit(task);
                     setShowActions(false);
                   }}
-                  className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                 >
                   Edit
                 </button>
@@ -374,7 +374,7 @@ function TaskCard({
                     onDelete(task);
                     setShowActions(false);
                   }}
-                  className="flex w-full items-center px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  className="flex w-full items-center px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
                 >
                   Delete
                 </button>
@@ -397,13 +397,13 @@ function DoneTaskCard({
   onDelete: (task: HouseholdTask) => void;
 }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+    <div className="rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-surface p-3">
       <div className="flex items-start gap-3">
         {/* Checked checkbox */}
         <button
           type="button"
           onClick={() => onUncomplete(task)}
-          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-green-400 bg-green-50 transition-colors hover:border-gray-300 hover:bg-white"
+          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-950 transition-colors hover:border-gray-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-card"
           aria-label={`Undo "${task.title}"`}
         >
           <svg
@@ -415,16 +415,16 @@ function DoneTaskCard({
             strokeWidth={3}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-green-600"
+            className="text-green-600 dark:text-green-400"
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </button>
 
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-gray-400 line-through">{task.title}</p>
+          <p className="text-sm text-gray-400 dark:text-slate-500 line-through">{task.title}</p>
           {task.completedAt && (
-            <p className="mt-0.5 text-[10px] text-gray-400">
+            <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">
               Completed {formatCompletedDate(task.completedAt)}
             </p>
           )}
@@ -433,7 +433,7 @@ function DoneTaskCard({
         <button
           type="button"
           onClick={() => onDelete(task)}
-          className="shrink-0 rounded p-1 text-gray-300 hover:bg-red-50 hover:text-red-400"
+          className="shrink-0 rounded p-1 text-gray-300 dark:text-slate-600 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-400"
           aria-label={`Delete "${task.title}"`}
         >
           <svg

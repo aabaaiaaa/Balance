@@ -199,7 +199,7 @@ export function BackupRestore() {
             <button
               type="button"
               onClick={handleFileSelect}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-card px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
             >
               <svg
                 width="16"
@@ -223,22 +223,22 @@ export function BackupRestore() {
 
       {/* Exporting spinner */}
       {step === "exporting" && (
-        <p className="text-sm text-gray-500">Preparing backup...</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Preparing backup...</p>
       )}
 
       {/* Export done */}
       {step === "export-done" && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-          <p className="text-sm font-medium text-green-800">
+        <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 p-3">
+          <p className="text-sm font-medium text-green-800 dark:text-green-200">
             Backup downloaded successfully
           </p>
-          <p className="mt-1 text-xs text-green-600">
+          <p className="mt-1 text-xs text-green-600 dark:text-green-400">
             {exportCount} records exported.
           </p>
           <button
             type="button"
             onClick={handleReset}
-            className="mt-2 text-sm font-medium text-green-700 transition-colors hover:text-green-800"
+            className="mt-2 text-sm font-medium text-green-700 dark:text-green-300 transition-colors hover:text-green-800 dark:hover:text-green-200"
           >
             Done
           </button>
@@ -247,14 +247,14 @@ export function BackupRestore() {
 
       {/* Reading file */}
       {step === "reading-file" && (
-        <p className="text-sm text-gray-500">Reading backup file...</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Reading backup file...</p>
       )}
 
       {/* Show summary — let user choose import mode */}
       {step === "show-summary" && summary && (
         <div className="space-y-3">
-          <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3">
-            <p className="text-sm font-medium text-indigo-900">
+          <div className="rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 p-3">
+            <p className="text-sm font-medium text-indigo-900 dark:text-indigo-100">
               Backup from{" "}
               {new Date(summary.exportedAt).toLocaleDateString(undefined, {
                 day: "numeric",
@@ -268,17 +268,17 @@ export function BackupRestore() {
               {Object.entries(summary.entities)
                 .filter(([, count]) => count > 0)
                 .map(([entity, count]) => (
-                  <li key={entity} className="text-xs text-indigo-700">
+                  <li key={entity} className="text-xs text-indigo-700 dark:text-indigo-300">
                     {count} {ENTITY_LABELS[entity] ?? entity}
                   </li>
                 ))}
             </ul>
-            <p className="mt-2 text-xs font-medium text-indigo-800">
+            <p className="mt-2 text-xs font-medium text-indigo-800 dark:text-indigo-200">
               {summary.totalRecords} total records
             </p>
           </div>
 
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
             How would you like to restore?
           </p>
 
@@ -286,10 +286,10 @@ export function BackupRestore() {
             <button
               type="button"
               onClick={() => setStep("confirming-replace")}
-              className="w-full rounded-lg border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50"
+              className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
             >
-              <p className="text-sm font-medium text-gray-900">Replace all</p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Replace all</p>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
                 Clear existing data and import everything. Best for moving to a
                 new device.
               </p>
@@ -298,10 +298,10 @@ export function BackupRestore() {
             <button
               type="button"
               onClick={() => setStep("confirming-merge")}
-              className="w-full rounded-lg border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50"
+              className="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
             >
-              <p className="text-sm font-medium text-gray-900">Merge</p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Merge</p>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
                 Combine with existing data. Newer records win conflicts. Best
                 for restoring without losing recent changes.
               </p>
@@ -311,7 +311,7 @@ export function BackupRestore() {
           <button
             type="button"
             onClick={handleReset}
-            className="text-sm font-medium text-gray-500 transition-colors hover:text-gray-700"
+            className="text-sm font-medium text-gray-500 dark:text-slate-400 transition-colors hover:text-gray-700 dark:hover:text-slate-300"
           >
             Cancel
           </button>
@@ -320,11 +320,11 @@ export function BackupRestore() {
 
       {/* Confirm replace all */}
       {step === "confirming-replace" && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-          <p className="text-sm font-medium text-amber-900">
+        <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-3">
+          <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
             Replace all data?
           </p>
-          <p className="mt-1 text-xs text-amber-700">
+          <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
             This will permanently delete all existing data on this device and
             replace it with the backup. This cannot be undone.
           </p>
@@ -339,7 +339,7 @@ export function BackupRestore() {
             <button
               type="button"
               onClick={() => setStep("show-summary")}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               Back
             </button>
@@ -349,11 +349,11 @@ export function BackupRestore() {
 
       {/* Confirm merge */}
       {step === "confirming-merge" && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-          <p className="text-sm font-medium text-blue-900">
+        <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 p-3">
+          <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
             Merge backup with existing data?
           </p>
-          <p className="mt-1 text-xs text-blue-700">
+          <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
             Records from the backup will be combined with your current data.
             When both have the same record, the newer version wins.
           </p>
@@ -368,7 +368,7 @@ export function BackupRestore() {
             <button
               type="button"
               onClick={() => setStep("show-summary")}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               Back
             </button>
@@ -378,18 +378,18 @@ export function BackupRestore() {
 
       {/* Importing */}
       {step === "importing" && (
-        <p className="text-sm text-gray-500">Importing data...</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Importing data...</p>
       )}
 
       {/* Import done */}
       {step === "import-done" && importResult && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-          <p className="text-sm font-medium text-green-800">
+        <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 p-3">
+          <p className="text-sm font-medium text-green-800 dark:text-green-200">
             {importResult.mode === "replace"
               ? "Data replaced successfully"
               : "Data merged successfully"}
           </p>
-          <p className="mt-1 text-xs text-green-600">
+          <p className="mt-1 text-xs text-green-600 dark:text-green-400">
             {importResult.totalImported} records{" "}
             {importResult.mode === "replace" ? "imported" : "added or updated"}.
           </p>
@@ -407,7 +407,7 @@ export function BackupRestore() {
                       parts.push(`${result.localWins} kept local`);
                     if (parts.length === 0) return null;
                     return (
-                      <li key={entity} className="text-xs text-green-700">
+                      <li key={entity} className="text-xs text-green-700 dark:text-green-300">
                         {ENTITY_LABELS[entity] ?? entity}: {parts.join(", ")}
                       </li>
                     );
@@ -418,7 +418,7 @@ export function BackupRestore() {
           <button
             type="button"
             onClick={handleReset}
-            className="mt-2 text-sm font-medium text-green-700 transition-colors hover:text-green-800"
+            className="mt-2 text-sm font-medium text-green-700 dark:text-green-300 transition-colors hover:text-green-800 dark:hover:text-green-200"
           >
             Done
           </button>
@@ -427,13 +427,13 @@ export function BackupRestore() {
 
       {/* Error */}
       {step === "error" && error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-          <p className="text-sm font-medium text-red-800">Error</p>
-          <p className="mt-1 text-xs text-red-600">{error}</p>
+        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-3">
+          <p className="text-sm font-medium text-red-800 dark:text-red-200">Error</p>
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>
           <button
             type="button"
             onClick={handleReset}
-            className="mt-2 text-sm font-medium text-red-700 transition-colors hover:text-red-800"
+            className="mt-2 text-sm font-medium text-red-700 dark:text-red-300 transition-colors hover:text-red-800 dark:hover:text-red-200"
           >
             Dismiss
           </button>

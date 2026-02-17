@@ -130,13 +130,13 @@ export function GoalForm({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
           {isEditing ? "Edit Goal" : "Add Goal"}
         </h3>
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           aria-label="Cancel"
         >
           Cancel
@@ -144,7 +144,7 @@ export function GoalForm({
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
@@ -154,9 +154,9 @@ export function GoalForm({
         <div>
           <label
             htmlFor="goal-title"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300"
           >
-            Title <span className="text-red-500">*</span>
+            Title <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             id="goal-title"
@@ -164,7 +164,7 @@ export function GoalForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Learn to play guitar"
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             autoFocus
           />
         </div>
@@ -173,7 +173,7 @@ export function GoalForm({
         <div>
           <label
             htmlFor="goal-description"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300"
           >
             Description
           </label>
@@ -183,7 +183,7 @@ export function GoalForm({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="What does this goal involve?"
             rows={2}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
 
@@ -191,7 +191,7 @@ export function GoalForm({
         <div>
           <label
             htmlFor="goal-target-date"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300"
           >
             Target date (optional)
           </label>
@@ -200,13 +200,13 @@ export function GoalForm({
             type="date"
             value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
-            className="mt-1 block w-44 rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-44 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
 
         {/* Milestones */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Milestones
           </label>
 
@@ -215,15 +215,15 @@ export function GoalForm({
               {milestones.map((m, i) => (
                 <li
                   key={i}
-                  className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5"
+                  className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-surface px-3 py-1.5"
                 >
-                  <span className="flex-1 text-sm text-gray-700">
+                  <span className="flex-1 text-sm text-gray-700 dark:text-slate-300">
                     {m.title}
                   </span>
                   <button
                     type="button"
                     onClick={() => handleRemoveMilestone(i)}
-                    className="shrink-0 text-gray-400 hover:text-red-500"
+                    className="shrink-0 text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400"
                     aria-label={`Remove milestone "${m.title}"`}
                   >
                     <svg
@@ -257,13 +257,13 @@ export function GoalForm({
                 }
               }}
               placeholder="Add a milestone..."
-              className="block flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="block flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
             <button
               type="button"
               onClick={handleAddMilestone}
               disabled={!newMilestone.trim()}
-              className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-40"
+              className="rounded-lg bg-gray-100 dark:bg-slate-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-200 dark:hover:bg-slate-600 disabled:opacity-40"
             >
               Add
             </button>

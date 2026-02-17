@@ -166,7 +166,7 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
   if (isEditing && existingPlace === undefined) {
     return (
       <div className="space-y-6">
-        <p className="text-sm text-gray-500">Loading place...</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Loading place...</p>
       </div>
     );
   }
@@ -174,13 +174,13 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
           {isEditing ? "Edit Place" : "Add Place"}
         </h2>
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           aria-label="Cancel"
         >
           Cancel
@@ -188,7 +188,7 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
@@ -196,8 +196,8 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
       <div className="space-y-4">
         {/* Label */}
         <div>
-          <label htmlFor="place-label" className="block text-sm font-medium text-gray-700">
-            Label <span className="text-red-500">*</span>
+          <label htmlFor="place-label" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Label <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             id="place-label"
@@ -205,30 +205,30 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="e.g. Mum's house, The gym, Office"
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             autoFocus
           />
         </div>
 
         {/* Location */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Location <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Location <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           {lat !== null && lng !== null ? (
-            <div className="mt-1 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-green-600 flex-shrink-0">
+            <div className="mt-1 flex items-center gap-2 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 px-3 py-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400 flex-shrink-0">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              <span className="text-sm text-green-800">
+              <span className="text-sm text-green-800 dark:text-green-300">
                 {lat.toFixed(4)}, {lng.toFixed(4)}
               </span>
               <button
                 type="button"
                 onClick={handleSetCurrentLocation}
                 disabled={locationLoading || locationPermission === "unavailable"}
-                className="ml-auto text-xs text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
+                className="ml-auto text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 disabled:opacity-50"
               >
                 {locationLoading ? "Updating..." : "Update"}
               </button>
@@ -238,7 +238,7 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
               type="button"
               onClick={handleSetCurrentLocation}
               disabled={locationLoading || locationPermission === "unavailable"}
-              className="mt-1 inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
+              className="mt-1 inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600 disabled:opacity-50"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -251,10 +251,10 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
             <p className="mt-1 text-xs text-amber-600">{locationError}</p>
           )}
           {locationPermission === "unavailable" && (
-            <p className="mt-1 text-xs text-gray-400">Location is not available in this browser.</p>
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Location is not available in this browser.</p>
           )}
           {locationPermission === "prompt" && lat === null && (
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
               Tap the button above to capture your current GPS position. This helps track visits and link places to contacts.
             </p>
           )}
@@ -262,7 +262,7 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
 
         {/* Radius */}
         <div>
-          <label htmlFor="place-radius" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="place-radius" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Radius (metres)
           </label>
           <div className="mt-1 flex items-center gap-2">
@@ -276,19 +276,19 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val)) setRadius(val);
               }}
-              className="block w-24 rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="block w-24 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
-            <span className="text-sm text-gray-600">m</span>
+            <span className="text-sm text-gray-600 dark:text-slate-300">m</span>
           </div>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
             Used for proximity detection. Default is {DEFAULT_PLACE_RADIUS_METRES}m.
           </p>
         </div>
 
         {/* Linked contacts */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Linked contacts <span className="text-xs text-gray-400">(optional)</span>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Linked contacts <span className="text-xs text-gray-400 dark:text-slate-500">(optional)</span>
           </label>
           {contacts && contacts.length > 0 ? (
             <div className="mt-1 flex flex-wrap gap-2">
@@ -302,8 +302,8 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
                     onClick={() => toggleContact(id)}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       isLinked
-                        ? "bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-800"
+                        : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600"
                     }`}
                   >
                     {isLinked ? "✓ " : ""}
@@ -313,14 +313,14 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
               })}
             </div>
           ) : (
-            <p className="mt-1 text-xs text-gray-400">No contacts available.</p>
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">No contacts available.</p>
           )}
         </div>
 
         {/* Linked life areas */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Linked life areas <span className="text-xs text-gray-400">(optional)</span>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Linked life areas <span className="text-xs text-gray-400 dark:text-slate-500">(optional)</span>
           </label>
           {lifeAreas && lifeAreas.length > 0 ? (
             <div className="mt-1 flex flex-wrap gap-2">
@@ -334,8 +334,8 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
                     onClick={() => toggleLifeArea(id)}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       isLinked
-                        ? "bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-800"
+                        : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600"
                     }`}
                   >
                     {isLinked ? "✓ " : ""}
@@ -345,7 +345,7 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
               })}
             </div>
           ) : (
-            <p className="mt-1 text-xs text-gray-400">No life areas available.</p>
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">No life areas available.</p>
           )}
         </div>
       </div>
@@ -365,15 +365,15 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(true)}
-            className="w-full rounded-lg border border-red-200 px-4 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
+            className="w-full rounded-lg border border-red-200 dark:border-red-800 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950 active:bg-red-100 dark:active:bg-red-900"
           >
             Delete Place
           </button>
         )}
 
         {isEditing && showDeleteConfirm && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="text-sm text-red-700">
+          <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-4">
+            <p className="text-sm text-red-700 dark:text-red-300">
               Are you sure you want to delete this place?
             </p>
             <div className="mt-3 flex gap-2">
@@ -388,7 +388,7 @@ export function SavedPlaceForm({ placeId, onComplete, onCancel }: SavedPlaceForm
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>

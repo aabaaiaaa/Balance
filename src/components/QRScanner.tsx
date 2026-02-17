@@ -172,7 +172,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
     return (
       <div className="flex flex-col items-center gap-4 px-4 text-center">
         {/* Camera icon */}
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
           <svg
             width="32"
             height="32"
@@ -182,7 +182,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-indigo-600"
+            className="text-indigo-600 dark:text-indigo-400"
           >
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
             <circle cx="12" cy="13" r="4" />
@@ -190,10 +190,10 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
             Camera Access Needed
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             Balance needs your camera to scan the QR code shown on the other
             device. Your camera is only used for scanning — no images are stored
             or sent anywhere.
@@ -212,7 +212,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
             <button
               type="button"
               onClick={onCancel}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
             >
               Cancel
             </button>
@@ -234,11 +234,11 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
         {/* Multi-code progress */}
         {expectedTotal !== null && expectedTotal > 1 && (
           <div className="flex flex-col items-center gap-2">
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
               Scanned {receivedCount} of {expectedTotal} codes
             </p>
             {/* Progress bar */}
-            <div className="h-2 w-48 overflow-hidden rounded-full bg-gray-200">
+            <div className="h-2 w-48 overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
               <div
                 className="h-full rounded-full bg-indigo-600 transition-all"
                 style={{
@@ -246,14 +246,14 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               Point your camera at each QR code in sequence
             </p>
           </div>
         )}
 
         {expectedTotal === null && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             Point your camera at the QR code
           </p>
         )}
@@ -265,7 +265,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
               stopScanner();
               onCancel();
             }}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
           >
             Cancel
           </button>
@@ -279,7 +279,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
     return (
       <div className="flex flex-col items-center gap-4 px-4 text-center">
         {/* Error icon */}
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
           <svg
             width="32"
             height="32"
@@ -289,7 +289,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-red-600"
+            className="text-red-600 dark:text-red-400"
           >
             <circle cx="12" cy="12" r="10" />
             <line x1="15" y1="9" x2="9" y2="15" />
@@ -298,11 +298,11 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
             Camera Unavailable
           </h3>
           {errorMessage && (
-            <p className="text-sm text-gray-600">{errorMessage}</p>
+            <p className="text-sm text-gray-600 dark:text-slate-300">{errorMessage}</p>
           )}
         </div>
 
@@ -318,7 +318,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
             <button
               type="button"
               onClick={onCancel}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
             >
               Cancel
             </button>
@@ -331,7 +331,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
   // Complete state — brief confirmation (parent typically navigates away)
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
         <svg
           width="32"
           height="32"
@@ -341,12 +341,12 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-green-600"
+          className="text-green-600 dark:text-green-400"
         >
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </div>
-      <p className="text-sm font-medium text-gray-700">Scan complete</p>
+      <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Scan complete</p>
     </div>
   );
 }

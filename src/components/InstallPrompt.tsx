@@ -81,7 +81,7 @@ export function InstallPrompt() {
   // Android/Chrome install
   if (deferredPrompt) {
     return (
-      <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+      <div className="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 p-4">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600">
             <svg
@@ -101,10 +101,10 @@ export function InstallPrompt() {
             </svg>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-indigo-900">
+            <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-100">
               Install Balance
             </p>
-            <p className="mt-0.5 text-xs text-indigo-700">
+            <p className="mt-0.5 text-xs text-indigo-700 dark:text-indigo-300">
               Add to your home screen for quick access and offline use.
             </p>
             <div className="mt-2 flex gap-2">
@@ -118,7 +118,7 @@ export function InstallPrompt() {
               <button
                 type="button"
                 onClick={dismiss}
-                className="rounded-lg px-3 py-1.5 text-xs text-indigo-600 hover:bg-indigo-100"
+                className="rounded-lg px-3 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900"
               >
                 Not now
               </button>
@@ -132,7 +132,7 @@ export function InstallPrompt() {
   // iOS Safari manual instruction
   if (showIOSPrompt) {
     return (
-      <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+      <div className="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 p-4">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600">
             <svg
@@ -152,10 +152,10 @@ export function InstallPrompt() {
             </svg>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-indigo-900">
+            <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-100">
               Install Balance
             </p>
-            <p className="mt-0.5 text-xs text-indigo-700">
+            <p className="mt-0.5 text-xs text-indigo-700 dark:text-indigo-300">
               Tap the share button{" "}
               <span className="inline-block" aria-label="share icon">
                 &#x2191;&#xFE0E;
@@ -166,7 +166,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={dismiss}
-              className="mt-2 rounded-lg px-3 py-1.5 text-xs text-indigo-600 hover:bg-indigo-100"
+              className="mt-2 rounded-lg px-3 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900"
             >
               Dismiss
             </button>

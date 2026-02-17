@@ -99,8 +99,8 @@ export default function LifeAreasPage() {
   return (
     <div className="space-y-6">
       <section>
-        <h2 className="text-xl font-semibold text-gray-900">Life Areas</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Life Areas</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Track and balance the areas that matter to you.
         </p>
       </section>
@@ -110,8 +110,8 @@ export default function LifeAreasPage() {
       )}
 
       {!lifeAreas || lifeAreas.length === 0 ? (
-        <section className="rounded-xl border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-400">
+        <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+          <p className="text-sm text-gray-400 dark:text-slate-500">
             No life areas yet. Tap the button below to add one.
           </p>
         </section>

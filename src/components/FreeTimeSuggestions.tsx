@@ -46,16 +46,16 @@ function formatMinutes(minutes: number): string {
 // ---------------------------------------------------------------------------
 
 const AREA_COLOURS: Record<string, string> = {
-  "Self-care": "bg-pink-100 text-pink-700",
-  "DIY/Household": "bg-amber-100 text-amber-700",
-  "Partner Time": "bg-purple-100 text-purple-700",
-  Social: "bg-blue-100 text-blue-700",
-  "Personal Goals": "bg-green-100 text-green-700",
-  People: "bg-indigo-100 text-indigo-700",
+  "Self-care": "bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300",
+  "DIY/Household": "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300",
+  "Partner Time": "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
+  Social: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
+  "Personal Goals": "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300",
+  People: "bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300",
 };
 
 function getAreaColour(area: string): string {
-  return AREA_COLOURS[area] ?? "bg-gray-100 text-gray-700";
+  return AREA_COLOURS[area] ?? "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300";
 }
 
 // ---------------------------------------------------------------------------
@@ -75,7 +75,7 @@ function SuggestionCard({
   const areaLabel = item.lifeArea ?? "General";
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 shadow-sm">
       {/* Header: area badge + estimated time */}
       <div className="mb-2 flex items-center justify-between">
         <span
@@ -83,20 +83,20 @@ function SuggestionCard({
         >
           {areaLabel}
         </span>
-        <span className="text-xs font-medium text-gray-500">
+        <span className="text-xs font-medium text-gray-500 dark:text-slate-400">
           ~{formatMinutes(estimate)}
         </span>
       </div>
 
       {/* Title */}
-      <h4 className="text-sm font-semibold text-gray-900">{item.title}</h4>
+      <h4 className="text-sm font-semibold text-gray-900 dark:text-slate-100">{item.title}</h4>
 
       {/* Reason */}
-      <p className="mt-1 text-xs text-gray-500">{item.reason}</p>
+      <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{item.reason}</p>
 
       {/* Sub-type hint for contacts */}
       {item.type === "contact" && item.subType && (
-        <p className="mt-1 text-xs text-gray-400">
+        <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
           Suggested: {CHECK_IN_TYPE_LABELS[item.subType as CheckInType] ?? item.subType}
         </p>
       )}
@@ -113,7 +113,7 @@ function SuggestionCard({
         <button
           type="button"
           onClick={() => onDismiss(item)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 active:bg-gray-100"
+          className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card px-3 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
         >
           Skip
         </button>
@@ -272,12 +272,12 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
           <button
             type="button"
             onClick={handleActionCancel}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
             aria-label="Back to suggestions"
           >
             &larr; Back
           </button>
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-gray-400 dark:text-slate-500">
             {activeAction.type === "check-in"
               ? `Log check-in with ${activeAction.contactName}`
               : `Log activity for ${activeAction.lifeAreaName}`}
@@ -306,9 +306,9 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Suggestions</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Suggestions</h3>
         </div>
-        <p className="text-sm text-gray-400">Loading suggestions...</p>
+        <p className="text-sm text-gray-400 dark:text-slate-500">Loading suggestions...</p>
       </div>
     );
   }
@@ -318,17 +318,17 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Suggestions</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Suggestions</h3>
           <button
             type="button"
             onClick={onDone}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           >
             Done
           </button>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-surface p-6 text-center">
+          <p className="text-sm text-gray-500 dark:text-slate-400">
             {dismissedKeys.size > 0
               ? "No more suggestions available. You've seen them all!"
               : "Nothing to suggest right now. You're all caught up!"}
@@ -349,20 +349,20 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
           Here&apos;s what to do
         </h3>
         <button
           type="button"
           onClick={onDone}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
         >
           Done
         </button>
       </div>
 
       {/* Time & energy summary */}
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-gray-500 dark:text-slate-400">
         {formatMinutes(inputs.availableMinutes)} available
         {inputs.energy !== "normal" && (
           <> &middot; {inputs.energy === "energetic" ? "Feeling energetic" : "Low energy"}</>

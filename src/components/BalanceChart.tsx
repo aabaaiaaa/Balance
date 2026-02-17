@@ -23,11 +23,11 @@ export function BalanceChart({ lifeAreas, hoursPerArea }: BalanceChartProps) {
   }).length;
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4">
+    <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900">Weekly Balance</h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Weekly Balance</h3>
         {underTargetCount > 0 && (
-          <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+          <span className="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
             {underTargetCount} area{underTargetCount !== 1 ? "s" : ""} low
           </span>
         )}
@@ -48,10 +48,10 @@ export function BalanceChart({ lifeAreas, hoursPerArea }: BalanceChartProps) {
               <div
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
                   isOnTrack
-                    ? "bg-green-100 text-green-600"
+                    ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
                     : isLow
-                      ? "bg-amber-100 text-amber-600"
-                      : "bg-indigo-100 text-indigo-600"
+                      ? "bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400"
+                      : "bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
                 }`}
               >
                 <LifeAreaIcon icon={area.icon} size={14} />
@@ -60,18 +60,18 @@ export function BalanceChart({ lifeAreas, hoursPerArea }: BalanceChartProps) {
               {/* Label and bar */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between text-xs">
-                  <span className={`font-medium ${isLow ? "text-amber-700" : "text-gray-700"}`}>
+                  <span className={`font-medium ${isLow ? "text-amber-700 dark:text-amber-400" : "text-gray-700 dark:text-slate-300"}`}>
                     {area.name}
                   </span>
-                  <span className="tabular-nums text-gray-400">
+                  <span className="tabular-nums text-gray-400 dark:text-slate-500">
                     {actual.toFixed(1)}/{target}h
                   </span>
                 </div>
-                <div className="relative mt-1 h-2 w-full rounded-full bg-gray-100">
+                <div className="relative mt-1 h-2 w-full rounded-full bg-gray-100 dark:bg-slate-700">
                   {/* Target marker line */}
                   {targetPercent > 0 && targetPercent <= 100 && (
                     <div
-                      className="absolute top-0 h-2 w-0.5 rounded-full bg-gray-300"
+                      className="absolute top-0 h-2 w-0.5 rounded-full bg-gray-300 dark:bg-slate-600"
                       style={{ left: `${targetPercent}%` }}
                     />
                   )}

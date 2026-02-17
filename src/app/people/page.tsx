@@ -83,24 +83,24 @@ export default function PeoplePage() {
   return (
     <div className="space-y-6">
       <section>
-        <h2 className="text-xl font-semibold text-gray-900">People</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">People</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
           Your contacts grouped by relationship tier.
         </p>
       </section>
 
       {!contacts || contacts.length === 0 ? (
-        <section className="rounded-xl border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-400">
+        <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+          <p className="text-sm text-gray-400 dark:text-slate-500">
             No contacts yet. Tap the button below to add someone.
           </p>
         </section>
       ) : (
         groups.map((group) => (
           <section key={group.tier}>
-            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
               {group.label}
-              <span className="ml-1.5 text-xs font-normal text-gray-400">
+              <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">
                 ({group.contacts.length})
               </span>
             </h3>

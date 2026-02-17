@@ -239,14 +239,14 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
           Sync with Partner
         </h2>
         {step !== "syncing" && step !== "connecting" && (
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-gray-400 dark:text-slate-500 transition-colors hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
             aria-label="Close sync"
           >
             <svg
@@ -269,7 +269,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Choose Role */}
       {step === "choose-role" && (
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             Both devices need to be on the same Wi-Fi network. One device starts
             the sync, the other joins.
           </p>
@@ -277,9 +277,9 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
           <button
             type="button"
             onClick={handleStartSync}
-            className="flex w-full items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="flex w-full items-center gap-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
               <svg
                 width="24"
                 height="24"
@@ -289,7 +289,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-indigo-600"
+                className="text-indigo-600 dark:text-indigo-400"
               >
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
                 <line x1="8" y1="21" x2="16" y2="21" />
@@ -297,8 +297,8 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
               </svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">Start Sync</p>
-              <p className="text-sm text-gray-500">
+              <p className="font-medium text-gray-900 dark:text-slate-100">Start Sync</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">
                 Show a QR code for your partner to scan
               </p>
             </div>
@@ -307,9 +307,9 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
           <button
             type="button"
             onClick={() => setStep("scan-offer")}
-            className="flex w-full items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="flex w-full items-center gap-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
           >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
               <svg
                 width="24"
                 height="24"
@@ -319,15 +319,15 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-green-600"
+                className="text-green-600 dark:text-green-400"
               >
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                 <circle cx="12" cy="13" r="4" />
               </svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">Join Sync</p>
-              <p className="text-sm text-gray-500">
+              <p className="font-medium text-gray-900 dark:text-slate-100">Join Sync</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">
                 Scan the QR code on your partner&apos;s device
               </p>
             </div>
@@ -338,8 +338,8 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Creating Offer (loading) */}
       {step === "creating-offer" && (
         <div className="flex flex-col items-center gap-4 py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
-          <p className="text-sm text-gray-600">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 dark:border-indigo-800 border-t-indigo-600 dark:border-t-indigo-400" />
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             Preparing connection...
           </p>
         </div>
@@ -348,8 +348,8 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Show Offer QR (Initiator) */}
       {step === "show-offer" && offerData && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-3">
-            <p className="text-center text-sm font-medium text-indigo-800">
+          <div className="rounded-xl border border-indigo-100 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 p-3">
+            <p className="text-center text-sm font-medium text-indigo-800 dark:text-indigo-300">
               Step 1 of 3: Show this code to your partner
             </p>
           </div>
@@ -359,7 +359,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
             label="Ask your partner to tap 'Join Sync' and scan this code"
           />
 
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-slate-400">
             <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
             Waiting for partner to scan...
           </div>
@@ -377,8 +377,8 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Scan Answer QR (Initiator) */}
       {step === "scan-answer" && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-3">
-            <p className="text-center text-sm font-medium text-indigo-800">
+          <div className="rounded-xl border border-indigo-100 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 p-3">
+            <p className="text-center text-sm font-medium text-indigo-800 dark:text-indigo-300">
               Step 2 of 3: Scan your partner&apos;s response code
             </p>
           </div>
@@ -393,8 +393,8 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Scan Offer QR (Joiner) */}
       {step === "scan-offer" && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-green-100 bg-green-50 p-3">
-            <p className="text-center text-sm font-medium text-green-800">
+          <div className="rounded-xl border border-green-100 dark:border-green-800 bg-green-50 dark:bg-green-950 p-3">
+            <p className="text-center text-sm font-medium text-green-800 dark:text-green-300">
               Step 1 of 3: Scan the code on your partner&apos;s device
             </p>
           </div>
@@ -409,8 +409,8 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Creating Answer (loading) */}
       {step === "creating-answer" && (
         <div className="flex flex-col items-center gap-4 py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-200 border-t-green-600" />
-          <p className="text-sm text-gray-600">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-200 dark:border-green-800 border-t-green-600 dark:border-t-green-400" />
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             Processing partner&apos;s connection...
           </p>
         </div>
@@ -419,8 +419,8 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Show Answer QR (Joiner) */}
       {step === "show-answer" && answerData && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-green-100 bg-green-50 p-3">
-            <p className="text-center text-sm font-medium text-green-800">
+          <div className="rounded-xl border border-green-100 dark:border-green-800 bg-green-50 dark:bg-green-950 p-3">
+            <p className="text-center text-sm font-medium text-green-800 dark:text-green-300">
               Step 2 of 3: Show this code to your partner
             </p>
           </div>
@@ -430,7 +430,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
             label="Ask your partner to scan this code"
           />
 
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-slate-400">
             <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
             Waiting for partner to scan...
           </div>
@@ -440,11 +440,11 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Connecting */}
       {step === "connecting" && (
         <div className="flex flex-col items-center gap-4 py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
-          <p className="text-sm font-medium text-gray-700">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 dark:border-indigo-800 border-t-indigo-600 dark:border-t-indigo-400" />
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
             Establishing connection...
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-slate-400">
             Both devices must be on the same Wi-Fi network
           </p>
         </div>
@@ -454,25 +454,25 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {step === "syncing" && (
         <div className="space-y-6 py-4">
           <div className="flex flex-col items-center gap-4">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
-            <p className="text-sm font-medium text-gray-700">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-200 dark:border-indigo-800 border-t-indigo-600 dark:border-t-indigo-400" />
+            <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
               Syncing data...
             </p>
           </div>
 
           {syncProgress && (
-            <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
+            <div className="space-y-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">Status</span>
-                <span className="font-medium capitalize text-gray-900">
+                <span className="text-gray-600 dark:text-slate-300">Status</span>
+                <span className="font-medium capitalize text-gray-900 dark:text-slate-100">
                   {syncProgress.phase}
                 </span>
               </div>
 
               {syncProgress.recordsSent > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Sending</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-gray-600 dark:text-slate-300">Sending</span>
+                  <span className="font-medium text-gray-900 dark:text-slate-100">
                     {syncProgress.recordsSent} records
                   </span>
                 </div>
@@ -480,14 +480,14 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
 
               {syncProgress.recordsReceived > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Receiving</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-gray-600 dark:text-slate-300">Receiving</span>
+                  <span className="font-medium text-gray-900 dark:text-slate-100">
                     {syncProgress.recordsReceived} records
                   </span>
                 </div>
               )}
 
-              <p className="text-xs text-gray-500">{syncProgress.message}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">{syncProgress.message}</p>
             </div>
           )}
         </div>
@@ -497,7 +497,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {step === "complete" && mergeSummary && (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
               <svg
                 width="32"
                 height="32"
@@ -507,38 +507,38 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-green-600"
+                className="text-green-600 dark:text-green-400"
               >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
               Sync Complete
             </h3>
           </div>
 
-          <div className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
+          <div className="space-y-2 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Records sent</span>
-              <span className="font-medium text-gray-900">
+              <span className="text-gray-600 dark:text-slate-300">Records sent</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">
                 {mergeSummary.totalSent}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Records received</span>
-              <span className="font-medium text-gray-900">
+              <span className="text-gray-600 dark:text-slate-300">Records received</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">
                 {mergeSummary.totalReceived}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Conflicts resolved</span>
-              <span className="font-medium text-gray-900">
+              <span className="text-gray-600 dark:text-slate-300">Conflicts resolved</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">
                 {mergeSummary.totalRemoteWins + mergeSummary.totalLocalWins}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Records updated</span>
-              <span className="font-medium text-gray-900">
+              <span className="text-gray-600 dark:text-slate-300">Records updated</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">
                 {mergeSummary.totalUpserted}
               </span>
             </div>
@@ -558,7 +558,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {step === "error" && (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
               <svg
                 width="32"
                 height="32"
@@ -568,21 +568,21 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-red-600"
+                className="text-red-600 dark:text-red-400"
               >
                 <circle cx="12" cy="12" r="10" />
                 <line x1="15" y1="9" x2="9" y2="15" />
                 <line x1="9" y1="9" x2="15" y2="15" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
               Sync Failed
             </h3>
           </div>
 
           {errorMessage && (
-            <div className="rounded-xl border border-red-100 bg-red-50 p-4">
-              <p className="text-sm text-red-800">{errorMessage}</p>
+            <div className="rounded-xl border border-red-100 dark:border-red-800 bg-red-50 dark:bg-red-950 p-4">
+              <p className="text-sm text-red-800 dark:text-red-300">{errorMessage}</p>
             </div>
           )}
 
@@ -597,7 +597,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
             >
               Cancel
             </button>

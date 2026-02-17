@@ -102,13 +102,13 @@ export function HouseholdTaskForm({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
           {isEditing ? "Edit Task" : "Add Task"}
         </h3>
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           aria-label="Cancel"
         >
           Cancel
@@ -116,7 +116,7 @@ export function HouseholdTaskForm({
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
@@ -126,9 +126,9 @@ export function HouseholdTaskForm({
         <div>
           <label
             htmlFor="task-title"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300"
           >
-            Title <span className="text-red-500">*</span>
+            Title <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             id="task-title"
@@ -136,7 +136,7 @@ export function HouseholdTaskForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Fix leaky tap"
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             autoFocus
           />
         </div>
@@ -145,9 +145,9 @@ export function HouseholdTaskForm({
         <div>
           <label
             htmlFor="task-estimated-minutes"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 dark:text-slate-300"
           >
-            Estimated time (minutes) <span className="text-red-500">*</span>
+            Estimated time (minutes) <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             id="task-estimated-minutes"
@@ -157,13 +157,13 @@ export function HouseholdTaskForm({
             value={estimatedMinutes}
             onChange={(e) => setEstimatedMinutes(e.target.value)}
             placeholder="30"
-            className="mt-1 block w-24 rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-24 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
 
         {/* Priority */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Priority
           </label>
           <div className="mt-1 flex gap-2">
@@ -175,11 +175,11 @@ export function HouseholdTaskForm({
                 className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
                   priority === opt.value
                     ? opt.value === "high"
-                      ? "border-red-300 bg-red-50 text-red-700"
+                      ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300"
                       : opt.value === "medium"
-                        ? "border-amber-300 bg-amber-50 text-amber-700"
-                        : "border-green-300 bg-green-50 text-green-700"
-                    : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+                        ? "border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300"
+                        : "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300"
+                    : "border-gray-200 dark:border-slate-700 bg-white dark:bg-card text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700"
                 }`}
               >
                 {opt.label}

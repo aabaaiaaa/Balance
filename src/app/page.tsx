@@ -60,16 +60,16 @@ function formatMinutes(minutes: number): string {
 }
 
 const AREA_COLOURS: Record<string, string> = {
-  "Self-care": "bg-pink-100 text-pink-700",
-  "DIY/Household": "bg-amber-100 text-amber-700",
-  "Partner Time": "bg-purple-100 text-purple-700",
-  Social: "bg-blue-100 text-blue-700",
-  "Personal Goals": "bg-green-100 text-green-700",
-  People: "bg-indigo-100 text-indigo-700",
+  "Self-care": "bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300",
+  "DIY/Household": "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300",
+  "Partner Time": "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
+  Social: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
+  "Personal Goals": "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300",
+  People: "bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300",
 };
 
 function getAreaColour(area: string): string {
-  return AREA_COLOURS[area] ?? "bg-gray-100 text-gray-700";
+  return AREA_COLOURS[area] ?? "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
 }
 
 /** Build a time-of-day greeting. */
@@ -103,7 +103,7 @@ function PriorityCard({
     <button
       type="button"
       onClick={() => onTap(item)}
-      className="w-full rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+      className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
     >
       <div className="flex items-start gap-3">
         {/* Left side: content */}
@@ -114,14 +114,14 @@ function PriorityCard({
             >
               {areaLabel}
             </span>
-            <span className="text-[10px] text-gray-400">
+            <span className="text-[10px] text-gray-400 dark:text-slate-500">
               ~{formatMinutes(estimate)}
             </span>
           </div>
-          <p className="text-sm font-medium text-gray-900">{item.title}</p>
-          <p className="mt-0.5 text-xs text-gray-500">{item.reason}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{item.title}</p>
+          <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{item.reason}</p>
           {item.type === "contact" && item.subType && (
-            <p className="mt-0.5 text-[10px] text-gray-400">
+            <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">
               Suggested: {CHECK_IN_TYPE_LABELS[item.subType as CheckInType] ?? item.subType}
             </p>
           )}
@@ -134,7 +134,7 @@ function PriorityCard({
             e.stopPropagation();
             onQuickAction(item);
           }}
-          className="shrink-0 rounded-lg bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 transition-colors hover:bg-indigo-100 active:bg-indigo-200"
+          className="shrink-0 rounded-lg bg-indigo-50 dark:bg-indigo-950 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900 active:bg-indigo-200 dark:active:bg-indigo-800"
         >
           {actionLabel}
         </button>
@@ -367,12 +367,12 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={handleQuickActionCancel}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
             aria-label="Back to dashboard"
           >
             &larr; Back
           </button>
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-gray-400 dark:text-slate-500">
             {quickAction.type === "check-in"
               ? `Log check-in with ${quickAction.contactName}`
               : `Log activity for ${quickAction.lifeAreaName}`}
@@ -400,19 +400,19 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Greeting with life-balance summary */}
       <section>
-        <h2 className="text-xl font-semibold text-gray-900">{getGreeting()}</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">{getGreeting()}</h2>
         {isLoading ? (
-          <p className="mt-1 text-sm text-gray-400">Loading your dashboard...</p>
+          <p className="mt-1 text-sm text-gray-400 dark:text-slate-500">Loading your dashboard...</p>
         ) : summaryParts.length > 0 ? (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             {summaryParts.join(" · ")}
           </p>
         ) : (contacts ?? []).length === 0 && (lifeAreas ?? []).length === 0 ? (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             Add some contacts and life areas to get started.
           </p>
         ) : (
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             You&apos;re on track — nothing overdue right now.
           </p>
         )}
@@ -433,9 +433,9 @@ export default function DashboardPage() {
         type="button"
         onClick={handleImHere}
         disabled={imHereLoading}
-        className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
+        className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600 disabled:opacity-50"
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
           <svg
             width="18"
             height="18"
@@ -445,30 +445,30 @@ export default function DashboardPage() {
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-blue-600"
+            className="text-blue-600 dark:text-blue-400"
           >
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
             <circle cx="12" cy="10" r="3" />
           </svg>
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-900">
+          <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
             {imHereLoading ? "Getting location..." : "I\u2019m here"}
           </p>
-          <p className="text-xs text-gray-500">Save this place for quick logging</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">Save this place for quick logging</p>
         </div>
       </button>
 
       {/* "I have free time" button / flow */}
       {showFreeTimeFlow ? (
-        <section className="rounded-xl border border-gray-200 bg-white p-4">
+        <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
           <FreeTimeFlow
             onComplete={handleFreeTimeComplete}
             onCancel={() => setShowFreeTimeFlow(false)}
           />
         </section>
       ) : freeTimeInputs ? (
-        <section className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+        <section className="rounded-xl border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950 p-4">
           <FreeTimeSuggestions
             inputs={freeTimeInputs}
             onDone={() => setFreeTimeInputs(null)}
@@ -478,7 +478,7 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={() => setShowFreeTimeFlow(true)}
-          className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50 p-4 transition-colors hover:border-indigo-400 hover:bg-indigo-100 active:bg-indigo-150"
+          className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950 p-4 transition-colors hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-900 active:bg-indigo-150 dark:active:bg-indigo-800"
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600">
             <svg
@@ -497,10 +497,10 @@ export default function DashboardPage() {
             </svg>
           </div>
           <div className="min-w-0 text-left">
-            <p className="text-sm font-semibold text-indigo-900">
+            <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-100">
               I have free time
             </p>
-            <p className="text-xs text-indigo-700">
+            <p className="text-xs text-indigo-700 dark:text-indigo-300">
               Get suggestions for the best use of your time
             </p>
           </div>
@@ -508,20 +508,20 @@ export default function DashboardPage() {
       )}
 
       {/* Top Priorities */}
-      <section className="rounded-xl border border-gray-200 bg-white p-4">
+      <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Top Priorities</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Top Priorities</h3>
           {priorities.length > 0 && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 dark:text-slate-500">
               {priorities.length} item{priorities.length !== 1 ? "s" : ""}
             </span>
           )}
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-gray-400">Loading priorities...</p>
+          <p className="text-sm text-gray-400 dark:text-slate-500">Loading priorities...</p>
         ) : priorities.length === 0 ? (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 dark:text-slate-500">
             No priorities right now. Add some contacts and life areas to get started.
           </p>
         ) : (
@@ -546,9 +546,9 @@ export default function DashboardPage() {
       {/* Sync shortcut */}
       <Link
         href="/sync"
-        className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 active:bg-gray-100"
+        className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
           <svg
             width="20"
             height="20"
@@ -558,7 +558,7 @@ export default function DashboardPage() {
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-indigo-600"
+            className="text-indigo-600 dark:text-indigo-400"
           >
             <polyline points="23 4 23 10 17 10" />
             <polyline points="1 20 1 14 7 14" />
@@ -567,10 +567,10 @@ export default function DashboardPage() {
           </svg>
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-900">
+          <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
             Sync with Partner
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-slate-400">
             {lastSync
               ? `Last synced ${new Date(lastSync).toLocaleDateString(undefined, {
                   day: "numeric",

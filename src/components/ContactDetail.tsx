@@ -15,11 +15,11 @@ interface ContactDetailProps {
 }
 
 const TIER_BADGE_STYLES: Record<Contact["tier"], string> = {
-  partner: "bg-pink-100 text-pink-700",
-  "close-family": "bg-purple-100 text-purple-700",
-  "extended-family": "bg-blue-100 text-blue-700",
-  "close-friends": "bg-green-100 text-green-700",
-  "wider-friends": "bg-gray-100 text-gray-600",
+  partner: "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
+  "close-family": "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
+  "extended-family": "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+  "close-friends": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+  "wider-friends": "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
 };
 
 export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps) {
@@ -60,7 +60,7 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
   if (contact === undefined) {
     return (
       <div className="space-y-6">
-        <p className="text-sm text-gray-500">Loading contact...</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Loading contact...</p>
       </div>
     );
   }
@@ -68,11 +68,11 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
   if (contact === null) {
     return (
       <div className="space-y-6">
-        <p className="text-sm text-gray-500">Contact not found.</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Contact not found.</p>
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-indigo-600 hover:text-indigo-800"
+          className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800"
         >
           Back to contacts
         </button>
@@ -93,7 +93,7 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+          className="flex items-center gap-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           aria-label="Back to contacts"
         >
           <svg
@@ -113,21 +113,21 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
         <button
           type="button"
           onClick={() => onEdit(contactId)}
-          className="text-sm text-indigo-600 hover:text-indigo-800"
+          className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800"
         >
           Edit
         </button>
       </div>
 
       {/* Contact info */}
-      <section className="rounded-xl border border-gray-200 bg-white p-4">
+      <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <div className="flex items-center gap-3">
           <span
             className={`h-3 w-3 flex-shrink-0 rounded-full ${overdueStatus.dotClass}`}
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="truncate text-xl font-semibold text-gray-900">
+              <h2 className="truncate text-xl font-semibold text-gray-900 dark:text-slate-100">
                 {contact.name}
               </h2>
               <span
@@ -136,21 +136,21 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
                 {TIER_LABELS[contact.tier]}
               </span>
             </div>
-            <p className="mt-0.5 text-sm text-gray-500">{overdueStatus.label}</p>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{overdueStatus.label}</p>
           </div>
         </div>
 
         {/* Details */}
         <div className="mt-4 space-y-2 text-sm">
-          <div className="flex justify-between text-gray-600">
+          <div className="flex justify-between text-gray-600 dark:text-slate-300">
             <span>Check-in every</span>
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-gray-900 dark:text-slate-100">
               {contact.checkInFrequencyDays} day{contact.checkInFrequencyDays !== 1 ? "s" : ""}
             </span>
           </div>
-          <div className="flex justify-between text-gray-600">
+          <div className="flex justify-between text-gray-600 dark:text-slate-300">
             <span>Last check-in</span>
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-gray-900 dark:text-slate-100">
               {daysSinceCheckIn !== null
                 ? daysSinceCheckIn === 0
                   ? "Today"
@@ -161,19 +161,19 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
             </span>
           </div>
           {contact.phoneNumber && (
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-600 dark:text-slate-300">
               <span>Phone</span>
               <a
                 href={`tel:${contact.phoneNumber}`}
-                className="font-medium text-indigo-600 hover:text-indigo-800"
+                className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800"
               >
                 {contact.phoneNumber}
               </a>
             </div>
           )}
           {contact.notes && (
-            <div className="border-t border-gray-100 pt-2">
-              <p className="text-gray-600">{contact.notes}</p>
+            <div className="border-t border-gray-100 dark:border-slate-700 pt-2">
+              <p className="text-gray-600 dark:text-slate-300">{contact.notes}</p>
             </div>
           )}
         </div>
@@ -181,7 +181,7 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
 
       {/* Log check-in button / form */}
       {showCheckInForm ? (
-        <section className="rounded-xl border border-gray-200 bg-white p-4">
+        <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
           <CheckInForm
             contactId={contactId}
             onComplete={() => setShowCheckInForm(false)}
@@ -200,18 +200,18 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
 
       {/* Check-in history */}
       <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Recent Check-ins
           {recentCheckIns && recentCheckIns.length > 0 && (
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
+            <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">
               ({recentCheckIns.length})
             </span>
           )}
         </h3>
 
         {!recentCheckIns || recentCheckIns.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-sm text-gray-400">
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+            <p className="text-sm text-gray-400 dark:text-slate-500">
               No check-ins yet. Tap the button above to log one.
             </p>
           </div>
@@ -222,18 +222,18 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
               return (
                 <div
                   key={checkIn.id}
-                  className="rounded-xl border border-gray-200 bg-white p-3"
+                  className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
                       {CHECK_IN_TYPE_LABELS[checkIn.type]}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">
                       {formatCheckInDate(checkIn.date, renderTime)}
                     </span>
                   </div>
                   {placeName && (
-                    <p className="mt-0.5 flex items-center gap-1 text-[10px] text-gray-400">
+                    <p className="mt-0.5 flex items-center gap-1 text-[10px] text-gray-400 dark:text-slate-500">
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                         <circle cx="12" cy="10" r="3" />
@@ -242,7 +242,7 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
                     </p>
                   )}
                   {checkIn.notes && (
-                    <p className="mt-1 text-xs text-gray-600">{checkIn.notes}</p>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-slate-300">{checkIn.notes}</p>
                   )}
                 </div>
               );

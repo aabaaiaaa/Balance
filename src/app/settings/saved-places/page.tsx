@@ -74,16 +74,16 @@ export default function SavedPlacesPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/settings"
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
               aria-label="Back to settings"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </Link>
-            <h2 className="text-xl font-semibold text-gray-900">Saved Places</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Saved Places</h2>
           </div>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             Manage your saved locations for proximity detection.
           </p>
         </div>
@@ -91,15 +91,15 @@ export default function SavedPlacesPage() {
 
       {/* Places list */}
       {!savedPlaces ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Loading...</p>
       ) : savedPlaces.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-gray-300">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-6 text-center">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-gray-300 dark:text-slate-600">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
             <circle cx="12" cy="10" r="3" />
           </svg>
-          <p className="mt-3 text-sm text-gray-500">No saved places yet.</p>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="mt-3 text-sm text-gray-500 dark:text-slate-400">No saved places yet.</p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
             Save places to track visits and link them to contacts or life areas.
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function SavedPlacesPage() {
               key={place.id}
               type="button"
               onClick={() => setEditingPlaceId(place.id!)}
-              className="w-full rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"
+              className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 text-left transition-colors hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
@@ -118,9 +118,9 @@ export default function SavedPlacesPage() {
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
-                  <span className="font-medium text-gray-900">{place.label}</span>
+                  <span className="font-medium text-gray-900 dark:text-slate-100">{place.label}</span>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 dark:text-slate-500 flex-shrink-0">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </div>
@@ -129,12 +129,12 @@ export default function SavedPlacesPage() {
               {(place.linkedContactIds.length > 0 || place.linkedLifeAreaIds.length > 0) && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {place.linkedContactIds.map((id) => (
-                    <span key={`contact-${id}`} className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+                    <span key={`contact-${id}`} className="rounded-full bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 text-xs text-indigo-700 dark:text-indigo-300">
                       {getContactName(id)}
                     </span>
                   ))}
                   {place.linkedLifeAreaIds.map((id) => (
-                    <span key={`area-${id}`} className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+                    <span key={`area-${id}`} className="rounded-full bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300">
                       {getLifeAreaName(id)}
                     </span>
                   ))}
@@ -142,7 +142,7 @@ export default function SavedPlacesPage() {
               )}
 
               {/* Visit stats */}
-              <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
+              <div className="mt-2 flex items-center gap-4 text-xs text-gray-400 dark:text-slate-500">
                 <span>{place.visitCount} visit{place.visitCount !== 1 ? "s" : ""}</span>
                 {place.lastVisited && (
                   <span>

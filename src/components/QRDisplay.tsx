@@ -26,7 +26,7 @@ export function QRDisplay({ data, size = 256, label }: QRDisplayProps) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {label && <p className="text-sm font-medium text-gray-700">{label}</p>}
+      {label && <p className="text-sm font-medium text-gray-700 dark:text-slate-300">{label}</p>}
 
       {/* White background ensures QR scannability regardless of app theme */}
       <div className="rounded-xl bg-white p-4">
@@ -41,7 +41,7 @@ export function QRDisplay({ data, size = 256, label }: QRDisplayProps) {
 
       {isMulti && (
         <div className="flex flex-col items-center gap-3">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             Code {currentIndex + 1} of {chunks.length}
           </p>
 
@@ -50,7 +50,7 @@ export function QRDisplay({ data, size = 256, label }: QRDisplayProps) {
               type="button"
               onClick={() => setCurrentIndex((i) => i - 1)}
               disabled={currentIndex === 0}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-40"
+              className="rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600 disabled:opacity-40"
               aria-label="Previous QR code"
             >
               Previous
@@ -72,7 +72,7 @@ export function QRDisplay({ data, size = 256, label }: QRDisplayProps) {
               <span
                 key={i}
                 className={`h-2 w-2 rounded-full transition-colors ${
-                  i === currentIndex ? "bg-indigo-600" : "bg-gray-300"
+                  i === currentIndex ? "bg-indigo-600" : "bg-gray-300 dark:bg-slate-600"
                 }`}
               />
             ))}

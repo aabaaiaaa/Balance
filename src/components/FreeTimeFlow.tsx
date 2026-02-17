@@ -83,13 +83,13 @@ export function FreeTimeFlow({ onComplete, onCancel }: FreeTimeFlowProps) {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
           {step === 1 ? "How much time do you have?" : "How are you feeling?"}
         </h3>
         <button
           type="button"
           onClick={step === 1 ? onCancel : () => setStep(1)}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           aria-label={step === 1 ? "Cancel" : "Back"}
         >
           {step === 1 ? "Cancel" : "Back"}
@@ -100,12 +100,12 @@ export function FreeTimeFlow({ onComplete, onCancel }: FreeTimeFlowProps) {
       <div className="flex gap-2">
         <div
           className={`h-1 flex-1 rounded-full ${
-            step >= 1 ? "bg-indigo-600" : "bg-gray-200"
+            step >= 1 ? "bg-indigo-600" : "bg-gray-200 dark:bg-slate-700"
           }`}
         />
         <div
           className={`h-1 flex-1 rounded-full ${
-            step >= 2 ? "bg-indigo-600" : "bg-gray-200"
+            step >= 2 ? "bg-indigo-600" : "bg-gray-200 dark:bg-slate-700"
           }`}
         />
       </div>
@@ -119,7 +119,7 @@ export function FreeTimeFlow({ onComplete, onCancel }: FreeTimeFlowProps) {
                 key={preset.minutes}
                 type="button"
                 onClick={() => handleTimeSelect(preset.minutes)}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-4 text-center font-medium text-gray-900 transition-colors hover:border-indigo-300 hover:bg-indigo-50 active:bg-indigo-100"
+                className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card px-4 py-4 text-center font-medium text-gray-900 dark:text-slate-100 transition-colors hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950 active:bg-indigo-100 dark:active:bg-indigo-900"
               >
                 {preset.label}
               </button>
@@ -145,12 +145,12 @@ export function FreeTimeFlow({ onComplete, onCancel }: FreeTimeFlowProps) {
                 onChange={(e) => setCustomMinutes(e.target.value)}
                 placeholder="Minutes"
                 autoFocus
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleCustomConfirm();
                 }}
               />
-              <span className="text-sm text-gray-500">min</span>
+              <span className="text-sm text-gray-500 dark:text-slate-400">min</span>
               <button
                 type="button"
                 onClick={handleCustomConfirm}
@@ -170,7 +170,7 @@ export function FreeTimeFlow({ onComplete, onCancel }: FreeTimeFlowProps) {
               key={option.value}
               type="button"
               onClick={() => handleEnergySelect(option.value)}
-              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-4 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50 active:bg-indigo-100"
+              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card px-4 py-4 text-left transition-colors hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950 active:bg-indigo-100 dark:active:bg-indigo-900"
             >
               <span className="text-xl" aria-hidden>
                 {option.value === "energetic"
@@ -180,8 +180,8 @@ export function FreeTimeFlow({ onComplete, onCancel }: FreeTimeFlowProps) {
                     : "\uD83D\uDE34"}
               </span>
               <div>
-                <p className="font-medium text-gray-900">{option.label}</p>
-                <p className="text-sm text-gray-500">{option.description}</p>
+                <p className="font-medium text-gray-900 dark:text-slate-100">{option.label}</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">{option.description}</p>
               </div>
             </button>
           ))}
@@ -189,7 +189,7 @@ export function FreeTimeFlow({ onComplete, onCancel }: FreeTimeFlowProps) {
           <button
             type="button"
             onClick={handleSkipEnergy}
-            className="w-full text-center text-sm text-gray-500 hover:text-gray-700"
+            className="w-full text-center text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           >
             Skip this step
           </button>

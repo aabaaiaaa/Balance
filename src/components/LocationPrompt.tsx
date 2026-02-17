@@ -163,9 +163,9 @@ export function LocationPrompt({
   // "New place? Save it" prompt
   if (promptState.type === "new-place") {
     return (
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+      <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 p-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
             <svg
               width="16"
               height="16"
@@ -175,17 +175,17 @@ export function LocationPrompt({
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-blue-600"
+              className="text-blue-600 dark:text-blue-400"
             >
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-blue-900">
+            <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
               New place? Save it
             </p>
-            <p className="mt-0.5 text-xs text-blue-700">
+            <p className="mt-0.5 text-xs text-blue-700 dark:text-blue-300">
               Save this location for quick logging next time
             </p>
           </div>
@@ -205,7 +205,7 @@ export function LocationPrompt({
             <button
               type="button"
               onClick={handleDismissNewPlace}
-              className="rounded-lg px-2 py-1.5 text-xs text-blue-600 transition-colors hover:bg-blue-100"
+              className="rounded-lg px-2 py-1.5 text-xs text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900"
             >
               Not now
             </button>
@@ -241,9 +241,9 @@ export function LocationPrompt({
     }
 
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-3">
+      <div className="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 p-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
             <svg
               width="16"
               height="16"
@@ -253,16 +253,16 @@ export function LocationPrompt({
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-green-600"
+              className="text-green-600 dark:text-green-400"
             >
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-green-900">{message}</p>
+            <p className="text-sm font-medium text-green-900 dark:text-green-100">{message}</p>
             {hasLink && (
-              <p className="mt-0.5 text-xs text-green-700">
+              <p className="mt-0.5 text-xs text-green-700 dark:text-green-300">
                 Tap to log a quick entry
               </p>
             )}
@@ -280,7 +280,7 @@ export function LocationPrompt({
             <button
               type="button"
               onClick={() => handleDismiss([place.id!])}
-              className="rounded-lg px-2 py-1.5 text-xs text-green-600 transition-colors hover:bg-green-100"
+              className="rounded-lg px-2 py-1.5 text-xs text-green-600 dark:text-green-400 transition-colors hover:bg-green-100 dark:hover:bg-green-900"
             >
               Not now
             </button>
@@ -301,9 +301,9 @@ export function LocationPrompt({
       const hasLink = linkedContacts.length > 0 || linkedAreas.length > 0;
 
       return (
-        <div className="rounded-xl border border-green-200 bg-green-50 p-3">
+        <div className="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 p-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
               <svg
                 width="16"
                 height="16"
@@ -313,14 +313,14 @@ export function LocationPrompt({
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-green-600"
+                className="text-green-600 dark:text-green-400"
               >
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-green-900">
+              <p className="text-sm font-medium text-green-900 dark:text-green-100">
                 Logging at {selectedPlace.label}
               </p>
             </div>
@@ -337,7 +337,7 @@ export function LocationPrompt({
               <button
                 type="button"
                 onClick={() => setSelectedPlace(null)}
-                className="rounded-lg px-2 py-1.5 text-xs text-green-600 transition-colors hover:bg-green-100"
+                className="rounded-lg px-2 py-1.5 text-xs text-green-600 dark:text-green-400 transition-colors hover:bg-green-100 dark:hover:bg-green-900"
               >
                 Back
               </button>
@@ -348,9 +348,9 @@ export function LocationPrompt({
     }
 
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-3">
+      <div className="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 p-3">
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
             <svg
               width="16"
               height="16"
@@ -360,22 +360,22 @@ export function LocationPrompt({
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-green-600"
+              className="text-green-600 dark:text-green-400"
             >
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-green-900">Where are you?</p>
-            <p className="mt-0.5 text-xs text-green-700">
+            <p className="text-sm font-medium text-green-900 dark:text-green-100">Where are you?</p>
+            <p className="mt-0.5 text-xs text-green-700 dark:text-green-300">
               You&apos;re near multiple saved places
             </p>
           </div>
           <button
             type="button"
             onClick={() => handleDismiss(allPlaceIds)}
-            className="shrink-0 rounded-lg px-2 py-1.5 text-xs text-green-600 transition-colors hover:bg-green-100"
+            className="shrink-0 rounded-lg px-2 py-1.5 text-xs text-green-600 dark:text-green-400 transition-colors hover:bg-green-100 dark:hover:bg-green-900"
           >
             Not now
           </button>
@@ -386,7 +386,7 @@ export function LocationPrompt({
               key={place.id}
               type="button"
               onClick={() => handleSelectPlace(place)}
-              className="flex w-full items-center gap-2 rounded-lg bg-white px-3 py-2 text-left text-sm font-medium text-gray-900 transition-colors hover:bg-green-100"
+              className="flex w-full items-center gap-2 rounded-lg bg-white dark:bg-card px-3 py-2 text-left text-sm font-medium text-gray-900 dark:text-slate-100 transition-colors hover:bg-green-100 dark:hover:bg-green-900"
             >
               <svg
                 width="14"
@@ -408,7 +408,7 @@ export function LocationPrompt({
           <button
             type="button"
             onClick={() => handleDismiss(allPlaceIds)}
-            className="flex w-full items-center gap-2 rounded-lg bg-white px-3 py-2 text-left text-sm text-gray-500 transition-colors hover:bg-gray-100"
+            className="flex w-full items-center gap-2 rounded-lg bg-white dark:bg-card px-3 py-2 text-left text-sm text-gray-500 dark:text-slate-400 transition-colors hover:bg-gray-100 dark:hover:bg-slate-700"
           >
             Just browsing
           </button>

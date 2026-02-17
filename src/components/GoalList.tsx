@@ -147,7 +147,7 @@ export function GoalList({ lifeAreaId }: GoalListProps) {
 
   if (showForm) {
     return (
-      <section className="rounded-xl border border-gray-200 bg-white p-4">
+      <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <GoalForm
           lifeAreaId={lifeAreaId}
           goalId={editingGoalId}
@@ -164,10 +164,10 @@ export function GoalList({ lifeAreaId }: GoalListProps) {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Goals
           {activeCount > 0 && (
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
+            <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">
               ({activeCount})
             </span>
           )}
@@ -178,7 +178,7 @@ export function GoalList({ lifeAreaId }: GoalListProps) {
             setEditingGoalId(undefined);
             setShowForm(true);
           }}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+          className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
         >
           + Add goal
         </button>
@@ -186,8 +186,8 @@ export function GoalList({ lifeAreaId }: GoalListProps) {
 
       {/* Active goals */}
       {activeCount === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-400">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+          <p className="text-sm text-gray-400 dark:text-slate-500">
             No goals yet. Add one to track what you&apos;re working toward.
           </p>
         </div>
@@ -211,7 +211,7 @@ export function GoalList({ lifeAreaId }: GoalListProps) {
           <button
             type="button"
             onClick={() => setShowCompleted(!showCompleted)}
-            className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600"
+            className="flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
           >
             <svg
               width="14"
@@ -270,16 +270,16 @@ function GoalCard({
     goal.targetDate !== null && goal.targetDate < Date.now();
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-3">
+    <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3">
       {/* Header */}
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-900">{goal.title}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{goal.title}</p>
 
           {/* Meta badges */}
           <div className="mt-1 flex flex-wrap items-center gap-2">
             {/* Progress */}
-            <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+            <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:text-indigo-300">
               {goal.progressPercent}%
             </span>
 
@@ -288,8 +288,8 @@ function GoalCard({
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
                   isOverdue
-                    ? "bg-red-50 text-red-700"
-                    : "bg-gray-100 text-gray-600"
+                    ? "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300"
+                    : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300"
                 }`}
               >
                 {formatDate(goal.targetDate)}
@@ -298,7 +298,7 @@ function GoalCard({
 
             {/* Milestone count */}
             {totalMilestones > 0 && (
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600">
+              <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-medium text-gray-600 dark:text-slate-300">
                 {doneMilestones}/{totalMilestones} milestones
               </span>
             )}
@@ -310,7 +310,7 @@ function GoalCard({
           <button
             type="button"
             onClick={() => setShowActions(!showActions)}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1 text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-600 dark:hover:text-slate-300"
             aria-label="Goal actions"
           >
             <svg
@@ -333,14 +333,14 @@ function GoalCard({
                 onClick={() => setShowActions(false)}
                 aria-label="Close menu"
               />
-              <div className="absolute right-0 top-8 z-20 w-36 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 top-8 z-20 w-36 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card py-1 shadow-lg">
                 <button
                   type="button"
                   onClick={() => {
                     onEdit(goal);
                     setShowActions(false);
                   }}
-                  className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex w-full items-center px-3 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
                 >
                   Edit
                 </button>
@@ -350,7 +350,7 @@ function GoalCard({
                     onDelete(goal);
                     setShowActions(false);
                   }}
-                  className="flex w-full items-center px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                  className="flex w-full items-center px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
                 >
                   Delete
                 </button>
@@ -362,7 +362,7 @@ function GoalCard({
 
       {/* Progress bar */}
       {totalMilestones > 0 && (
-        <div className="mt-2 h-1.5 w-full rounded-full bg-gray-200">
+        <div className="mt-2 h-1.5 w-full rounded-full bg-gray-200 dark:bg-slate-700">
           <div
             className="h-1.5 rounded-full bg-indigo-500 transition-all"
             style={{ width: `${goal.progressPercent}%` }}
@@ -372,7 +372,7 @@ function GoalCard({
 
       {/* Description (if present) */}
       {goal.description && (
-        <p className="mt-2 text-xs text-gray-500">{goal.description}</p>
+        <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">{goal.description}</p>
       )}
 
       {/* Expandable milestones */}
@@ -381,7 +381,7 @@ function GoalCard({
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600"
+            className="flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
           >
             <svg
               width="12"
@@ -408,8 +408,8 @@ function GoalCard({
                     onClick={() => onToggleMilestone(goal, i)}
                     className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors ${
                       m.done
-                        ? "border-green-400 bg-green-50"
-                        : "border-gray-300 hover:border-green-400 hover:bg-green-50"
+                        ? "border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-950"
+                        : "border-gray-300 dark:border-slate-600 hover:border-green-400 dark:hover:border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
                     }`}
                     aria-label={`${m.done ? "Uncheck" : "Check"} "${m.title}"`}
                   >
@@ -423,7 +423,7 @@ function GoalCard({
                         strokeWidth={3}
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-green-600"
+                        className="text-green-600 dark:text-green-400"
                       >
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -432,8 +432,8 @@ function GoalCard({
                   <span
                     className={`text-xs ${
                       m.done
-                        ? "text-gray-400 line-through"
-                        : "text-gray-700"
+                        ? "text-gray-400 dark:text-slate-500 line-through"
+                        : "text-gray-700 dark:text-slate-300"
                     }`}
                   >
                     {m.title}
@@ -456,9 +456,9 @@ function CompletedGoalCard({
   onDelete: (goal: Goal) => void;
 }) {
   return (
-    <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+    <div className="rounded-xl border border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-surface p-3">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-green-400 bg-green-50">
+        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-950">
           <svg
             width="12"
             height="12"
@@ -468,15 +468,15 @@ function CompletedGoalCard({
             strokeWidth={3}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-green-600"
+            className="text-green-600 dark:text-green-400"
           >
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-gray-400 line-through">{goal.title}</p>
-          <p className="mt-0.5 text-[10px] text-gray-400">
+          <p className="text-sm text-gray-400 dark:text-slate-500 line-through">{goal.title}</p>
+          <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">
             Completed {formatCompletedDate(goal.updatedAt)}
           </p>
         </div>
@@ -484,7 +484,7 @@ function CompletedGoalCard({
         <button
           type="button"
           onClick={() => onDelete(goal)}
-          className="shrink-0 rounded p-1 text-gray-300 hover:bg-red-50 hover:text-red-400"
+          className="shrink-0 rounded p-1 text-gray-300 dark:text-slate-600 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-400"
           aria-label={`Delete "${goal.title}"`}
         >
           <svg

@@ -110,7 +110,7 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
   if (area === undefined) {
     return (
       <div className="space-y-6">
-        <p className="text-sm text-gray-500">Loading life area...</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Loading life area...</p>
       </div>
     );
   }
@@ -118,11 +118,11 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
   if (area === null) {
     return (
       <div className="space-y-6">
-        <p className="text-sm text-gray-500">Life area not found.</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400">Life area not found.</p>
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-indigo-600 hover:text-indigo-800"
+          className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
         >
           Back to life areas
         </button>
@@ -137,7 +137,7 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+          className="flex items-center gap-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           aria-label="Back to life areas"
         >
           <svg
@@ -157,50 +157,50 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
         <button
           type="button"
           onClick={() => onEdit(lifeAreaId)}
-          className="text-sm text-indigo-600 hover:text-indigo-800"
+          className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
         >
           Edit
         </button>
       </div>
 
       {/* Life area info & weekly summary */}
-      <section className="rounded-xl border border-gray-200 bg-white p-4">
+      <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <div className="flex items-start gap-3">
           <div
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
               isOnTrack
-                ? "bg-green-100 text-green-600"
+                ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
                 : isLow
-                  ? "bg-amber-100 text-amber-600"
-                  : "bg-indigo-100 text-indigo-600"
+                  ? "bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400"
+                  : "bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
             }`}
           >
             <LifeAreaIcon icon={area.icon} size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-xl font-semibold text-gray-900">{area.name}</h2>
-            <p className="mt-0.5 text-sm text-gray-500">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">{area.name}</h2>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">
               Target: {targetHours}h per week
             </p>
           </div>
         </div>
 
         {/* Weekly summary */}
-        <div className="mt-4 rounded-lg bg-gray-50 p-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+        <div className="mt-4 rounded-lg bg-gray-50 dark:bg-surface p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             This Week
           </h3>
           <div className="mt-2 flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-gray-900 dark:text-slate-100">
               {formatDuration(totalMinutesThisWeek)}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-slate-400">
               of {targetHours}h target
             </span>
           </div>
 
           {/* Progress bar */}
-          <div className="mt-2 h-2.5 w-full rounded-full bg-gray-200">
+          <div className="mt-2 h-2.5 w-full rounded-full bg-gray-200 dark:bg-slate-700">
             <div
               className={`h-2.5 rounded-full transition-all ${
                 isOnTrack
@@ -213,7 +213,7 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
             />
           </div>
 
-          <p className="mt-1.5 text-xs text-gray-500">
+          <p className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
             {isOnTrack
               ? "On track! You've met your target this week."
               : targetHours > 0
@@ -225,7 +225,7 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
 
       {/* Log activity button / form */}
       {showActivityForm ? (
-        <section className="rounded-xl border border-gray-200 bg-white p-4">
+        <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
           <ActivityForm
             lifeAreaId={lifeAreaId}
             onComplete={() => setShowActivityForm(false)}
@@ -254,18 +254,18 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
 
       {/* Activity history */}
       <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Recent Activities
           {recentActivities && recentActivities.length > 0 && (
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
+            <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">
               ({recentActivities.length})
             </span>
           )}
         </h3>
 
         {!recentActivities || recentActivities.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <p className="text-sm text-gray-400">
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+            <p className="text-sm text-gray-400 dark:text-slate-500">
               No activities yet. Tap the button above to log one.
             </p>
           </div>
@@ -276,22 +276,22 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
               return (
                 <div
                   key={activity.id}
-                  className="rounded-xl border border-gray-200 bg-white p-3"
+                  className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-gray-900 dark:text-slate-100">
                       {activity.description}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">
                       {formatActivityDate(activity.date)}
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700">
+                    <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:text-indigo-300">
                       {formatDuration(activity.durationMinutes)}
                     </span>
                     {placeName && (
-                      <span className="flex items-center gap-0.5 text-[10px] text-gray-400">
+                      <span className="flex items-center gap-0.5 text-[10px] text-gray-400 dark:text-slate-500">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                           <circle cx="12" cy="10" r="3" />
@@ -300,7 +300,7 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
                       </span>
                     )}
                     {activity.notes && (
-                      <span className="truncate text-xs text-gray-600">
+                      <span className="truncate text-xs text-gray-600 dark:text-slate-300">
                         {activity.notes}
                       </span>
                     )}

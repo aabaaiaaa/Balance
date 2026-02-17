@@ -311,8 +311,8 @@ export function PlaceQuickCreate({
   if (step.type === "done") {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100">
+        <div className="flex items-center gap-3 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
             <svg
               width="20"
               height="20"
@@ -322,16 +322,16 @@ export function PlaceQuickCreate({
               strokeWidth={2.5}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-green-600"
+              className="text-green-600 dark:text-green-400"
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <div>
-            <p className="text-sm font-medium text-green-900">
+            <p className="text-sm font-medium text-green-900 dark:text-green-100">
               &ldquo;{label.trim()}&rdquo; saved!
             </p>
-            <p className="text-xs text-green-700">
+            <p className="text-xs text-green-700 dark:text-green-300">
               Location saved for quick logging next time
             </p>
           </div>
@@ -361,14 +361,14 @@ export function PlaceQuickCreate({
                 setStep({ type: "purpose" });
               else if (step.type === "new-contact") setStep({ type: "pick-contact" });
             }}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
             aria-label="Go back"
           >
             &larr;
           </button>
         )}
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
             <svg
               width="14"
               height="14"
@@ -378,18 +378,18 @@ export function PlaceQuickCreate({
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-blue-600"
+              className="text-blue-600 dark:text-blue-400"
             >
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900">Save New Place</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Save New Place</h3>
         </div>
         <button
           type="button"
           onClick={onCancel}
-          className="ml-auto text-sm text-gray-400 hover:text-gray-600"
+          className="ml-auto text-sm text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
           aria-label="Cancel"
         >
           Cancel
@@ -398,7 +398,7 @@ export function PlaceQuickCreate({
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
@@ -407,7 +407,7 @@ export function PlaceQuickCreate({
       {step.type === "name" && (
         <div className="space-y-3">
           <div>
-            <label htmlFor="place-name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="place-name" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
               Name this place
             </label>
             <input
@@ -419,7 +419,7 @@ export function PlaceQuickCreate({
                 if (e.key === "Enter") handleNameNext();
               }}
               placeholder={'e.g. "The park", "Jo\'s house", "That nice cafe"'}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
               autoFocus
             />
           </div>
@@ -436,7 +436,7 @@ export function PlaceQuickCreate({
       {/* Step 2: Purpose */}
       {step.type === "purpose" && (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
             What is &ldquo;{label.trim()}&rdquo; for?
           </p>
 
@@ -444,17 +444,17 @@ export function PlaceQuickCreate({
             type="button"
             onClick={() => handlePurposeSelect("contact")}
             disabled={saving}
-            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600 dark:text-indigo-400">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Someone&apos;s place</p>
-              <p className="text-xs text-gray-500">Link to a contact</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Someone&apos;s place</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Link to a contact</p>
             </div>
           </button>
 
@@ -462,17 +462,17 @@ export function PlaceQuickCreate({
             type="button"
             onClick={() => handlePurposeSelect("activity")}
             disabled={saving}
-            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pink-100">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-pink-600">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-900">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-pink-600 dark:text-pink-400">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Activity spot</p>
-              <p className="text-xs text-gray-500">Link to a life area (gym, cafe, etc.)</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Activity spot</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Link to a life area (gym, cafe, etc.)</p>
             </div>
           </button>
 
@@ -481,16 +481,16 @@ export function PlaceQuickCreate({
               type="button"
               onClick={() => handlePurposeSelect("diy")}
               disabled={saving}
-              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+              className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-amber-600">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 dark:text-amber-400">
                   <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">DIY/errand location</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-sm font-medium text-gray-900 dark:text-slate-100">DIY/errand location</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   {hasDiyTasks ? "Optionally add a task here" : "Link to DIY/Household"}
                 </p>
               </div>
@@ -501,17 +501,17 @@ export function PlaceQuickCreate({
             type="button"
             onClick={() => handlePurposeSelect("just-save")}
             disabled={saving}
-            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-slate-300">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Just save it</p>
-              <p className="text-xs text-gray-500">Link it later</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-slate-100">Just save it</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Link it later</p>
             </div>
           </button>
         </div>
@@ -520,7 +520,7 @@ export function PlaceQuickCreate({
       {/* Step 3a: Pick existing contact */}
       {step.type === "pick-contact" && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-gray-700">Whose place is this?</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Whose place is this?</p>
 
           {contacts && contacts.length > 0 && (
             <div className="max-h-48 space-y-1 overflow-y-auto">
@@ -530,13 +530,13 @@ export function PlaceQuickCreate({
                   type="button"
                   onClick={() => handlePickContact(contact.id!)}
                   disabled={saving}
-                  className="flex w-full items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-sm text-gray-900 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                  className="flex w-full items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card px-3 py-2 text-left text-sm text-gray-900 dark:text-slate-100 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50"
                 >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-medium text-indigo-700">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 text-xs font-medium text-indigo-700 dark:text-indigo-300">
                     {contact.name.charAt(0).toUpperCase()}
                   </div>
                   <span>{contact.name}</span>
-                  <span className="ml-auto text-xs text-gray-400">
+                  <span className="ml-auto text-xs text-gray-400 dark:text-slate-500">
                     {TIER_LABELS[contact.tier]}
                   </span>
                 </button>
@@ -548,7 +548,7 @@ export function PlaceQuickCreate({
             type="button"
             onClick={() => setStep({ type: "new-contact" })}
             disabled={saving}
-            className="flex w-full items-center gap-2 rounded-lg border border-dashed border-indigo-300 bg-indigo-50 px-3 py-2 text-left text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-100"
+            className="flex w-full items-center gap-2 rounded-lg border border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950 px-3 py-2 text-left text-sm font-medium text-indigo-700 dark:text-indigo-300 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -562,11 +562,11 @@ export function PlaceQuickCreate({
       {/* Step 3a-ii: New contact form */}
       {step.type === "new-contact" && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-gray-700">Add a new contact</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Add a new contact</p>
 
           <div>
-            <label htmlFor="qc-contact-name" className="block text-xs font-medium text-gray-600">
-              Name <span className="text-red-500">*</span>
+            <label htmlFor="qc-contact-name" className="block text-xs font-medium text-gray-600 dark:text-slate-300">
+              Name <span className="text-red-500 dark:text-red-400">*</span>
             </label>
             <input
               id="qc-contact-name"
@@ -574,20 +574,20 @@ export function PlaceQuickCreate({
               value={contactName}
               onChange={(e) => setContactName(e.target.value)}
               placeholder="e.g. Jo, Mum, Dave"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
               autoFocus
             />
           </div>
 
           <div>
-            <label htmlFor="qc-contact-tier" className="block text-xs font-medium text-gray-600">
+            <label htmlFor="qc-contact-tier" className="block text-xs font-medium text-gray-600 dark:text-slate-300">
               Relationship
             </label>
             <select
               id="qc-contact-tier"
               value={contactTier}
               onChange={(e) => setContactTier(e.target.value as ContactTier)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-card px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             >
               {TIER_ORDER.map((t) => (
                 <option key={t} value={t}>
@@ -598,8 +598,8 @@ export function PlaceQuickCreate({
           </div>
 
           <div>
-            <label htmlFor="qc-contact-phone" className="block text-xs font-medium text-gray-600">
-              Phone <span className="text-xs text-gray-400">(optional)</span>
+            <label htmlFor="qc-contact-phone" className="block text-xs font-medium text-gray-600 dark:text-slate-300">
+              Phone <span className="text-xs text-gray-400 dark:text-slate-500">(optional)</span>
             </label>
             <input
               id="qc-contact-phone"
@@ -607,7 +607,7 @@ export function PlaceQuickCreate({
               value={contactPhone}
               onChange={(e) => setContactPhone(e.target.value)}
               placeholder="07700 900000"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
 
@@ -625,7 +625,7 @@ export function PlaceQuickCreate({
       {/* Step 3b: Pick life area for activity spot */}
       {step.type === "pick-area" && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-gray-700">What kind of activity?</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-300">What kind of activity?</p>
 
           {lifeAreas && lifeAreas.length > 0 && (
             <div className="space-y-1">
@@ -639,7 +639,7 @@ export function PlaceQuickCreate({
                     }
                   }}
                   disabled={saving || logActivity}
-                  className="flex w-full items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-sm text-gray-900 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                  className="flex w-full items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card px-3 py-2 text-left text-sm text-gray-900 dark:text-slate-100 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50"
                 >
                   <span className="text-base">{getAreaEmoji(area.name)}</span>
                   <span>{area.name}</span>
@@ -648,15 +648,15 @@ export function PlaceQuickCreate({
             </div>
           )}
 
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-surface p-3">
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={logActivity}
                 onChange={(e) => setLogActivity(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500"
               />
-              <span className="text-sm text-gray-700">Log an activity here now</span>
+              <span className="text-sm text-gray-700 dark:text-slate-300">Log an activity here now</span>
             </label>
 
             {logActivity && (
@@ -666,7 +666,7 @@ export function PlaceQuickCreate({
                   value={activityDesc}
                   onChange={(e) => setActivityDesc(e.target.value)}
                   placeholder="What are you doing?"
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                   autoFocus
                 />
                 <div className="flex items-center gap-2">
@@ -675,12 +675,12 @@ export function PlaceQuickCreate({
                     min={1}
                     value={activityDuration}
                     onChange={(e) => setActivityDuration(e.target.value)}
-                    className="block w-20 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    className="block w-20 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                   />
-                  <span className="text-xs text-gray-500">minutes</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">minutes</span>
                 </div>
 
-                <p className="text-xs text-gray-500">Pick a life area above to save</p>
+                <p className="text-xs text-gray-500 dark:text-slate-400">Pick a life area above to save</p>
                 {lifeAreas && lifeAreas.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {lifeAreas.map((area) => (
@@ -689,7 +689,7 @@ export function PlaceQuickCreate({
                         type="button"
                         onClick={() => handleSaveWithLifeArea(area.id!)}
                         disabled={saving || !activityDesc.trim()}
-                        className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition-colors hover:bg-indigo-100 disabled:opacity-50"
+                        className="rounded-lg bg-indigo-50 dark:bg-indigo-950 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900 disabled:opacity-50"
                       >
                         {area.name}
                       </button>
@@ -705,19 +705,19 @@ export function PlaceQuickCreate({
       {/* Step 3c: DIY/errand — optional task */}
       {step.type === "diy-task" && diyArea && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
             Saving to DIY/Household
           </p>
 
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+          <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-surface p-3">
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={createTask}
                 onChange={(e) => setCreateTask(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-indigo-600 focus:ring-indigo-500"
               />
-              <span className="text-sm text-gray-700">Add a task for this place</span>
+              <span className="text-sm text-gray-700 dark:text-slate-300">Add a task for this place</span>
             </label>
 
             {createTask && (
@@ -727,7 +727,7 @@ export function PlaceQuickCreate({
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
                   placeholder="What needs doing?"
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                  className="block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                   autoFocus
                 />
                 <div className="flex items-center gap-2">
@@ -736,9 +736,9 @@ export function PlaceQuickCreate({
                     min={1}
                     value={taskMinutes}
                     onChange={(e) => setTaskMinutes(e.target.value)}
-                    className="block w-20 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    className="block w-20 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                   />
-                  <span className="text-xs text-gray-500">estimated minutes</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">estimated minutes</span>
                 </div>
               </div>
             )}
@@ -757,7 +757,7 @@ export function PlaceQuickCreate({
 
       {/* Saving overlay */}
       {saving && step.type === "purpose" && (
-        <p className="text-center text-sm text-gray-400">Saving...</p>
+        <p className="text-center text-sm text-gray-400 dark:text-slate-500">Saving...</p>
       )}
     </div>
   );

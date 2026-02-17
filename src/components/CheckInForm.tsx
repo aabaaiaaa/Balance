@@ -82,11 +82,11 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Log Check-in</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Log Check-in</h3>
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300"
           aria-label="Cancel"
         >
           Cancel
@@ -94,7 +94,7 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}
@@ -102,14 +102,14 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
       <div className="space-y-4">
         {/* Check-in type */}
         <div>
-          <label htmlFor="checkin-type" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="checkin-type" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Type
           </label>
           <select
             id="checkin-type"
             value={type}
             onChange={(e) => setType(e.target.value as CheckInType)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-card px-3 py-2 text-gray-900 dark:text-slate-100 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           >
             {CHECK_IN_TYPES.map((t) => (
               <option key={t} value={t}>
@@ -121,7 +121,7 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
 
         {/* Date */}
         <div>
-          <label htmlFor="checkin-date" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="checkin-date" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
             Date
           </label>
           <input
@@ -129,14 +129,14 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
             type="datetime-local"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           />
         </div>
 
         {/* Notes */}
         <div>
-          <label htmlFor="checkin-notes" className="block text-sm font-medium text-gray-700">
-            Notes <span className="text-xs text-gray-400">(optional)</span>
+          <label htmlFor="checkin-notes" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Notes <span className="text-xs text-gray-400 dark:text-slate-500">(optional)</span>
           </label>
           <textarea
             id="checkin-notes"
@@ -144,28 +144,28 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
             onChange={(e) => setNotes(e.target.value)}
             placeholder="How did it go?"
             rows={3}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none resize-none"
+            className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 bg-white dark:bg-card focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none resize-none"
           />
         </div>
 
         {/* Location */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Location <span className="text-xs text-gray-400">(optional)</span>
+          <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+            Location <span className="text-xs text-gray-400 dark:text-slate-500">(optional)</span>
           </label>
           {location ? (
-            <div className="mt-1 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-green-600 flex-shrink-0">
+            <div className="mt-1 flex items-center gap-2 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 px-3 py-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400 flex-shrink-0">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              <span className="text-sm text-green-800">
+              <span className="text-sm text-green-800 dark:text-green-300">
                 {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
               </span>
               <button
                 type="button"
                 onClick={handleClearLocation}
-                className="ml-auto text-xs text-green-600 hover:text-green-800"
+                className="ml-auto text-xs text-green-600 dark:text-green-400 hover:text-green-800"
               >
                 Remove
               </button>
@@ -175,7 +175,7 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
               type="button"
               onClick={handleUseLocation}
               disabled={locationLoading || locationPermission === "unavailable"}
-              className="mt-1 inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
+              className="mt-1 inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-2 text-sm text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600 disabled:opacity-50"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -188,7 +188,7 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
             <p className="mt-1 text-xs text-amber-600">{locationError}</p>
           )}
           {locationPermission === "unavailable" && (
-            <p className="mt-1 text-xs text-gray-400">Location is not available in this browser.</p>
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Location is not available in this browser.</p>
           )}
         </div>
       </div>
