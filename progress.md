@@ -2,9 +2,9 @@
 
 ## Summary
 - **Total Tasks**: 41
-- **Completed**: 26
-- **Remaining**: 15
-- **Last Updated**: 2026-02-17T02:43:09.415Z
+- **Completed**: 27
+- **Remaining**: 14
+- **Last Updated**: 2026-02-17T02:55:31.995Z
 
 ## Iteration Log
 
@@ -215,4 +215,12 @@
 - **Exit Status**: success
 - **Tokens**: 2,495,543 total (9,769 in, 26,622 out, 110,995 cache-create, 2,348,157 cache-read)
 - **Cost**: $3.6956
+
+### Iteration 27 - 2026-02-17T02:43:12.086Z
+- **Task Completed**: TASK-030
+- **Summary**: Completed PWA optimisation and offline reliability
+- **Duration**: 740s
+- **Exit Status**: success
+- **Tokens**: 3,919,391 total (7,518 in, 21,448 out, 76,660 cache-create, 3,813,765 cache-read)
+- **Cost**: $3.4784
 

@@ -13,9 +13,13 @@ async function buildSW() {
     swDest: resolve(rootDir, "out/sw.js"),
     globDirectory: resolve(rootDir, "out"),
     globPatterns: [
-      "**/*.{html,js,css,png,jpg,jpeg,svg,gif,ico,woff,woff2,ttf,eot,json}",
+      "**/*.{html,js,css,png,jpg,jpeg,svg,gif,ico,woff,woff2,ttf,eot,json,webmanifest,txt,wasm}",
     ],
-    skipWaiting: true,
+    // Do NOT use skipWaiting — we handle updates gracefully via the UI
+    // by prompting the user when a new version is available.
+    // clientsClaim is still used so that on first install, the SW takes
+    // control immediately.
+    skipWaiting: false,
     clientsClaim: true,
     // Increase the size limit for precaching (default 2MB)
     maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
@@ -24,6 +28,8 @@ async function buildSW() {
     modifyURLPrefix: basePath ? { "": `${basePath}/` } : {},
     // Navigation fallback for SPA-style routing
     navigateFallback: `${basePath}/index.html`,
+    // Don't use the navigation fallback for non-page requests
+    navigateFallbackDenylist: [/^\/_next\//, /\/sw\.js$/],
   });
 
   console.log(

@@ -15,6 +15,7 @@ import { FreeTimeFlow } from "@/components/FreeTimeFlow";
 import { FreeTimeSuggestions } from "@/components/FreeTimeSuggestions";
 import { CheckInForm } from "@/components/CheckInForm";
 import { ActivityForm } from "@/components/ActivityForm";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import type { CheckInType, WeekStartDay } from "@/types/models";
@@ -354,6 +355,9 @@ export default function DashboardPage() {
           </p>
         )}
       </section>
+
+      {/* Install prompt for mobile users */}
+      <InstallPrompt />
 
       {/* "I have free time" button / flow */}
       {showFreeTimeFlow ? (

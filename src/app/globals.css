@@ -24,6 +24,22 @@ body {
     "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Slide-down animation for update prompt */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
 /* Safe area utilities for notched/rounded devices */
 .safe-area-top {
   padding-top: env(safe-area-inset-top, 0px);

@@ -1,15 +1,16 @@
-import { writeFileSync } from "fs";
+import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Generate a simple PNG icon programmatically
-// This creates a minimal valid PNG with a solid indigo background and "B" letter
+// Creates a minimal valid PNG with a solid indigo background
 function createPNG(size) {
-  // Create an uncompressed PNG
-  // For simplicity, create a solid-color PNG
   const r = 79,
     g = 70,
     b = 229; // #4f46e5 (indigo-600)
@@ -29,7 +30,6 @@ function createPNG(size) {
   const ihdrChunk = createChunk("IHDR", ihdrData);
 
   // IDAT chunk - raw pixel data with zlib
-  // Each row: filter byte (0) + RGB pixels
   const rawRows = [];
   for (let y = 0; y < size; y++) {
     const row = Buffer.alloc(1 + size * 3);
@@ -44,8 +44,7 @@ function createPNG(size) {
   }
   const rawData = Buffer.concat(rawRows);
 
-  // Wrap in zlib (deflate with zlib header)
-  const { deflateSync } = await_import_zlib();
+  const { deflateSync } = require("zlib");
   const compressed = deflateSync(rawData);
   const idatChunk = createChunk("IDAT", compressed);
 
@@ -53,11 +52,6 @@ function createPNG(size) {
   const iendChunk = createChunk("IEND", Buffer.alloc(0));
 
   return Buffer.concat([signature, ihdrChunk, idatChunk, iendChunk]);
-}
-
-function await_import_zlib() {
-  // Dynamic import workaround for ESM
-  return require("zlib");
 }
 
 function createChunk(type, data) {
@@ -88,14 +82,23 @@ function crc32(buf) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-// Use createRequire for zlib in ESM
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
+const iconsDir = resolve(__dirname, "../public/icons");
+mkdirSync(iconsDir, { recursive: true });
 
-const sizes = [192, 512];
+// Standard icon sizes for PWA
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 for (const size of sizes) {
   const png = createPNG(size);
-  const outPath = resolve(__dirname, `../public/icons/icon-${size}x${size}.png`);
+  const outPath = resolve(iconsDir, `icon-${size}x${size}.png`);
   writeFileSync(outPath, png);
   console.log(`Generated ${outPath} (${png.length} bytes)`);
+}
+
+// Maskable icons (separate files for manifest purpose separation)
+const maskableSizes = [192, 512];
+for (const size of maskableSizes) {
+  const png = createPNG(size);
+  const outPath = resolve(iconsDir, `maskable-${size}x${size}.png`);
+  writeFileSync(outPath, png);
+  console.log(`Generated maskable ${outPath} (${png.length} bytes)`);
 }

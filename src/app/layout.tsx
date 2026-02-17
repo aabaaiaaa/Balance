@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
@@ -36,9 +37,20 @@ export default function RootLayout({
           rel="apple-touch-icon"
           href={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/icons/icon-192x192.png`}
         />
+        <link
+          rel="apple-touch-icon"
+          sizes="152x152"
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/icons/icon-152x152.png`}
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="144x144"
+          href={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/icons/icon-144x144.png`}
+        />
       </head>
       <body className="antialiased">
         <ServiceWorkerRegistration />
+        <UpdatePrompt />
         <AppShell>{children}</AppShell>
       </body>
     </html>
