@@ -23,7 +23,7 @@ export function BalanceChart({ lifeAreas, hoursPerArea }: BalanceChartProps) {
   }).length;
 
   return (
-    <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+    <section aria-label="Weekly balance overview" className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Weekly Balance</h3>
         {underTargetCount > 0 && (
@@ -41,11 +41,13 @@ export function BalanceChart({ lifeAreas, hoursPerArea }: BalanceChartProps) {
           const targetPercent = maxValue > 0 ? (target / maxValue) * 100 : 0;
           const isOnTrack = target > 0 && actual >= target;
           const isLow = target > 0 && actual < target * 0.5;
+          const progressForTarget = target > 0 ? Math.min((actual / target) * 100, 100) : 0;
 
           return (
             <div key={area.id} className="flex items-center gap-2">
               {/* Icon */}
               <div
+                aria-hidden="true"
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
                   isOnTrack
                     ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
@@ -67,12 +69,20 @@ export function BalanceChart({ lifeAreas, hoursPerArea }: BalanceChartProps) {
                     {actual.toFixed(1)}/{target}h
                   </span>
                 </div>
-                <div className="relative mt-1 h-2 w-full rounded-full bg-gray-100 dark:bg-slate-700">
+                <div
+                  className="relative mt-1 h-2 w-full rounded-full bg-gray-100 dark:bg-slate-700"
+                  role="progressbar"
+                  aria-valuenow={Math.round(progressForTarget)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${area.name}: ${actual.toFixed(1)} of ${target} hours`}
+                >
                   {/* Target marker line */}
                   {targetPercent > 0 && targetPercent <= 100 && (
                     <div
                       className="absolute top-0 h-2 w-0.5 rounded-full bg-gray-300 dark:bg-slate-600"
                       style={{ left: `${targetPercent}%` }}
+                      aria-hidden="true"
                     />
                   )}
                   {/* Actual progress bar */}

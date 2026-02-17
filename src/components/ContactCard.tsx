@@ -16,6 +16,8 @@ interface OverdueStatus {
   label: string;
   /** Tailwind classes for the dot indicator */
   dotClass: string;
+  /** Accessible status description */
+  statusText: string;
 }
 
 function getOverdueStatus(
@@ -23,7 +25,7 @@ function getOverdueStatus(
   frequencyDays: number
 ): OverdueStatus {
   if (lastCheckIn === null) {
-    return { label: "Never contacted", dotClass: "bg-red-500" };
+    return { label: "Never contacted", dotClass: "bg-red-500", statusText: "overdue" };
   }
 
   const daysSince = Math.floor(
@@ -36,17 +38,18 @@ function getOverdueStatus(
     return {
       label: `${daysSince}d ago (${overdueDays}d overdue)`,
       dotClass: "bg-red-500",
+      statusText: "overdue",
     };
   }
 
   // Amber: due soon (within 25% of the frequency remaining)
   const remaining = frequencyDays - daysSince;
   if (remaining <= Math.max(1, Math.ceil(frequencyDays * 0.25))) {
-    return { label: `${daysSince}d ago (due soon)`, dotClass: "bg-amber-500" };
+    return { label: `${daysSince}d ago (due soon)`, dotClass: "bg-amber-500", statusText: "due soon" };
   }
 
   // Green: recently contacted
-  return { label: `${daysSince}d ago`, dotClass: "bg-green-500" };
+  return { label: `${daysSince}d ago`, dotClass: "bg-green-500", statusText: "up to date" };
 }
 
 interface ContactCardProps {
@@ -64,12 +67,14 @@ export function ContactCard({ contact, onTap }: ContactCardProps) {
     <button
       type="button"
       onClick={() => contact.id != null && onTap(contact.id)}
+      aria-label={`${contact.name}, ${TIER_LABELS[contact.tier]}, ${status.label}`}
       className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
     >
       {/* Overdue indicator dot */}
       <span
         className={`h-3 w-3 flex-shrink-0 rounded-full ${status.dotClass}`}
-        aria-label={status.label}
+        role="img"
+        aria-label={`Status: ${status.statusText}`}
       />
 
       <div className="min-w-0 flex-1">
@@ -94,6 +99,7 @@ export function ContactCard({ contact, onTap }: ContactCardProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
         className="flex-shrink-0 text-gray-400 dark:text-slate-500"
+        aria-hidden="true"
       >
         <polyline points="9 18 15 12 9 6" />
       </svg>

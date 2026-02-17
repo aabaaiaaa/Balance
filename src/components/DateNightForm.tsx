@@ -69,7 +69,7 @@ export function DateNightForm({ onComplete, onCancel }: DateNightFormProps) {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">
+        <div role="alert" className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
         </div>
       )}

@@ -15,7 +15,7 @@
 
   /* Text */
   --color-text-primary: #111827;   /* gray-900 */
-  --color-text-secondary: #6b7280; /* gray-500 */
+  --color-text-secondary: #4b5563; /* gray-600 — improved from gray-500 for 4.5:1 contrast on white */
 
   /* Borders */
   --color-border: #e5e7eb;         /* gray-200 */
@@ -26,7 +26,7 @@
 
   /* Semantic colours */
   --color-success: #16a34a;        /* green-600 */
-  --color-warning: #d97706;        /* amber-600 */
+  --color-warning: #b45309;        /* amber-700 — improved from amber-600 for better contrast on white */
   --color-danger: #dc2626;         /* red-600 */
 
   /* Legacy aliases kept for existing body styles */
@@ -41,7 +41,7 @@
   --color-card: #1e293b;          /* slate-800 */
 
   --color-text-primary: #f1f5f9;  /* slate-100 */
-  --color-text-secondary: #94a3b8; /* slate-400 */
+  --color-text-secondary: #94a3b8; /* slate-400 — 4.6:1 on slate-900 */
 
   --color-border: #334155;         /* slate-700 */
 
@@ -90,6 +90,41 @@ body {
     "Helvetica Neue", Arial, sans-serif;
 }
 
+/* ------------------------------------------------------------------ */
+/* Accessibility: focus-visible styles                                */
+/* ------------------------------------------------------------------ */
+
+/* Global focus-visible ring for all interactive elements */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default outline only when focus-visible is supported */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Accessibility: reduced motion preference                           */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Animations                                                         */
+/* ------------------------------------------------------------------ */
+
 /* Slide-down animation for update prompt */
 @keyframes slide-down {
   from {
@@ -106,11 +141,30 @@ body {
   animation: slide-down 0.3s ease-out;
 }
 
-/* Safe area utilities for notched/rounded devices */
+/* ------------------------------------------------------------------ */
+/* Safe area utilities for notched/rounded devices                    */
+/* ------------------------------------------------------------------ */
+
 .safe-area-top {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ------------------------------------------------------------------ */
+/* Performance: CSS containment for layout-heavy elements             */
+/* ------------------------------------------------------------------ */
+
+/* Cards and list items benefit from layout containment */
+[class*="rounded-xl"][class*="border"] {
+  contain: layout style;
+}
+
+/* Defer rendering of off-screen list items for faster initial paint */
+.space-y-3 > *,
+.space-y-4 > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 80px;
 }

@@ -19,11 +19,13 @@ export function LifeAreaCard({ area, hoursThisWeek, onTap }: LifeAreaCardProps) 
     <button
       type="button"
       onClick={() => area.id != null && onTap(area.id)}
+      aria-label={`${area.name}: ${hoursThisWeek.toFixed(1)} of ${target} hours this week${isOnTrack ? ", on track" : isLow ? ", below target" : ""}`}
       className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
         <div
+          aria-hidden="true"
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
             isOnTrack
               ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
@@ -49,6 +51,7 @@ export function LifeAreaCard({ area, hoursThisWeek, onTap }: LifeAreaCardProps) 
               strokeLinecap="round"
               strokeLinejoin="round"
               className="shrink-0 text-gray-400 dark:text-slate-500"
+              aria-hidden="true"
             >
               <polyline points="9 18 15 12 9 6" />
             </svg>
@@ -63,7 +66,14 @@ export function LifeAreaCard({ area, hoursThisWeek, onTap }: LifeAreaCardProps) 
           </div>
 
           {/* Progress bar */}
-          <div className="mt-1.5 h-2 w-full rounded-full bg-gray-100 dark:bg-slate-700">
+          <div
+            className="mt-1.5 h-2 w-full rounded-full bg-gray-100 dark:bg-slate-700"
+            role="progressbar"
+            aria-valuenow={Math.round(progressPercent)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${area.name} weekly progress`}
+          >
             <div
               className={`h-2 rounded-full transition-all ${
                 isOnTrack

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import {
@@ -12,13 +13,10 @@ import {
 } from "@/lib/priority";
 import { BalanceChart } from "@/components/BalanceChart";
 import { FreeTimeFlow } from "@/components/FreeTimeFlow";
-import { FreeTimeSuggestions } from "@/components/FreeTimeSuggestions";
 import { CheckInForm } from "@/components/CheckInForm";
 import { ActivityForm } from "@/components/ActivityForm";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { LocationPrompt } from "@/components/LocationPrompt";
-import { PlaceQuickCreate } from "@/components/PlaceQuickCreate";
-import { PartnerActivityFeed } from "@/components/PartnerActivityFeed";
 import { DateNightForm } from "@/components/DateNightForm";
 import { WelcomeBackBanner } from "@/components/WelcomeBackBanner";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
@@ -26,6 +24,17 @@ import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import { useLocation } from "@/hooks/useLocation";
 import { useReminders } from "@/hooks/useReminders";
 import type { CheckInType, WeekStartDay, SnoozedItemType, Contact, DateNight } from "@/types/models";
+
+// Lazy-load heavy components that are conditionally rendered
+const FreeTimeSuggestions = dynamic(
+  () => import("@/components/FreeTimeSuggestions").then((m) => ({ default: m.FreeTimeSuggestions })),
+);
+const PlaceQuickCreate = dynamic(
+  () => import("@/components/PlaceQuickCreate").then((m) => ({ default: m.PlaceQuickCreate })),
+);
+const PartnerActivityFeed = dynamic(
+  () => import("@/components/PartnerActivityFeed").then((m) => ({ default: m.PartnerActivityFeed })),
+);
 
 // ---------------------------------------------------------------------------
 // Types
@@ -156,7 +165,7 @@ function PriorityCard({
             className="inline-flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-950 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 transition-colors hover:bg-green-100 dark:hover:bg-green-900 active:bg-green-200 dark:active:bg-green-800"
             aria-label={`Call ${contact.name}`}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
             Call
@@ -170,9 +179,10 @@ function PriorityCard({
             e.stopPropagation();
             onQuickAction(item);
           }}
+          aria-label={`Log ${item.title}`}
           className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 dark:bg-indigo-950 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900 active:bg-indigo-200 dark:active:bg-indigo-800"
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
@@ -187,9 +197,10 @@ function PriorityCard({
               e.stopPropagation();
               onSnooze(item);
             }}
+            aria-label={`Snooze ${item.title} for 24 hours`}
             className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950 px-2.5 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-300 transition-colors hover:bg-amber-100 dark:hover:bg-amber-900 active:bg-amber-200 dark:active:bg-amber-800"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
@@ -450,7 +461,21 @@ export default function DashboardPage() {
     <>
     {/* Bottom-sheet modal for quick Log it action */}
     {quickAction && (
-      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+      <div
+        className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+        role="dialog"
+        aria-modal="true"
+        aria-label={
+          quickAction.type === "check-in"
+            ? `Log check-in with ${quickAction.contactName}`
+            : quickAction.type === "date-night"
+              ? "Log a date night"
+              : `Log activity for ${quickAction.lifeAreaName}`
+        }
+        onKeyDown={(e) => {
+          if (e.key === "Escape") handleQuickActionCancel();
+        }}
+      >
         {/* Backdrop */}
         <div
           className="absolute inset-0 bg-black/40"
@@ -493,10 +518,10 @@ export default function DashboardPage() {
 
     <div className="space-y-6">
       {/* Greeting with life-balance summary */}
-      <section>
+      <section aria-label="Dashboard summary">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">{getGreeting()}</h2>
         {isLoading ? (
-          <p className="mt-1 text-sm text-gray-400 dark:text-slate-500">Loading your dashboard...</p>
+          <p className="mt-1 text-sm text-gray-400 dark:text-slate-500" aria-live="polite">Loading your dashboard...</p>
         ) : summaryParts.length > 0 ? (
           <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
             {summaryParts.join(" · ")}
@@ -530,9 +555,10 @@ export default function DashboardPage() {
         type="button"
         onClick={handleImHere}
         disabled={imHereLoading}
+        aria-label={imHereLoading ? "Getting location" : "Save current location for quick logging"}
         className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600 disabled:opacity-50"
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900" aria-hidden="true">
           <svg
             width="18"
             height="18"
@@ -543,6 +569,7 @@ export default function DashboardPage() {
             strokeLinecap="round"
             strokeLinejoin="round"
             className="text-blue-600 dark:text-blue-400"
+            aria-hidden="true"
           >
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
             <circle cx="12" cy="10" r="3" />
@@ -575,9 +602,10 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={() => setShowFreeTimeFlow(true)}
+          aria-label="I have free time — get suggestions for the best use of your time"
           className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950 p-4 transition-colors hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-900 active:bg-indigo-150 dark:active:bg-indigo-800"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600" aria-hidden="true">
             <svg
               width="20"
               height="20"
@@ -588,6 +616,7 @@ export default function DashboardPage() {
               strokeLinecap="round"
               strokeLinejoin="round"
               className="text-white"
+              aria-hidden="true"
             >
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
@@ -605,7 +634,7 @@ export default function DashboardPage() {
       )}
 
       {/* Top Priorities */}
-      <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+      <section aria-label="Top priorities" className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Top Priorities</h3>
           {priorities.length > 0 && (
@@ -649,9 +678,10 @@ export default function DashboardPage() {
       {/* Sync shortcut */}
       <Link
         href="/sync"
+        aria-label="Sync with Partner"
         className="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900" aria-hidden="true">
           <svg
             width="20"
             height="20"
@@ -662,6 +692,7 @@ export default function DashboardPage() {
             strokeLinecap="round"
             strokeLinejoin="round"
             className="text-indigo-600 dark:text-indigo-400"
+            aria-hidden="true"
           >
             <polyline points="23 4 23 10 17 10" />
             <polyline points="1 20 1 14 7 14" />

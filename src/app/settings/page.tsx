@@ -2,13 +2,18 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, deleteDatabase } from "@/lib/db";
-import { LinkPartnerFlow } from "@/components/LinkPartnerFlow";
 import { BackupRestore } from "@/components/BackupRestore";
 import { useTheme } from "@/components/ThemeProvider";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
 import type { Theme, WeekStartDay } from "@/types/models";
+
+// Lazy-load the LinkPartnerFlow — only shown when user taps "Link Partner"
+const LinkPartnerFlow = dynamic(
+  () => import("@/components/LinkPartnerFlow").then((m) => ({ default: m.LinkPartnerFlow })),
+);
 
 const themeOptions: { value: Theme; label: string; icon: React.ReactNode }[] = [
   {
@@ -384,7 +389,7 @@ export default function SettingsPage() {
               Clear all local data
             </button>
           ) : (
-            <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-3">
+            <div role="alert" className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-3">
               <p className="text-sm text-red-800 dark:text-red-200">
                 This will permanently delete all your data including contacts,
                 check-ins, activities, goals, and preferences. This action

@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { seedDatabase } from "@/lib/seed";
-import { OnboardingFlow } from "@/components/OnboardingFlow";
+
+// Lazy-load the OnboardingFlow — it's only shown once on first launch
+const OnboardingFlow = dynamic(
+  () => import("@/components/OnboardingFlow").then((m) => ({ default: m.OnboardingFlow })),
+  { loading: () => <div className="flex min-h-screen items-center justify-center"><p className="text-sm text-gray-400">Loading...</p></div> }
+);
 
 interface AppInitializerProps {
   children: React.ReactNode;

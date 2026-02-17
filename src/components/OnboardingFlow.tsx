@@ -181,7 +181,7 @@ function AddContactsStep({
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>
+        <div role="alert" className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>
       )}
 
       {/* Added contacts list */}
@@ -443,7 +443,7 @@ function BalanceTargetsStep({
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>
+        <div role="alert" className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>
       )}
 
       <div className="space-y-3">
@@ -839,7 +839,7 @@ function NotificationStep({
         </div>
       )}
       {result === "denied" && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-center text-sm text-red-700 dark:text-red-300">
+        <div role="alert" className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-center text-sm text-red-700 dark:text-red-300">
           Permission denied. You can enable this later in your browser settings.
         </div>
       )}
