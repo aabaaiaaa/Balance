@@ -52,6 +52,7 @@ export function useReminders({
     const result = runReminderCheck(data, {
       lastAppOpenTimestamp: prefs.lastAppOpenTimestamp ?? null,
       notificationsEnabled: prefs.notificationsEnabled ?? false,
+      notificationTypes: prefs.notificationTypes,
       lastNotificationTimestamps: prefs.lastNotificationTimestamps ?? {},
       weekStartDay: prefs.weekStartDay,
       partnerDeviceId: prefs.partnerDeviceId,

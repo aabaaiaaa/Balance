@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { LinkPartnerFlow } from "@/components/LinkPartnerFlow";
 import { BackupRestore } from "@/components/BackupRestore";
 import { useTheme } from "@/components/ThemeProvider";
+import { NotificationPreferences } from "@/components/NotificationPreferences";
 import type { Theme } from "@/types/models";
 
 const themeOptions: { value: Theme; label: string; icon: React.ReactNode }[] = [
@@ -279,6 +280,9 @@ export default function SettingsPage() {
           Manage Saved Places
         </Link>
       </section>
+
+      {/* Notifications section */}
+      <NotificationPreferences />
 
       {/* Data section */}
       <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">

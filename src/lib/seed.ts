@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { DEFAULT_LIFE_AREAS, DEFAULT_DATE_NIGHT_FREQUENCY_DAYS } from "@/lib/constants";
+import { DEFAULT_LIFE_AREAS, DEFAULT_DATE_NIGHT_FREQUENCY_DAYS, DEFAULT_NOTIFICATION_TYPES } from "@/lib/constants";
 import { generateDeviceId } from "@/lib/device-id";
 import type { LifeArea, UserPreferences } from "@/types/models";
 
@@ -31,6 +31,7 @@ export async function seedDatabase(): Promise<void> {
       dateNightFrequencyDays: DEFAULT_DATE_NIGHT_FREQUENCY_DAYS,
       theme: "system",
       notificationsEnabled: false,
+      notificationTypes: { ...DEFAULT_NOTIFICATION_TYPES },
       lastAppOpenTimestamp: null,
       lastNotificationTimestamps: {},
     };

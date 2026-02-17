@@ -195,7 +195,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Implement an on-open reminder system that fires **when the user opens the app**, not in the background. Since this is a serverless PWA with no push notification server, true background notifications are not possible — reminders only appear when the app is actively opened. On each app open: (1) Check the priority algorithm for overdue items. (2) If the app hasn't been opened in over a day, show a "Welcome back" banner at the top of the dashboard summarising what needs attention (e.g., "3 contacts overdue, self-care time is low this week"). (3) Use the Notification API (with user permission) to show 1-2 local notifications for the most urgent items — these appear as OS-level notifications even though the app is open, which is useful if the user switches away immediately. Limit to 2-3 notifications per app-open session to avoid being annoying. Store last notification timestamps in preferences to avoid showing the same reminder repeatedly within 24 hours. Request notification permission during onboarding with a clear explanation of what they'll get ("reminders when you open the app").
 
 ### TASK-024: Build notification preferences UI
-- **Status**: pending
+- **Status**: done
 - **Priority**: low
 - **Dependencies**: TASK-023
 - **Description**: In the Settings page, add a notifications section: toggle notifications on/off globally, choose which types of reminders to receive (contact check-ins, life area imbalance, task reminders). Save preferences locally. Include a "Test notification" button that sends a sample notification immediately.

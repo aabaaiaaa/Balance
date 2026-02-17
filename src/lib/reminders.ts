@@ -19,7 +19,8 @@ import {
   NOTIFICATION_COOLDOWN_MS,
   WELCOME_BACK_THRESHOLD_MS,
 } from "@/lib/constants";
-import type { WeekStartDay } from "@/types/models";
+import type { NotificationTypePreferences, WeekStartDay } from "@/types/models";
+import { DEFAULT_NOTIFICATION_TYPES } from "@/lib/constants";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -171,9 +172,30 @@ export function showItemNotification(item: ScoredItem): boolean {
 // ---------------------------------------------------------------------------
 
 /**
+ * Check whether a scored item is allowed by the per-type notification preferences.
+ */
+export function isItemTypeEnabled(
+  item: ScoredItem,
+  notificationTypes: NotificationTypePreferences,
+): boolean {
+  switch (item.type) {
+    case "contact":
+      return notificationTypes.contactCheckIns;
+    case "life-area":
+      return notificationTypes.lifeAreaImbalance;
+    case "household-task":
+    case "goal":
+      return notificationTypes.taskReminders;
+    default:
+      return true;
+  }
+}
+
+/**
  * Filter priority items to find those eligible for OS notifications.
  *
  * Respects:
+ * - Per-type notification preferences
  * - 24h cooldown per item (based on lastNotificationTimestamps)
  * - Maximum notifications per session
  */
@@ -181,11 +203,16 @@ export function getNotifiableItems(
   priorities: ScoredItem[],
   lastNotificationTimestamps: Record<string, number>,
   now: number,
+  notificationTypes?: NotificationTypePreferences,
 ): ScoredItem[] {
   const eligible: ScoredItem[] = [];
+  const types = notificationTypes ?? DEFAULT_NOTIFICATION_TYPES;
 
   for (const item of priorities) {
     if (eligible.length >= MAX_NOTIFICATIONS_PER_SESSION) break;
+
+    // Filter by notification type preference
+    if (!isItemTypeEnabled(item, types)) continue;
 
     const lastNotified = lastNotificationTimestamps[item.key];
     if (lastNotified && now - lastNotified < NOTIFICATION_COOLDOWN_MS) {
@@ -212,6 +239,7 @@ export function runReminderCheck(
   options: {
     lastAppOpenTimestamp: number | null;
     notificationsEnabled: boolean;
+    notificationTypes?: NotificationTypePreferences;
     lastNotificationTimestamps: Record<string, number>;
     weekStartDay: WeekStartDay;
     partnerDeviceId: string | null;
@@ -246,6 +274,7 @@ export function runReminderCheck(
       priorities,
       options.lastNotificationTimestamps,
       now,
+      options.notificationTypes,
     );
 
     for (const item of eligible) {

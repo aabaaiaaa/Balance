@@ -1,4 +1,4 @@
-import type { CheckInType, ContactTier } from "@/types/models";
+import type { CheckInType, ContactTier, NotificationTypePreferences } from "@/types/models";
 
 /** Default check-in frequency (in days) for each relationship tier. */
 export const DEFAULT_CHECK_IN_FREQUENCIES: Record<ContactTier, number> = {
@@ -68,3 +68,10 @@ export const NOTIFICATION_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 /** Minimum hours since last app open to show the "Welcome back" banner (24h). */
 export const WELCOME_BACK_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+/** Default per-type notification preferences (all enabled). */
+export const DEFAULT_NOTIFICATION_TYPES: NotificationTypePreferences = {
+  contactCheckIns: true,
+  lifeAreaImbalance: true,
+  taskReminders: true,
+};

@@ -471,6 +471,7 @@ describe("BalanceDatabase", () => {
         dateNightFrequencyDays: 14,
         theme: "system",
         notificationsEnabled: false,
+        notificationTypes: { contactCheckIns: true, lifeAreaImbalance: true, taskReminders: true },
         lastAppOpenTimestamp: null,
         lastNotificationTimestamps: {},
       };
@@ -495,6 +496,7 @@ describe("BalanceDatabase", () => {
         dateNightFrequencyDays: 14,
         theme: "light",
         notificationsEnabled: false,
+        notificationTypes: { contactCheckIns: true, lifeAreaImbalance: true, taskReminders: true },
         lastAppOpenTimestamp: null,
         lastNotificationTimestamps: {},
       };

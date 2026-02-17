@@ -142,6 +142,16 @@ export type WeekStartDay = "monday" | "sunday";
 export type EnergyLevel = "energetic" | "normal" | "low";
 export type Theme = "light" | "dark" | "system";
 
+/** Per-type notification preferences — each maps to a scored item type. */
+export interface NotificationTypePreferences {
+  /** Show reminders for overdue contact check-ins. */
+  contactCheckIns: boolean;
+  /** Show reminders when life areas are below target. */
+  lifeAreaImbalance: boolean;
+  /** Show reminders for pending household tasks. */
+  taskReminders: boolean;
+}
+
 export interface UserPreferences {
   id: string;
   onboardingComplete: boolean;
@@ -154,6 +164,8 @@ export interface UserPreferences {
   theme: Theme;
   /** Whether the user has granted or been asked about notification permission. */
   notificationsEnabled: boolean;
+  /** Per-type notification preferences (which types of reminders to receive). */
+  notificationTypes: NotificationTypePreferences;
   /** Timestamp of the last time the app was opened (for "welcome back" detection). */
   lastAppOpenTimestamp: number | null;
   /** Map of item keys to last notification timestamp to avoid repeat notifications within 24h. */
