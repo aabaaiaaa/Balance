@@ -4,12 +4,36 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { ContactForm } from "@/components/ContactForm";
-import { TIER_LABELS } from "@/lib/constants";
+import { ContactCard } from "@/components/ContactCard";
+import { TIER_LABELS, TIER_ORDER } from "@/lib/constants";
+import type { Contact, ContactTier } from "@/types/models";
 
 type ViewState =
   | { mode: "list" }
   | { mode: "add" }
   | { mode: "edit"; contactId: number };
+
+/** Group contacts by tier, preserving TIER_ORDER and omitting empty tiers. */
+function groupByTier(
+  contacts: Contact[]
+): { tier: ContactTier; label: string; contacts: Contact[] }[] {
+  const map = new Map<ContactTier, Contact[]>();
+
+  for (const contact of contacts) {
+    const group = map.get(contact.tier);
+    if (group) {
+      group.push(contact);
+    } else {
+      map.set(contact.tier, [contact]);
+    }
+  }
+
+  return TIER_ORDER.filter((t) => map.has(t)).map((t) => ({
+    tier: t,
+    label: TIER_LABELS[t],
+    contacts: map.get(t)!,
+  }));
+}
 
 export default function PeoplePage() {
   const [view, setView] = useState<ViewState>({ mode: "list" });
@@ -42,12 +66,14 @@ export default function PeoplePage() {
     );
   }
 
+  const groups = contacts ? groupByTier(contacts) : [];
+
   return (
     <div className="space-y-6">
       <section>
         <h2 className="text-xl font-semibold text-gray-900">People</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Manage your contacts and relationship tiers.
+          Your contacts grouped by relationship tier.
         </p>
       </section>
 
@@ -58,42 +84,25 @@ export default function PeoplePage() {
           </p>
         </section>
       ) : (
-        <section className="space-y-2">
-          {contacts.map((contact) => (
-            <button
-              key={contact.id}
-              type="button"
-              onClick={() =>
-                contact.id != null &&
-                setView({ mode: "edit", contactId: contact.id })
-              }
-              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-gray-900">
-                  {contact.name}
-                </p>
-                <p className="mt-0.5 text-xs text-gray-500">
-                  {TIER_LABELS[contact.tier]} · every{" "}
-                  {contact.checkInFrequencyDays}d
-                </p>
-              </div>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="ml-2 flex-shrink-0 text-gray-400"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          ))}
-        </section>
+        groups.map((group) => (
+          <section key={group.tier}>
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+              {group.label}
+              <span className="ml-1.5 text-xs font-normal text-gray-400">
+                ({group.contacts.length})
+              </span>
+            </h3>
+            <div className="space-y-2">
+              {group.contacts.map((contact) => (
+                <ContactCard
+                  key={contact.id}
+                  contact={contact}
+                  onTap={(id) => setView({ mode: "edit", contactId: id })}
+                />
+              ))}
+            </div>
+          </section>
+        ))
       )}
 
       {/* Floating action button */}

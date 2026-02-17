@@ -87,7 +87,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Create a form to add a new contact: name, relationship tier (dropdown: Partner, Close Family, Extended Family, Close Friends, Wider Friends), desired check-in frequency (e.g., every X days), optional phone number, and optional notes. When a tier is selected, auto-populate the check-in frequency with the tier's default value (from TASK-004 constants) — the user can then adjust it if needed. The same form should work for editing existing contacts. Include a delete option with confirmation (soft delete — sets `deletedAt`). Save to local database via Dexie.
 
 ### TASK-006: Build contacts list view with tier grouping and overdue indicators
-- **Status**: pending
+- **Status**: done
 - **Priority**: high
 - **Dependencies**: TASK-005
 - **Description**: Create the People tab view showing all contacts grouped by tier. Each contact card shows: name, tier badge, days since last check-in, and a colour-coded overdue indicator (green = recent, amber = due soon, red = overdue based on their frequency). Tapping a contact opens their detail/edit view. Include a floating action button to add new contacts.
