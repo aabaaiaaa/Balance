@@ -266,7 +266,7 @@ export function runReminderCheck(
   );
 
   // Send OS notifications for the most urgent items
-  let notifiedItems: ScoredItem[] = [];
+  const notifiedItems: ScoredItem[] = [];
   const updatedTimestamps = { ...options.lastNotificationTimestamps };
 
   if (options.notificationsEnabled) {

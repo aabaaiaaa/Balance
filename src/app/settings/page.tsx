@@ -565,6 +565,31 @@ export default function SettingsPage() {
         <BackupRestore />
 
         <div className="mt-4 border-t border-gray-200 dark:border-slate-700 pt-4">
+          <p className="mb-2 text-sm text-gray-500 dark:text-slate-400">
+            Or transfer directly to another device over Wi-Fi.
+          </p>
+          <Link
+            href="/device-transfer"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-card px-4 py-2 text-sm font-medium text-gray-900 dark:text-slate-100 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+            Transfer to Another Device
+          </Link>
+        </div>
+
+        <div className="mt-4 border-t border-gray-200 dark:border-slate-700 pt-4">
           {!showClearDataConfirm ? (
             <button
               type="button"

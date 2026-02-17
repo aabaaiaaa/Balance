@@ -118,6 +118,11 @@ describe("Dashboard", () => {
     });
 
     it('shows "No priorities right now" when there are no items', async () => {
+      // Disable date night scorer so it doesn't generate a priority in an empty DB
+      await currentTestDb.userPreferences.update("prefs", {
+        dateNightFrequencyDays: 0,
+      });
+
       render(<DashboardPage />);
 
       await waitFor(() => {
