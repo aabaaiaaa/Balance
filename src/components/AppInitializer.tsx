@@ -20,10 +20,18 @@ interface AppInitializerProps {
 export function AppInitializer({ children }: AppInitializerProps) {
   const [seeded, setSeeded] = useState(false);
 
-  // Seed the database on first mount
+  // Seed the database on first mount and clean up expired snoozed items
   useEffect(() => {
     seedDatabase()
-      .then(() => setSeeded(true))
+      .then(async () => {
+        // Clean up expired SnoozedItem records on app open
+        const now = Date.now();
+        await db.snoozedItems
+          .where("snoozedUntil")
+          .below(now)
+          .delete();
+        setSeeded(true);
+      })
       .catch((err) => {
         console.error("Failed to seed database:", err);
         setSeeded(true); // Continue anyway so the app doesn't get stuck

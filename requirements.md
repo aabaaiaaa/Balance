@@ -219,7 +219,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Create the Settings tab with sections: (1) Partner — link/unlink partner (links to TASK-021 flow), show linked status and last sync time, (2) Sync — button to start peer-to-peer sync flow, sync history showing past sync timestamps, (3) Notifications — links to TASK-024 preferences, (4) Saved Places — links to saved places management screen (TASK-033), (5) Data — links to export/import (TASK-026), clear all local data (with confirmation), (6) Preferences — week start day (Monday/Sunday), theme (Light/Dark/System), (7) About — app version. Keep it clean and simple.
 
 ### TASK-028: Add quick-action shortcuts from dashboard
-- **Status**: pending
+- **Status**: done
 - **Priority**: low
 - **Dependencies**: TASK-012
 - **Description**: On each priority item in the dashboard, add contextual quick actions so users can act without navigating away: "Call" button that opens the phone dialer (using `tel:` link if phone number stored on the contact), "Log it" button that opens an inline check-in or activity form as a bottom sheet/modal, "Snooze" button that creates a `SnoozedItem` record (from TASK-004) with `snoozedUntil` set to 24 hours from now — the priority algorithm (TASK-011) already excludes snoozed items. Clean up expired `SnoozedItem` records on app open. These reduce friction for time-poor users.

@@ -24,7 +24,7 @@ import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import { useLocation } from "@/hooks/useLocation";
 import { useReminders } from "@/hooks/useReminders";
-import type { CheckInType, WeekStartDay } from "@/types/models";
+import type { CheckInType, WeekStartDay, SnoozedItemType, Contact } from "@/types/models";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -84,65 +84,117 @@ function getGreeting(): string {
 }
 
 // ---------------------------------------------------------------------------
+// Snooze item type mapping
+// ---------------------------------------------------------------------------
+
+/** Map scored item types to SnoozedItem types. Returns null for types that can't be snoozed. */
+function toSnoozedItemType(scoredType: string): SnoozedItemType | null {
+  switch (scoredType) {
+    case "contact": return "contact";
+    case "household-task": return "task";
+    case "goal": return "goal";
+    default: return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Priority item card
 // ---------------------------------------------------------------------------
 
 function PriorityCard({
   item,
+  contact,
   onQuickAction,
-  onTap,
+  onSnooze,
 }: {
   item: ScoredItem;
+  contact: Contact | null;
   onQuickAction: (item: ScoredItem) => void;
-  onTap: (item: ScoredItem) => void;
+  onSnooze: (item: ScoredItem) => void;
 }) {
   const estimate = item.estimatedMinutes ?? getTimeEstimate(item.type, item.subType);
   const areaLabel = item.lifeArea ?? "General";
 
-  const actionLabel =
-    item.type === "contact" ? "Log check-in" : "Log activity";
+  const showCallButton = item.type === "contact" && contact?.phoneNumber;
+  const canSnooze = toSnoozedItemType(item.type) !== null;
 
   return (
-    <button
-      type="button"
-      onClick={() => onTap(item)}
-      className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 active:bg-gray-100 dark:active:bg-slate-600"
+    <div
+      className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3 text-left"
     >
-      <div className="flex items-start gap-3">
-        {/* Left side: content */}
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center gap-2">
-            <span
-              className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${getAreaColour(areaLabel)}`}
-            >
-              {areaLabel}
-            </span>
-            <span className="text-[10px] text-gray-400 dark:text-slate-500">
-              ~{formatMinutes(estimate)}
-            </span>
-          </div>
-          <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{item.title}</p>
-          <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{item.reason}</p>
-          {item.type === "contact" && item.subType && (
-            <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">
-              Suggested: {CHECK_IN_TYPE_LABELS[item.subType as CheckInType] ?? item.subType}
-            </p>
-          )}
+      {/* Item info */}
+      <div className="mb-2">
+        <div className="mb-1 flex items-center gap-2">
+          <span
+            className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${getAreaColour(areaLabel)}`}
+          >
+            {areaLabel}
+          </span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-500">
+            ~{formatMinutes(estimate)}
+          </span>
         </div>
+        <p className="text-sm font-medium text-gray-900 dark:text-slate-100">{item.title}</p>
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{item.reason}</p>
+        {item.type === "contact" && item.subType && (
+          <p className="mt-0.5 text-[10px] text-gray-400 dark:text-slate-500">
+            Suggested: {CHECK_IN_TYPE_LABELS[item.subType as CheckInType] ?? item.subType}
+          </p>
+        )}
+      </div>
 
-        {/* Quick action button */}
+      {/* Quick action buttons */}
+      <div className="flex items-center gap-2">
+        {/* Call button — only for contacts with a phone number */}
+        {showCallButton && (
+          <a
+            href={`tel:${contact.phoneNumber}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-950 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 transition-colors hover:bg-green-100 dark:hover:bg-green-900 active:bg-green-200 dark:active:bg-green-800"
+            aria-label={`Call ${contact.name}`}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+            Call
+          </a>
+        )}
+
+        {/* Log it button */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onQuickAction(item);
           }}
-          className="shrink-0 rounded-lg bg-indigo-50 dark:bg-indigo-950 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900 active:bg-indigo-200 dark:active:bg-indigo-800"
+          className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 dark:bg-indigo-950 px-2.5 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 transition-colors hover:bg-indigo-100 dark:hover:bg-indigo-900 active:bg-indigo-200 dark:active:bg-indigo-800"
         >
-          {actionLabel}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          Log it
         </button>
+
+        {/* Snooze button — only for snoozable items */}
+        {canSnooze && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSnooze(item);
+            }}
+            className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950 px-2.5 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-300 transition-colors hover:bg-amber-100 dark:hover:bg-amber-900 active:bg-amber-200 dark:active:bg-amber-800"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Snooze
+          </button>
+        )}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -295,14 +347,28 @@ export default function DashboardPage() {
     [contacts, lifeAreas],
   );
 
-  const handleTapItem = useCallback(
-    (item: ScoredItem) => {
-      // For items, open the quick action form directly (same as tapping the button)
-      // since the detail views live on other tab pages
-      handleQuickAction(item);
-    },
-    [handleQuickAction],
-  );
+  const handleSnooze = useCallback(async (item: ScoredItem) => {
+    const snoozedType = toSnoozedItemType(item.type);
+    if (!snoozedType) return;
+
+    try {
+      const prefs = await db.userPreferences.get("prefs");
+      const deviceId = prefs?.deviceId ?? "unknown";
+      const now = Date.now();
+      const snoozedUntil = now + 24 * 60 * 60 * 1000; // 24 hours from now
+
+      await db.snoozedItems.add({
+        itemType: snoozedType,
+        itemId: item.itemId,
+        snoozedUntil,
+        updatedAt: now,
+        deviceId,
+        deletedAt: null,
+      });
+    } catch (err) {
+      console.error("Failed to snooze item:", err);
+    }
+  }, []);
 
   const handleQuickActionComplete = useCallback(() => {
     setQuickAction(null);
@@ -369,44 +435,44 @@ export default function DashboardPage() {
     );
   }
 
-  // If a quick action form is active, show it
-  if (quickAction) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleQuickActionCancel}
-            className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
-            aria-label="Back to dashboard"
-          >
-            &larr; Back
-          </button>
-          <span className="text-sm text-gray-400 dark:text-slate-500">
-            {quickAction.type === "check-in"
-              ? `Log check-in with ${quickAction.contactName}`
-              : `Log activity for ${quickAction.lifeAreaName}`}
-          </span>
-        </div>
-
-        {quickAction.type === "check-in" ? (
-          <CheckInForm
-            contactId={quickAction.contactId}
-            onComplete={handleQuickActionComplete}
-            onCancel={handleQuickActionCancel}
-          />
-        ) : (
-          <ActivityForm
-            lifeAreaId={quickAction.lifeAreaId}
-            onComplete={handleQuickActionComplete}
-            onCancel={handleQuickActionCancel}
-          />
-        )}
-      </div>
-    );
-  }
-
   return (
+    <>
+    {/* Bottom-sheet modal for quick Log it action */}
+    {quickAction && (
+      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/40"
+          onClick={handleQuickActionCancel}
+          aria-hidden="true"
+        />
+        {/* Sheet content */}
+        <div className="relative z-10 w-full max-w-lg rounded-t-2xl sm:rounded-2xl bg-white dark:bg-card p-4 shadow-xl max-h-[85vh] overflow-y-auto">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-500 dark:text-slate-400">
+              {quickAction.type === "check-in"
+                ? `Log check-in with ${quickAction.contactName}`
+                : `Log activity for ${quickAction.lifeAreaName}`}
+            </span>
+          </div>
+
+          {quickAction.type === "check-in" ? (
+            <CheckInForm
+              contactId={quickAction.contactId}
+              onComplete={handleQuickActionComplete}
+              onCancel={handleQuickActionCancel}
+            />
+          ) : (
+            <ActivityForm
+              lifeAreaId={quickAction.lifeAreaId}
+              onComplete={handleQuickActionComplete}
+              onCancel={handleQuickActionCancel}
+            />
+          )}
+        </div>
+      </div>
+    )}
+
     <div className="space-y-6">
       {/* Greeting with life-balance summary */}
       <section>
@@ -543,8 +609,9 @@ export default function DashboardPage() {
               <PriorityCard
                 key={item.key}
                 item={item}
+                contact={item.type === "contact" ? contacts?.find((c) => c.id === item.itemId) ?? null : null}
                 onQuickAction={handleQuickAction}
-                onTap={handleTapItem}
+                onSnooze={handleSnooze}
               />
             ))}
           </div>
@@ -601,5 +668,6 @@ export default function DashboardPage() {
         </div>
       </Link>
     </div>
+    </>
   );
 }
