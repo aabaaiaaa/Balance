@@ -1,4 +1,17 @@
 import Dexie, { type Table } from "dexie";
+import type {
+  Contact,
+  CheckIn,
+  LifeArea,
+  Activity,
+  HouseholdTask,
+  Goal,
+  DateNight,
+  DateNightIdea,
+  SavedPlace,
+  SnoozedItem,
+  UserPreferences,
+} from "@/types/models";
 
 /**
  * Balance app local database using Dexie.js (IndexedDB wrapper).
@@ -9,17 +22,17 @@ import Dexie, { type Table } from "dexie";
  * object properties regardless of schema declaration.
  */
 export class BalanceDatabase extends Dexie {
-  contacts!: Table;
-  checkIns!: Table;
-  lifeAreas!: Table;
-  activities!: Table;
-  householdTasks!: Table;
-  goals!: Table;
-  dateNights!: Table;
-  dateNightIdeas!: Table;
-  savedPlaces!: Table;
-  snoozedItems!: Table;
-  userPreferences!: Table;
+  contacts!: Table<Contact, number>;
+  checkIns!: Table<CheckIn, number>;
+  lifeAreas!: Table<LifeArea, number>;
+  activities!: Table<Activity, number>;
+  householdTasks!: Table<HouseholdTask, number>;
+  goals!: Table<Goal, number>;
+  dateNights!: Table<DateNight, number>;
+  dateNightIdeas!: Table<DateNightIdea, number>;
+  savedPlaces!: Table<SavedPlace, number>;
+  snoozedItems!: Table<SnoozedItem, number>;
+  userPreferences!: Table<UserPreferences, string>;
 
   constructor() {
     super("BalanceDB");
