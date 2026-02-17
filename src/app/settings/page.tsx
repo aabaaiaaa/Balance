@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -8,7 +8,7 @@ import { db, deleteDatabase } from "@/lib/db";
 import { BackupRestore } from "@/components/BackupRestore";
 import { useTheme } from "@/components/ThemeProvider";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
-import type { Theme, WeekStartDay } from "@/types/models";
+import type { Theme, WeekStartDay, RemoteSyncConfig } from "@/types/models";
 
 // Lazy-load the LinkPartnerFlow — only shown when user taps "Link Partner"
 const LinkPartnerFlow = dynamic(
@@ -59,6 +59,188 @@ const weekStartOptions: { value: WeekStartDay; label: string }[] = [
   { value: "monday", label: "Monday" },
   { value: "sunday", label: "Sunday" },
 ];
+
+function RemoteSyncSettings() {
+  const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
+  const [showSettings, setShowSettings] = useState(false);
+  const config = prefs?.remoteSyncConfig;
+
+  const [stunServer, setStunServer] = useState("");
+  const [turnServer, setTurnServer] = useState("");
+  const [turnUsername, setTurnUsername] = useState("");
+  const [turnCredential, setTurnCredential] = useState("");
+
+  // Sync local form state when prefs load
+  useEffect(() => {
+    if (config) {
+      setStunServer(config.stunServer);
+      setTurnServer(config.turnServer);
+      setTurnUsername(config.turnUsername);
+      setTurnCredential(config.turnCredential);
+    }
+  }, [config]);
+
+  const handleSave = useCallback(async () => {
+    const newConfig: RemoteSyncConfig = {
+      stunServer: stunServer.trim(),
+      turnServer: turnServer.trim(),
+      turnUsername: turnUsername.trim(),
+      turnCredential: turnCredential.trim(),
+    };
+    await db.userPreferences.update("prefs", { remoteSyncConfig: newConfig });
+    setShowSettings(false);
+  }, [stunServer, turnServer, turnUsername, turnCredential]);
+
+  const handleClear = useCallback(async () => {
+    await db.userPreferences.update("prefs", { remoteSyncConfig: null });
+    setStunServer("");
+    setTurnServer("");
+    setTurnUsername("");
+    setTurnCredential("");
+  }, []);
+
+  const hasCustomConfig = config && (config.stunServer || config.turnServer);
+
+  return (
+    <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+      <h3 className="font-medium text-gray-900 dark:text-slate-100">Remote Sync</h3>
+      <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+        Optionally configure custom STUN/TURN servers for syncing across
+        different networks. Leave blank to use defaults.
+      </p>
+
+      {hasCustomConfig && !showSettings && (
+        <div className="mt-2 space-y-1">
+          {config.stunServer && (
+            <p className="text-xs text-gray-400 dark:text-slate-500">
+              STUN: {config.stunServer}
+            </p>
+          )}
+          {config.turnServer && (
+            <p className="text-xs text-gray-400 dark:text-slate-500">
+              TURN: {config.turnServer}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!showSettings ? (
+        <div className="mt-3 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setShowSettings(true)}
+            className="text-sm font-medium text-indigo-600 dark:text-indigo-400 transition-colors hover:text-indigo-700 dark:hover:text-indigo-300"
+          >
+            {hasCustomConfig ? "Edit servers" : "Configure servers"}
+          </button>
+          {hasCustomConfig && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="text-sm font-medium text-gray-500 dark:text-slate-400 transition-colors hover:text-gray-700 dark:hover:text-slate-300"
+            >
+              Reset to defaults
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="mt-3 space-y-3">
+          <div>
+            <label
+              htmlFor="stun-server"
+              className="block text-xs font-medium text-gray-600 dark:text-slate-300"
+            >
+              STUN server URL
+            </label>
+            <input
+              id="stun-server"
+              type="text"
+              value={stunServer}
+              onChange={(e) => setStunServer(e.target.value)}
+              placeholder="stun:stun.l.google.com:19302"
+              className="mt-1 w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+              Leave blank to use Google&apos;s public STUN server
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="turn-server"
+              className="block text-xs font-medium text-gray-600 dark:text-slate-300"
+            >
+              TURN server URL (optional)
+            </label>
+            <input
+              id="turn-server"
+              type="text"
+              value={turnServer}
+              onChange={(e) => setTurnServer(e.target.value)}
+              placeholder="turn:turn.example.com:3478"
+              className="mt-1 w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+            <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+              Required for connections behind symmetric NATs
+            </p>
+          </div>
+
+          {turnServer.trim() && (
+            <>
+              <div>
+                <label
+                  htmlFor="turn-username"
+                  className="block text-xs font-medium text-gray-600 dark:text-slate-300"
+                >
+                  TURN username
+                </label>
+                <input
+                  id="turn-username"
+                  type="text"
+                  value={turnUsername}
+                  onChange={(e) => setTurnUsername(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="turn-credential"
+                  className="block text-xs font-medium text-gray-600 dark:text-slate-300"
+                >
+                  TURN credential
+                </label>
+                <input
+                  id="turn-credential"
+                  type="password"
+                  value={turnCredential}
+                  onChange={(e) => setTurnCredential(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 active:bg-indigo-800"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSettings(false)}
+              className="rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 function PreferencesSection() {
   const { theme, setTheme } = useTheme();
@@ -340,6 +522,9 @@ export default function SettingsPage() {
           </div>
         )}
       </section>
+
+      {/* Remote Sync section */}
+      <RemoteSyncSettings />
 
       {/* Saved Places section */}
       <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">

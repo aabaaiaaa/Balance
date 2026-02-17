@@ -35,6 +35,7 @@ export async function seedDatabase(): Promise<void> {
       lastAppOpenTimestamp: null,
       lastNotificationTimestamps: {},
       syncHistory: [],
+      remoteSyncConfig: null,
     };
     await db.userPreferences.put(prefs);
 

@@ -475,6 +475,7 @@ describe("BalanceDatabase", () => {
         lastAppOpenTimestamp: null,
         lastNotificationTimestamps: {},
         syncHistory: [],
+        remoteSyncConfig: null,
       };
       await db.userPreferences.put(prefs);
 
@@ -501,6 +502,7 @@ describe("BalanceDatabase", () => {
         lastAppOpenTimestamp: null,
         lastNotificationTimestamps: {},
         syncHistory: [],
+        remoteSyncConfig: null,
       };
       await db.userPreferences.put(prefs);
       await db.userPreferences.put({ ...prefs, theme: "dark" });

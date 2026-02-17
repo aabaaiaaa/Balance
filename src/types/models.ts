@@ -152,6 +152,18 @@ export interface NotificationTypePreferences {
   taskReminders: boolean;
 }
 
+/** Remote sync server configuration for STUN/TURN. */
+export interface RemoteSyncConfig {
+  /** Custom STUN server URL (e.g., "stun:stun.l.google.com:19302"). Empty string = use default. */
+  stunServer: string;
+  /** Optional TURN server URL (e.g., "turn:turn.example.com:3478"). */
+  turnServer: string;
+  /** TURN server username (if required). */
+  turnUsername: string;
+  /** TURN server credential (if required). */
+  turnCredential: string;
+}
+
 export interface UserPreferences {
   id: string;
   onboardingComplete: boolean;
@@ -172,4 +184,6 @@ export interface UserPreferences {
   lastNotificationTimestamps: Record<string, number>;
   /** History of past sync timestamps (most recent first, capped at 20 entries). */
   syncHistory: number[];
+  /** Optional remote sync (STUN/TURN) configuration. Undefined means use defaults. */
+  remoteSyncConfig: RemoteSyncConfig | null;
 }

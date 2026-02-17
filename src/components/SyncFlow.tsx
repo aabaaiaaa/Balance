@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { QRDisplay } from "@/components/QRDisplay";
 import { QRScanner } from "@/components/QRScanner";
 import { PeerConnection } from "@/lib/peer-connection";
 import { performSync, type SyncProgress, type MergeSummary } from "@/lib/sync";
+import {
+  buildRemotePeerConfig,
+  buildLocalPeerConfig,
+  getRemoteConnectionErrorMessage,
+} from "@/lib/remote-peer-config";
+import { db } from "@/lib/db";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +45,8 @@ type SyncStep =
   | "complete"
   | "error";
 
+type NetworkMode = "local" | "remote";
+
 interface SyncFlowProps {
   /** Called when the user wants to exit the sync flow. */
   onClose: () => void;
@@ -49,12 +58,14 @@ interface SyncFlowProps {
 
 export function SyncFlow({ onClose }: SyncFlowProps) {
   const [step, setStep] = useState<SyncStep>("choose-role");
+  const [networkMode, setNetworkMode] = useState<NetworkMode>("local");
   const [offerData, setOfferData] = useState<string | null>(null);
   const [answerData, setAnswerData] = useState<string | null>(null);
   const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null);
   const [mergeSummary, setMergeSummary] = useState<MergeSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
   const peerRef = useRef<PeerConnection | null>(null);
 
   // Clean up peer connection on unmount
@@ -76,10 +87,12 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
   // Error handler
   // -----------------------------------------------------------------------
 
-  const handleError = useCallback((message: string) => {
+  const handleError = useCallback((message: string, isRemote?: boolean) => {
     peerRef.current?.close();
     peerRef.current = null;
-    setErrorMessage(message);
+    setErrorMessage(
+      isRemote ? getRemoteConnectionErrorMessage(message) : message,
+    );
     setStep("error");
   }, []);
 
@@ -113,7 +126,11 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
   const handleStartSync = useCallback(async () => {
     setStep("creating-offer");
     try {
-      const peer = new PeerConnection();
+      const config =
+        networkMode === "remote"
+          ? buildRemotePeerConfig(prefs?.remoteSyncConfig)
+          : buildLocalPeerConfig();
+      const peer = new PeerConnection(config);
       peerRef.current = peer;
 
       const offer = await peer.createOffer();
@@ -124,9 +141,10 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
         err instanceof Error
           ? err.message
           : "Failed to create connection offer.",
+        networkMode === "remote",
       );
     }
-  }, [handleError]);
+  }, [handleError, networkMode, prefs?.remoteSyncConfig]);
 
   const handleAnswerScanned = useCallback(
     async (scannedAnswer: string) => {
@@ -145,10 +163,11 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
           err instanceof Error
             ? err.message
             : "Failed to establish connection.",
+          networkMode === "remote",
         );
       }
     },
-    [handleError, runSync],
+    [handleError, runSync, networkMode],
   );
 
   // -----------------------------------------------------------------------
@@ -159,7 +178,11 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
     async (scannedOffer: string) => {
       setStep("creating-answer");
       try {
-        const peer = new PeerConnection();
+        const config =
+          networkMode === "remote"
+            ? buildRemotePeerConfig(prefs?.remoteSyncConfig)
+            : buildLocalPeerConfig();
+        const peer = new PeerConnection(config);
         peerRef.current = peer;
 
         const answer = await peer.acceptOffer(scannedOffer);
@@ -203,6 +226,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
               err instanceof Error
                 ? err.message
                 : "Connection failed while waiting for partner.",
+              networkMode === "remote",
             ),
           );
       } catch (err) {
@@ -210,10 +234,11 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
           err instanceof Error
             ? err.message
             : "Failed to process partner's QR code.",
+          networkMode === "remote",
         );
       }
     },
-    [handleError, runSync],
+    [handleError, runSync, networkMode, prefs?.remoteSyncConfig],
   );
 
   // -----------------------------------------------------------------------
@@ -228,6 +253,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
     setSyncProgress(null);
     setMergeSummary(null);
     setErrorMessage(null);
+    setNetworkMode("local");
     setStep("choose-role");
   }, []);
 
@@ -269,10 +295,63 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
       {/* Step: Choose Role */}
       {step === "choose-role" && (
         <div className="space-y-4">
+          {/* Network mode toggle */}
+          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3">
+            <p className="mb-2 text-xs font-medium text-gray-500 dark:text-slate-400">
+              Connection mode
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setNetworkMode("local")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                  networkMode === "local"
+                    ? "border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                    : "border-gray-200 dark:border-slate-700 bg-white dark:bg-card text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                }`}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                  <line x1="12" y1="20" x2="12.01" y2="20" />
+                </svg>
+                Local network
+              </button>
+              <button
+                type="button"
+                onClick={() => setNetworkMode("remote")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                  networkMode === "remote"
+                    ? "border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                    : "border-gray-200 dark:border-slate-700 bg-white dark:bg-card text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+                }`}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                Remote network
+              </button>
+            </div>
+          </div>
+
           <p className="text-sm text-gray-600 dark:text-slate-300">
-            Both devices need to be on the same Wi-Fi network. One device starts
-            the sync, the other joins.
+            {networkMode === "local"
+              ? "Both devices need to be on the same Wi-Fi network. One device starts the sync, the other joins."
+              : "Connect across different networks using the internet. Both devices need an internet connection. Make sure both devices select \"Remote network\" mode."}
           </p>
+
+          {networkMode === "remote" && (
+            <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-3">
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                Remote sync requires internet access and may not work behind
+                all network configurations. If it fails, try local network
+                mode or use File Export/Import from Settings.
+              </p>
+            </div>
+          )}
 
           <button
             type="button"
@@ -445,7 +524,9 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
             Establishing connection...
           </p>
           <p className="text-xs text-gray-500 dark:text-slate-400">
-            Both devices must be on the same Wi-Fi network
+            {networkMode === "remote"
+              ? "Connecting across networks — this may take a moment"
+              : "Both devices must be on the same Wi-Fi network"}
           </p>
         </div>
       )}
@@ -582,7 +663,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
 
           {errorMessage && (
             <div className="rounded-xl border border-red-100 dark:border-red-800 bg-red-50 dark:bg-red-950 p-4">
-              <p className="text-sm text-red-800 dark:text-red-300">{errorMessage}</p>
+              <p className="whitespace-pre-line text-sm text-red-800 dark:text-red-300">{errorMessage}</p>
             </div>
           )}
 
