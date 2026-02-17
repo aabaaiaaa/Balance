@@ -93,7 +93,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Create the People tab view showing all contacts grouped by tier. Each contact card shows: name, tier badge, days since last check-in, and a colour-coded overdue indicator (green = recent, amber = due soon, red = overdue based on their frequency). Tapping a contact opens their detail/edit view. Include a floating action button to add new contacts.
 
 ### TASK-007: Build check-in logging UI
-- **Status**: pending
+- **Status**: done
 - **Priority**: high
 - **Dependencies**: TASK-006
 - **Description**: From a contact's detail view, add a "Log check-in" button that opens a quick-entry form: check-in type (called, texted, met up, video call, other), optional notes, and date (defaults to now). Saving a check-in updates the contact's lastCheckIn date. Show a recent check-in history list on the contact detail view (last 10 check-ins with type, date, and notes).

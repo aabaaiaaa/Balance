@@ -5,13 +5,15 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { ContactForm } from "@/components/ContactForm";
 import { ContactCard } from "@/components/ContactCard";
+import { ContactDetail } from "@/components/ContactDetail";
 import { TIER_LABELS, TIER_ORDER } from "@/lib/constants";
 import type { Contact, ContactTier } from "@/types/models";
 
 type ViewState =
   | { mode: "list" }
   | { mode: "add" }
-  | { mode: "edit"; contactId: number };
+  | { mode: "edit"; contactId: number }
+  | { mode: "detail"; contactId: number };
 
 /** Group contacts by tier, preserving TIER_ORDER and omitting empty tiers. */
 function groupByTier(
@@ -52,6 +54,16 @@ export default function PeoplePage() {
       <ContactForm
         onComplete={() => setView({ mode: "list" })}
         onCancel={() => setView({ mode: "list" })}
+      />
+    );
+  }
+
+  if (view.mode === "detail") {
+    return (
+      <ContactDetail
+        contactId={view.contactId}
+        onBack={() => setView({ mode: "list" })}
+        onEdit={(id) => setView({ mode: "edit", contactId: id })}
       />
     );
   }
@@ -97,7 +109,7 @@ export default function PeoplePage() {
                 <ContactCard
                   key={contact.id}
                   contact={contact}
-                  onTap={(id) => setView({ mode: "edit", contactId: id })}
+                  onTap={(id) => setView({ mode: "detail", contactId: id })}
                 />
               ))}
             </div>

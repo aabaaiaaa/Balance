@@ -1,4 +1,4 @@
-import type { ContactTier } from "@/types/models";
+import type { CheckInType, ContactTier } from "@/types/models";
 
 /** Default check-in frequency (in days) for each relationship tier. */
 export const DEFAULT_CHECK_IN_FREQUENCIES: Record<ContactTier, number> = {
@@ -41,3 +41,21 @@ export const DEFAULT_DATE_NIGHT_FREQUENCY_DAYS = 14;
 
 /** Default saved place radius in metres. */
 export const DEFAULT_PLACE_RADIUS_METRES = 200;
+
+/** Human-readable labels for each check-in type. */
+export const CHECK_IN_TYPE_LABELS: Record<CheckInType, string> = {
+  called: "Phone call",
+  texted: "Text message",
+  "met-up": "Met in person",
+  "video-call": "Video call",
+  other: "Other",
+};
+
+/** All check-in type values in display order. */
+export const CHECK_IN_TYPES: CheckInType[] = [
+  "called",
+  "texted",
+  "met-up",
+  "video-call",
+  "other",
+];
