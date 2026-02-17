@@ -2,9 +2,9 @@
 
 ## Summary
 - **Total Tasks**: 41
-- **Completed**: 21
-- **Remaining**: 20
-- **Last Updated**: 2026-02-17T01:39:01.890Z
+- **Completed**: 22
+- **Remaining**: 19
+- **Last Updated**: 2026-02-17T01:44:18.051Z
 
 ## Iteration Log
 
@@ -175,4 +175,12 @@
 - **Exit Status**: success
 - **Tokens**: 1,743,406 total (3,091 in, 15,346 out, 65,874 cache-create, 1,659,095 cache-read)
 - **Cost**: $2.6326
+
+### Iteration 22 - 2026-02-17T01:39:04.610Z
+- **Task Completed**: TASK-021
+- **Summary**: Completed Build partner/household linking via sync
+- **Duration**: 313s
+- **Exit Status**: success
+- **Tokens**: 997,837 total (3,226 in, 13,859 out, 62,599 cache-create, 918,153 cache-read)
+- **Cost**: $1.3823
 
