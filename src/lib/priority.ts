@@ -438,6 +438,108 @@ export const householdTaskScorer: ItemScorer = {
   },
 };
 
+/**
+ * Goal scorer.
+ *
+ * Scores active (not-yet-complete) goals based on:
+ * - Target date urgency (overdue > due this week > due this month)
+ * - Stalled progress (no updates in 14+ days with < 50% complete)
+ * - Almost-done boost (> 80% complete, nudge to finish)
+ *
+ * Uses a default 30-minute estimate per work session for time filtering.
+ */
+export const goalScorer: ItemScorer = {
+  type: "goal",
+  score(data: ScoringData, ctx: ScoringContext): ScoredItem[] {
+    const snoozedSet = buildSnoozedSet(data.snoozedItems, ctx.now);
+    const items: ScoredItem[] = [];
+
+    // Find the Personal Goals life area name for display
+    const areaName = (() => {
+      for (const area of data.lifeAreas) {
+        if (area.deletedAt === null) {
+          const lower = area.name.toLowerCase();
+          if (lower.includes("personal") && lower.includes("goal")) {
+            return area.name;
+          }
+        }
+      }
+      return "Personal Goals";
+    })();
+
+    for (const goal of data.goals) {
+      if (goal.deletedAt !== null) continue;
+      if (goal.progressPercent >= 100) continue;
+      if (goal.id === undefined) continue;
+      if (isSnoozed(snoozedSet, "goal", goal.id)) continue;
+
+      let score = 1.0; // Base score
+
+      // Factor 1: Target date urgency
+      if (goal.targetDate) {
+        const daysUntil =
+          (goal.targetDate - ctx.now) / (1000 * 60 * 60 * 24);
+        if (daysUntil < 0) {
+          // Overdue — high priority
+          score += 3.0;
+        } else if (daysUntil < 7) {
+          // Due this week
+          score += 2.0;
+        } else if (daysUntil < 30) {
+          // Due this month
+          score += 1.0;
+        }
+      }
+
+      // Factor 2: Stalled progress (no updates in 14+ days with low progress)
+      const daysSinceUpdate =
+        (ctx.now - goal.updatedAt) / (1000 * 60 * 60 * 24);
+      if (daysSinceUpdate > 14 && goal.progressPercent < 50) {
+        score += 1.5;
+      }
+
+      // Factor 3: Almost done — nudge to finish
+      if (goal.progressPercent > 80) {
+        score += 0.5;
+      }
+
+      // Build reason string
+      const doneMilestones = goal.milestones.filter((m) => m.done).length;
+      const totalMilestones = goal.milestones.length;
+
+      let reason: string;
+      if (goal.targetDate) {
+        const daysUntil =
+          (goal.targetDate - ctx.now) / (1000 * 60 * 60 * 24);
+        if (daysUntil < 0) {
+          const overdueDays = Math.abs(Math.floor(daysUntil));
+          reason = `${overdueDays} day${overdueDays === 1 ? "" : "s"} overdue, ${goal.progressPercent}% complete`;
+        } else {
+          const daysLeft = Math.ceil(daysUntil);
+          reason = `Due in ${daysLeft} day${daysLeft === 1 ? "" : "s"}, ${goal.progressPercent}% complete`;
+        }
+      } else if (totalMilestones > 0) {
+        reason = `${doneMilestones}/${totalMilestones} milestones done`;
+      } else {
+        reason = `${goal.progressPercent}% complete`;
+      }
+
+      items.push({
+        key: `goal:${goal.id}`,
+        type: "goal",
+        title: goal.title,
+        reason,
+        score,
+        itemId: goal.id,
+        estimatedMinutes: getTimeEstimate("goal"),
+        lifeArea: areaName,
+      });
+    }
+
+    return items;
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Configurable time estimate defaults (in minutes)
 // ---------------------------------------------------------------------------
@@ -573,6 +675,7 @@ export function getFilteredSuggestions(
 registerScorer(contactScorer);
 registerScorer(lifeAreaScorer);
 registerScorer(householdTaskScorer);
+registerScorer(goalScorer);
 
 // ---------------------------------------------------------------------------
 // Core algorithm

@@ -230,11 +230,29 @@ export function FreeTimeSuggestions({ inputs, onDone }: FreeTimeSuggestionsProps
           lifeAreaId: item.itemId,
           lifeAreaName: area?.name ?? "Activity",
         });
+      } else if (item.type === "goal") {
+        // Log an activity for the goal's life area
+        const goal = goals?.find((g) => g.id === item.itemId);
+        if (goal) {
+          setActiveAction({
+            type: "activity",
+            lifeAreaId: goal.lifeAreaId,
+            lifeAreaName: item.lifeArea ?? "Personal Goals",
+          });
+        }
+      } else if (item.type === "household-task") {
+        // Log an activity for the household task's life area
+        const task = householdTasks?.find((t) => t.id === item.itemId);
+        if (task) {
+          setActiveAction({
+            type: "activity",
+            lifeAreaId: task.lifeAreaId,
+            lifeAreaName: item.lifeArea ?? "DIY/Household",
+          });
+        }
       }
-      // For household-task and goal types (not yet registered as scorers),
-      // the accept action would navigate to those screens once built.
     },
-    [contacts, lifeAreas],
+    [contacts, lifeAreas, goals, householdTasks],
   );
 
   const handleActionComplete = useCallback(() => {

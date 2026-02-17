@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { LifeAreaIcon } from "@/components/LifeAreaIcon";
 import { ActivityForm } from "@/components/ActivityForm";
 import { HouseholdTaskList } from "@/components/HouseholdTaskList";
+import { GoalList } from "@/components/GoalList";
 import type { WeekStartDay } from "@/types/models";
 
 interface LifeAreaDetailProps {
@@ -82,6 +83,13 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
     if (!area) return false;
     const lower = area.name.toLowerCase();
     return lower.includes("diy") || lower.includes("household");
+  }, [area]);
+
+  // Show goals section for Personal Goals-type life areas
+  const isPersonalGoalsArea = useMemo(() => {
+    if (!area) return false;
+    const lower = area.name.toLowerCase();
+    return lower.includes("personal") && lower.includes("goal");
   }, [area]);
 
   if (area === undefined) {
@@ -222,6 +230,11 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
       {/* Household task list (shown only for DIY/Household-type life areas) */}
       {isHouseholdArea && (
         <HouseholdTaskList lifeAreaId={lifeAreaId} />
+      )}
+
+      {/* Goal list (shown only for Personal Goals-type life areas) */}
+      {isPersonalGoalsArea && (
+        <GoalList lifeAreaId={lifeAreaId} />
       )}
 
       {/* Activity history */}

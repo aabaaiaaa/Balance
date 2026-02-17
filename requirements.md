@@ -147,7 +147,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Within the DIY/Household life area, add task-specific features using the `HouseholdTask` model from TASK-004. Build a task list with title, estimated time, priority (high/medium/low), and status (pending/in-progress/done). Allow adding, editing, and completing tasks. Completed tasks move to a "Done" section. Register a `HouseholdTask` scorer with the priority algorithm (TASK-011) so that pending tasks are ranked by their priority and how long they've been waiting. These tasks feed into the "I have free time" suggestions filtered by their estimated time.
 
 ### TASK-016: Build personal goals tracking
-- **Status**: pending
+- **Status**: done
 - **Priority**: medium
 - **Dependencies**: TASK-008, TASK-011
 - **Description**: Within the Personal Goals life area, add goal-specific features using the `Goal` model from TASK-004. Define goals with a title, description, and optional target date. Each goal can have milestones (sub-items that can be checked off). Track progress as a percentage (based on milestones completed). Register a `Goal` scorer with the priority algorithm (TASK-011) so that goals with approaching target dates or stalled progress are surfaced. Goals feed into the "I have free time" suggestions. Keep it simple — this isn't a full project management tool, just enough to remember what you're working toward.
