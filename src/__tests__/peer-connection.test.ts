@@ -254,6 +254,278 @@ describe("PeerConnection", () => {
 });
 
 // ---------------------------------------------------------------------------
+// PeerConnection — mocked RTCPeerConnection tests
+// ---------------------------------------------------------------------------
+
+describe("PeerConnection with mocked RTCPeerConnection", () => {
+  let mockPc: Record<string, unknown>;
+  let mockDataChannel: Record<string, unknown>;
+  const originalRTCPeerConnection = globalThis.RTCPeerConnection;
+  const originalRTCSessionDescription = globalThis.RTCSessionDescription;
+
+  beforeEach(() => {
+    // Create a mock data channel
+    mockDataChannel = {
+      readyState: "connecting",
+      onopen: null as ((ev: unknown) => void) | null,
+      onclose: null as ((ev: unknown) => void) | null,
+      onerror: null as ((ev: unknown) => void) | null,
+      onmessage: null as ((ev: unknown) => void) | null,
+      send: jest.fn(),
+      close: jest.fn(),
+    };
+
+    // Create a mock RTCPeerConnection
+    mockPc = {
+      iceGatheringState: "complete",
+      connectionState: "new",
+      localDescription: { sdp: "v=0\r\no=- 123 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0" },
+      createDataChannel: jest.fn(() => mockDataChannel),
+      createOffer: jest.fn(async () => ({ type: "offer", sdp: "mock-sdp" })),
+      createAnswer: jest.fn(async () => ({ type: "answer", sdp: "mock-answer" })),
+      setLocalDescription: jest.fn(async () => {}),
+      setRemoteDescription: jest.fn(async () => {}),
+      onconnectionstatechange: null as ((ev: unknown) => void) | null,
+      onicegatheringstatechange: null as ((ev: unknown) => void) | null,
+      ondatachannel: null as ((ev: unknown) => void) | null,
+      close: jest.fn(),
+    };
+
+    // Install mocks globally
+    globalThis.RTCPeerConnection = jest.fn(() => mockPc) as unknown as typeof RTCPeerConnection;
+    globalThis.RTCSessionDescription = jest.fn((init: { type: string; sdp: string }) => init) as unknown as typeof RTCSessionDescription;
+  });
+
+  afterEach(() => {
+    globalThis.RTCPeerConnection = originalRTCPeerConnection;
+    globalThis.RTCSessionDescription = originalRTCSessionDescription;
+  });
+
+  it("createOffer creates a peer connection with configured iceServers", async () => {
+    const pc = new PeerConnection({ iceServers: [{ urls: "stun:stun.example.com" }] });
+    await pc.createOffer();
+
+    expect(globalThis.RTCPeerConnection).toHaveBeenCalledWith({
+      iceServers: [{ urls: "stun:stun.example.com" }],
+    });
+    pc.close();
+  });
+
+  it("createOffer uses empty iceServers by default (local network mode)", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    expect(globalThis.RTCPeerConnection).toHaveBeenCalledWith({
+      iceServers: [],
+    });
+    pc.close();
+  });
+
+  it("createOffer creates a data channel named 'sync'", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    expect(mockPc.createDataChannel).toHaveBeenCalledWith("sync");
+    pc.close();
+  });
+
+  it("createOffer transitions to connecting state", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // State is "connecting" until data channel opens
+    expect(pc.state).toBe("connecting");
+    pc.close();
+  });
+
+  it("createOffer returns a compressed SDP string", async () => {
+    const pc = new PeerConnection();
+    const offer = await pc.createOffer();
+
+    expect(typeof offer).toBe("string");
+    expect(offer.length).toBeGreaterThan(0);
+    // It should be decompressible back
+    const decompressed = decompressSdp(offer);
+    expect(decompressed).toBe("v=0\r\no=- 123 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0");
+    pc.close();
+  });
+
+  it("acceptOffer decompresses the offer and sets remote description", async () => {
+    const pc = new PeerConnection();
+    const fakeOffer = compressSdp("v=0\r\nfake-offer-sdp");
+    await pc.acceptOffer(fakeOffer);
+
+    expect(mockPc.setRemoteDescription).toHaveBeenCalled();
+    const call = (mockPc.setRemoteDescription as jest.Mock).mock.calls[0][0];
+    expect(call.type).toBe("offer");
+    expect(call.sdp).toBe("v=0\r\nfake-offer-sdp");
+    pc.close();
+  });
+
+  it("acceptOffer returns a compressed SDP answer", async () => {
+    const pc = new PeerConnection();
+    const fakeOffer = compressSdp("v=0\r\nfake-offer");
+    const answer = await pc.acceptOffer(fakeOffer);
+
+    expect(typeof answer).toBe("string");
+    expect(answer.length).toBeGreaterThan(0);
+    pc.close();
+  });
+
+  it("acceptOffer listens for ondatachannel events", async () => {
+    const pc = new PeerConnection();
+    const fakeOffer = compressSdp("v=0\r\nfake-offer");
+    await pc.acceptOffer(fakeOffer);
+
+    expect(mockPc.ondatachannel).not.toBeNull();
+    pc.close();
+  });
+
+  it("data channel onopen transitions state to 'open'", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Simulate data channel opening
+    if (typeof mockDataChannel.onopen === "function") {
+      mockDataChannel.onopen({});
+    }
+
+    expect(pc.state).toBe("open");
+    pc.close();
+  });
+
+  it("data channel onclose transitions state to 'closed'", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Open first, then close
+    if (typeof mockDataChannel.onopen === "function") {
+      mockDataChannel.onopen({});
+    }
+    if (typeof mockDataChannel.onclose === "function") {
+      mockDataChannel.onclose({});
+    }
+
+    expect(pc.state).toBe("closed");
+    pc.close();
+  });
+
+  it("data channel onerror transitions state to 'failed'", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    if (typeof mockDataChannel.onerror === "function") {
+      mockDataChannel.onerror({});
+    }
+
+    expect(pc.state).toBe("failed");
+    pc.close();
+  });
+
+  it("connection state 'failed' transitions to failed", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Simulate connection failure
+    mockPc.connectionState = "failed";
+    if (typeof mockPc.onconnectionstatechange === "function") {
+      mockPc.onconnectionstatechange({});
+    }
+
+    expect(pc.state).toBe("failed");
+    pc.close();
+  });
+
+  it("connection timeout fires after configured delay", async () => {
+    jest.useFakeTimers();
+
+    const pc = new PeerConnection({ connectionTimeoutMs: 5000 });
+    await pc.createOffer();
+
+    expect(pc.state).toBe("connecting");
+
+    // Advance time past timeout
+    jest.advanceTimersByTime(5000);
+
+    expect(pc.state).toBe("closed"); // close() is called after timeout sets state to failed
+
+    jest.useRealTimers();
+  });
+
+  it("timeout does not fire if data channel opens in time", async () => {
+    jest.useFakeTimers();
+
+    const pc = new PeerConnection({ connectionTimeoutMs: 5000 });
+    await pc.createOffer();
+
+    // Open the data channel before timeout
+    if (typeof mockDataChannel.onopen === "function") {
+      mockDataChannel.onopen({});
+    }
+
+    expect(pc.state).toBe("open");
+
+    // Advance time past timeout — should NOT change state
+    jest.advanceTimersByTime(10000);
+
+    expect(pc.state).toBe("open");
+
+    jest.useRealTimers();
+    pc.close();
+  });
+
+  it("send with open data channel calls channel.send with chunks", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Open the data channel
+    mockDataChannel.readyState = "open";
+    if (typeof mockDataChannel.onopen === "function") {
+      mockDataChannel.onopen({});
+    }
+
+    pc.send("hello world");
+
+    expect(mockDataChannel.send).toHaveBeenCalledTimes(1);
+    expect((mockDataChannel.send as jest.Mock).mock.calls[0][0]).toBe("CHUNK:1:1:hello world");
+    pc.close();
+  });
+
+  it("onMessage receives and reassembles chunked messages", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    const received: string[] = [];
+    pc.onMessage((data) => received.push(data));
+
+    // Simulate receiving a single-chunk message
+    if (typeof mockDataChannel.onmessage === "function") {
+      mockDataChannel.onmessage({ data: "CHUNK:1:1:test message" });
+    }
+
+    expect(received).toEqual(["test message"]);
+    pc.close();
+  });
+
+  it("onMessage reassembles multi-chunk messages", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    const received: string[] = [];
+    pc.onMessage((data) => received.push(data));
+
+    // Simulate receiving a 2-chunk message
+    if (typeof mockDataChannel.onmessage === "function") {
+      mockDataChannel.onmessage({ data: "CHUNK:1:2:hello " });
+      mockDataChannel.onmessage({ data: "CHUNK:2:2:world" });
+    }
+
+    expect(received).toEqual(["hello world"]);
+    pc.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Integration: compress → chunk → reassemble → decompress round-trip
 // ---------------------------------------------------------------------------
 

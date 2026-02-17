@@ -9,8 +9,15 @@ import {
   isSnoozed,
   contactScorer,
   lifeAreaScorer,
+  householdTaskScorer,
+  goalScorer,
   TIER_WEIGHTS,
   PARTNER_DISCOUNT_FACTOR,
+  getTimeEstimate,
+  setTimeEstimateDefault,
+  getTimeEstimateDefaults,
+  isEnergyAppropriate,
+  getFilteredSuggestions,
   type ScoringData,
   type ScoredItem,
   type ItemScorer,
@@ -1022,5 +1029,659 @@ describe("calculatePriorities", () => {
       expect(item.estimatedMinutes).toBeDefined();
       expect(item.estimatedMinutes).toBeGreaterThan(0);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Helper factories for household tasks and goals
+// ---------------------------------------------------------------------------
+
+function makeHouseholdTask(
+  overrides: Partial<HouseholdTask> & { id: number },
+): HouseholdTask {
+  return {
+    lifeAreaId: 1,
+    title: "Test Task",
+    estimatedMinutes: 30,
+    priority: "medium",
+    status: "pending",
+    completedAt: null,
+    updatedAt: NOW,
+    deviceId: "device-a",
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+function makeGoal(
+  overrides: Partial<Goal> & { id: number },
+): Goal {
+  return {
+    lifeAreaId: 1,
+    title: "Test Goal",
+    description: "",
+    targetDate: null,
+    milestones: [],
+    progressPercent: 0,
+    updatedAt: NOW,
+    deviceId: "device-a",
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Household task scorer
+// ---------------------------------------------------------------------------
+
+describe("householdTaskScorer", () => {
+  it("scores pending tasks", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, title: "Fix tap", priority: "high", status: "pending" }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(1);
+    expect(results[0].key).toBe("household-task:1");
+    expect(results[0].score).toBeGreaterThan(0);
+  });
+
+  it("scores high priority higher than low priority", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, title: "High", priority: "high", updatedAt: NOW }),
+        makeHouseholdTask({ id: 2, title: "Low", priority: "low", updatedAt: NOW }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    const high = results.find((r) => r.key === "household-task:1")!;
+    const low = results.find((r) => r.key === "household-task:2")!;
+    expect(high.score).toBeGreaterThan(low.score);
+  });
+
+  it("gives in-progress tasks a boost over pending tasks of same priority", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, title: "In Progress", priority: "medium", status: "in-progress", updatedAt: NOW }),
+        makeHouseholdTask({ id: 2, title: "Pending", priority: "medium", status: "pending", updatedAt: NOW }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    const inProgress = results.find((r) => r.key === "household-task:1")!;
+    const pending = results.find((r) => r.key === "household-task:2")!;
+    expect(inProgress.score).toBeGreaterThan(pending.score);
+  });
+
+  it("excludes done tasks", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, title: "Done", status: "done" }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("excludes soft-deleted tasks", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, deletedAt: NOW }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("excludes snoozed tasks", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1 }),
+      ],
+      snoozedItems: [
+        makeSnoozedItem({ id: 1, itemId: 1, itemType: "task", snoozedUntil: NOW + DAY_MS }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("uses task estimatedMinutes for time estimate", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, estimatedMinutes: 45 }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results[0].estimatedMinutes).toBe(45);
+  });
+
+  it("increases score for older tasks (age factor)", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, title: "Old", priority: "medium", updatedAt: NOW - 14 * DAY_MS }),
+        makeHouseholdTask({ id: 2, title: "New", priority: "medium", updatedAt: NOW }),
+      ],
+    };
+
+    const results = householdTaskScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    const old = results.find((r) => r.key === "household-task:1")!;
+    const fresh = results.find((r) => r.key === "household-task:2")!;
+    expect(old.score).toBeGreaterThan(fresh.score);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Goal scorer
+// ---------------------------------------------------------------------------
+
+describe("goalScorer", () => {
+  it("scores active goals", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({ id: 1, title: "Learn guitar", progressPercent: 30 }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(1);
+    expect(results[0].key).toBe("goal:1");
+    expect(results[0].score).toBeGreaterThan(0);
+  });
+
+  it("excludes completed goals (100%)", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({ id: 1, progressPercent: 100 }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("scores overdue goals higher than future goals", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({
+          id: 1,
+          title: "Overdue",
+          progressPercent: 20,
+          targetDate: NOW - 7 * DAY_MS, // 7 days overdue
+        }),
+        makeGoal({
+          id: 2,
+          title: "Future",
+          progressPercent: 20,
+          targetDate: NOW + 60 * DAY_MS, // 2 months out
+        }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    const overdue = results.find((r) => r.key === "goal:1")!;
+    const future = results.find((r) => r.key === "goal:2")!;
+    expect(overdue.score).toBeGreaterThan(future.score);
+  });
+
+  it("boosts goals due this week", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({
+          id: 1,
+          title: "Due this week",
+          progressPercent: 50,
+          targetDate: NOW + 3 * DAY_MS,
+        }),
+        makeGoal({
+          id: 2,
+          title: "No deadline",
+          progressPercent: 50,
+          targetDate: null,
+        }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    const thisWeek = results.find((r) => r.key === "goal:1")!;
+    const noDeadline = results.find((r) => r.key === "goal:2")!;
+    expect(thisWeek.score).toBeGreaterThan(noDeadline.score);
+  });
+
+  it("boosts stalled goals (no updates in 14+ days, < 50% progress)", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({
+          id: 1,
+          title: "Stalled",
+          progressPercent: 20,
+          updatedAt: NOW - 20 * DAY_MS, // stalled for 20 days
+        }),
+        makeGoal({
+          id: 2,
+          title: "Active",
+          progressPercent: 20,
+          updatedAt: NOW - 1 * DAY_MS, // updated yesterday
+        }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    const stalled = results.find((r) => r.key === "goal:1")!;
+    const active = results.find((r) => r.key === "goal:2")!;
+    expect(stalled.score).toBeGreaterThan(active.score);
+  });
+
+  it("boosts almost-done goals (> 80% progress)", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({
+          id: 1,
+          title: "Almost done",
+          progressPercent: 90,
+          updatedAt: NOW,
+        }),
+        makeGoal({
+          id: 2,
+          title: "Half done",
+          progressPercent: 50,
+          updatedAt: NOW,
+        }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    const almostDone = results.find((r) => r.key === "goal:1")!;
+    const halfDone = results.find((r) => r.key === "goal:2")!;
+    expect(almostDone.score).toBeGreaterThan(halfDone.score);
+  });
+
+  it("excludes snoozed goals", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({ id: 1, progressPercent: 20 }),
+      ],
+      snoozedItems: [
+        makeSnoozedItem({ id: 1, itemId: 1, itemType: "goal", snoozedUntil: NOW + DAY_MS }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("excludes soft-deleted goals", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({ id: 1, deletedAt: NOW }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results).toHaveLength(0);
+  });
+
+  it("uses 30-minute default time estimate", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      goals: [
+        makeGoal({ id: 1, progressPercent: 20 }),
+      ],
+    };
+
+    const results = goalScorer.score(data, {
+      now: NOW,
+      weekStartDay: "monday",
+      partnerDeviceId: null,
+      weekStart: getWeekStart(NOW, "monday"),
+    });
+
+    expect(results[0].estimatedMinutes).toBe(30);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getTimeEstimate
+// ---------------------------------------------------------------------------
+
+describe("getTimeEstimate", () => {
+  it("returns 15 for contact:called", () => {
+    expect(getTimeEstimate("contact", "called")).toBe(15);
+  });
+
+  it("returns 5 for contact:texted", () => {
+    expect(getTimeEstimate("contact", "texted")).toBe(5);
+  });
+
+  it("returns 60 for contact:met-up", () => {
+    expect(getTimeEstimate("contact", "met-up")).toBe(60);
+  });
+
+  it("returns 30 for life-area", () => {
+    expect(getTimeEstimate("life-area")).toBe(30);
+  });
+
+  it("returns 30 for goal", () => {
+    expect(getTimeEstimate("goal")).toBe(30);
+  });
+
+  it("returns 30 as fallback for unknown types", () => {
+    expect(getTimeEstimate("unknown-type")).toBe(30);
+  });
+
+  it("can be overridden with setTimeEstimateDefault", () => {
+    const original = getTimeEstimate("contact", "called");
+    setTimeEstimateDefault("contact:called", 20);
+    expect(getTimeEstimate("contact", "called")).toBe(20);
+    // Restore
+    setTimeEstimateDefault("contact:called", original);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isEnergyAppropriate
+// ---------------------------------------------------------------------------
+
+describe("isEnergyAppropriate", () => {
+  const meetUpItem: ScoredItem = {
+    key: "contact:1",
+    type: "contact",
+    title: "Meet Alice",
+    reason: "test",
+    score: 5,
+    itemId: 1,
+    subType: "met-up",
+  };
+
+  const householdItem: ScoredItem = {
+    key: "household-task:1",
+    type: "household-task",
+    title: "Fix tap",
+    reason: "test",
+    score: 3,
+    itemId: 1,
+    lifeArea: "DIY/Household",
+  };
+
+  const textItem: ScoredItem = {
+    key: "contact:2",
+    type: "contact",
+    title: "Text Bob",
+    reason: "test",
+    score: 3,
+    itemId: 2,
+    subType: "texted",
+  };
+
+  it("returns true for all items when energy is energetic", () => {
+    expect(isEnergyAppropriate(meetUpItem, "energetic")).toBe(true);
+    expect(isEnergyAppropriate(householdItem, "energetic")).toBe(true);
+  });
+
+  it("returns true for all items when energy is normal", () => {
+    expect(isEnergyAppropriate(meetUpItem, "normal")).toBe(true);
+    expect(isEnergyAppropriate(householdItem, "normal")).toBe(true);
+  });
+
+  it("excludes met-up contacts at low energy", () => {
+    expect(isEnergyAppropriate(meetUpItem, "low")).toBe(false);
+  });
+
+  it("excludes household tasks at low energy", () => {
+    expect(isEnergyAppropriate(householdItem, "low")).toBe(false);
+  });
+
+  it("allows texting contacts at low energy", () => {
+    expect(isEnergyAppropriate(textItem, "low")).toBe(true);
+  });
+
+  it("excludes DIY life area activities at low energy", () => {
+    const diyArea: ScoredItem = {
+      key: "life-area:1",
+      type: "life-area",
+      title: "DIY",
+      reason: "test",
+      score: 2,
+      itemId: 1,
+      lifeArea: "DIY/Household",
+    };
+    expect(isEnergyAppropriate(diyArea, "low")).toBe(false);
+  });
+
+  it("allows self-care at low energy", () => {
+    const selfCare: ScoredItem = {
+      key: "life-area:2",
+      type: "life-area",
+      title: "Self-care",
+      reason: "test",
+      score: 2,
+      itemId: 2,
+      lifeArea: "Self-care",
+    };
+    expect(isEnergyAppropriate(selfCare, "low")).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getFilteredSuggestions
+// ---------------------------------------------------------------------------
+
+describe("getFilteredSuggestions", () => {
+  it("filters by available time", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      contacts: [
+        makeContact({
+          id: 1,
+          name: "Alice",
+          lastCheckIn: null,
+          tier: "close-friends",
+        }),
+      ],
+      householdTasks: [
+        makeHouseholdTask({
+          id: 1,
+          title: "Big task",
+          estimatedMinutes: 120,
+          priority: "high",
+        }),
+      ],
+    };
+
+    // Only 15 minutes available — big task shouldn't appear
+    const results = getFilteredSuggestions(data, {
+      now: NOW,
+      availableMinutes: 15,
+      energy: "energetic",
+    });
+
+    const taskResult = results.find((r) => r.type === "household-task");
+    expect(taskResult).toBeUndefined();
+  });
+
+  it("filters by energy level", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({
+          id: 1,
+          title: "DIY task",
+          estimatedMinutes: 15,
+          priority: "high",
+        }),
+      ],
+      contacts: [
+        makeContact({
+          id: 1,
+          name: "Bob",
+          lastCheckIn: null,
+        }),
+      ],
+    };
+
+    const results = getFilteredSuggestions(data, {
+      now: NOW,
+      availableMinutes: 60,
+      energy: "low",
+    });
+
+    // Household tasks should be filtered out at low energy
+    const taskResult = results.find((r) => r.type === "household-task");
+    expect(taskResult).toBeUndefined();
+  });
+
+  it("limits to maxSuggestions", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      contacts: Array.from({ length: 10 }, (_, i) =>
+        makeContact({ id: i + 1, name: `Person ${i}`, lastCheckIn: null }),
+      ),
+    };
+
+    const results = getFilteredSuggestions(data, {
+      now: NOW,
+      availableMinutes: 60,
+      energy: "energetic",
+      maxSuggestions: 3,
+    });
+
+    expect(results.length).toBeLessThanOrEqual(3);
+  });
+
+  it("returns empty array when no items fit", () => {
+    const data: ScoringData = {
+      ...emptyData(),
+      householdTasks: [
+        makeHouseholdTask({ id: 1, estimatedMinutes: 120, priority: "high" }),
+      ],
+    };
+
+    const results = getFilteredSuggestions(data, {
+      now: NOW,
+      availableMinutes: 5, // too short for anything
+      energy: "energetic",
+    });
+
+    // Only the household task is a scored item, and it's 120 min, too long
+    expect(results.filter((r) => r.type === "household-task")).toHaveLength(0);
   });
 });
