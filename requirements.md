@@ -129,7 +129,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Create the Dashboard tab (home screen). Show: (1) a greeting with a quick life-balance summary ("3 contacts overdue, partner time is low this week"), (2) a "Top priorities" list showing the 5-7 highest-scored items from the priority algorithm, each with a quick-action button (e.g., "Log check-in" or "Log activity"), (3) a mini balance chart showing this week's overview. Tapping an item navigates to the relevant detail view.
 
 ### TASK-013: Build "I have free time" flow — input step
-- **Status**: pending
+- **Status**: done
 - **Priority**: high
 - **Dependencies**: TASK-011
 - **Description**: Add a prominent "I have free time" button on the dashboard. Tapping it opens a quick flow: step 1 asks "How much time do you have?" with preset buttons (15 min, 30 min, 1 hour, 2+ hours) and a custom input. Step 2 optionally asks "How are you feeling?" (energetic, normal, low energy) to help filter suggestions (e.g., don't suggest DIY when energy is low). Store these inputs for the suggestion algorithm.
