@@ -18,6 +18,7 @@ import { ActivityForm } from "@/components/ActivityForm";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { LocationPrompt } from "@/components/LocationPrompt";
 import { PlaceQuickCreate } from "@/components/PlaceQuickCreate";
+import { PartnerActivityFeed } from "@/components/PartnerActivityFeed";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import { useLocation } from "@/hooks/useLocation";
@@ -537,6 +538,11 @@ export default function DashboardPage() {
           </div>
         )}
       </section>
+
+      {/* Partner Activity Feed */}
+      {prefs?.partnerDeviceId && (
+        <PartnerActivityFeed partnerDeviceId={prefs.partnerDeviceId} />
+      )}
 
       {/* Mini Balance Chart */}
       {!isLoading && lifeAreas && lifeAreas.length > 0 && (
