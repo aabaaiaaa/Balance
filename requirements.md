@@ -99,7 +99,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: From a contact's detail view, add a "Log check-in" button that opens a quick-entry form: check-in type (called, texted, met up, video call, other), optional notes, and date (defaults to now). Saving a check-in updates the contact's lastCheckIn date. Show a recent check-in history list on the contact detail view (last 10 check-ins with type, date, and notes).
 
 ### TASK-008: Build life area configuration screen
-- **Status**: pending
+- **Status**: done
 - **Priority**: medium
 - **Dependencies**: TASK-002, TASK-004
 - **Description**: Create the Life Areas tab showing all life areas as cards. Each card displays: area name, icon, target hours per week, and hours logged this week (with a simple progress bar). Allow users to edit the target hours per week for each area. Allow adding custom life areas and editing/deleting non-default ones. Pre-populate with the five default areas on first launch.
