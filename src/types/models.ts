@@ -152,4 +152,10 @@ export interface UserPreferences {
   weekStartDay: WeekStartDay;
   dateNightFrequencyDays: number;
   theme: Theme;
+  /** Whether the user has granted or been asked about notification permission. */
+  notificationsEnabled: boolean;
+  /** Timestamp of the last time the app was opened (for "welcome back" detection). */
+  lastAppOpenTimestamp: number | null;
+  /** Map of item keys to last notification timestamp to avoid repeat notifications within 24h. */
+  lastNotificationTimestamps: Record<string, number>;
 }

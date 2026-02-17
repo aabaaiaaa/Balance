@@ -470,6 +470,9 @@ describe("BalanceDatabase", () => {
         weekStartDay: "monday",
         dateNightFrequencyDays: 14,
         theme: "system",
+        notificationsEnabled: false,
+        lastAppOpenTimestamp: null,
+        lastNotificationTimestamps: {},
       };
       await db.userPreferences.put(prefs);
 
@@ -491,6 +494,9 @@ describe("BalanceDatabase", () => {
         weekStartDay: "monday",
         dateNightFrequencyDays: 14,
         theme: "light",
+        notificationsEnabled: false,
+        lastAppOpenTimestamp: null,
+        lastNotificationTimestamps: {},
       };
       await db.userPreferences.put(prefs);
       await db.userPreferences.put({ ...prefs, theme: "dark" });

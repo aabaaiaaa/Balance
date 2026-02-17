@@ -59,3 +59,12 @@ export const CHECK_IN_TYPES: CheckInType[] = [
   "video-call",
   "other",
 ];
+
+/** Maximum number of OS notifications to show per app-open session. */
+export const MAX_NOTIFICATIONS_PER_SESSION = 2;
+
+/** Minimum hours between showing the same notification item again (24h). */
+export const NOTIFICATION_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+/** Minimum hours since last app open to show the "Welcome back" banner (24h). */
+export const WELCOME_BACK_THRESHOLD_MS = 24 * 60 * 60 * 1000;

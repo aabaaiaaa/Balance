@@ -30,6 +30,9 @@ export async function seedDatabase(): Promise<void> {
       weekStartDay: "monday",
       dateNightFrequencyDays: DEFAULT_DATE_NIGHT_FREQUENCY_DAYS,
       theme: "system",
+      notificationsEnabled: false,
+      lastAppOpenTimestamp: null,
+      lastNotificationTimestamps: {},
     };
     await db.userPreferences.put(prefs);
 

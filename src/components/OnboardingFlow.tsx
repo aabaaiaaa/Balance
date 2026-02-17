@@ -9,6 +9,10 @@ import {
 } from "@/lib/constants";
 import { useTheme } from "@/components/ThemeProvider";
 import { useLiveQuery } from "dexie-react-hooks";
+import {
+  isNotificationSupported,
+  requestNotificationPermission,
+} from "@/lib/reminders";
 import type { Contact, ContactTier, LifeArea, Theme, WeekStartDay } from "@/types/models";
 
 // ---------------------------------------------------------------------------
@@ -25,7 +29,7 @@ interface OnboardingFlowProps {
   onComplete: () => void;
 }
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 // ---------------------------------------------------------------------------
 // Step 1: Welcome
@@ -740,7 +744,142 @@ function ThemeStep({
 }
 
 // ---------------------------------------------------------------------------
-// Step 6: All Set
+// Step 6: Notification Permission
+// ---------------------------------------------------------------------------
+
+function NotificationStep({
+  onNext,
+  onSkip,
+  onBack,
+}: {
+  onNext: () => void;
+  onSkip: () => void;
+  onBack: () => void;
+}) {
+  const [requesting, setRequesting] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const supported = isNotificationSupported();
+
+  const handleEnable = useCallback(async () => {
+    setRequesting(true);
+    try {
+      const permission = await requestNotificationPermission();
+      if (permission === "granted") {
+        await db.userPreferences.update("prefs", { notificationsEnabled: true });
+        setResult("granted");
+      } else {
+        setResult(permission === "denied" ? "denied" : "dismissed");
+      }
+      // Brief delay so the user sees the result before moving on
+      setTimeout(onNext, 800);
+    } catch {
+      onNext();
+    } finally {
+      setRequesting(false);
+    }
+  }, [onNext]);
+
+  const handleSkip = useCallback(() => {
+    onSkip();
+  }, [onSkip]);
+
+  // If notifications aren't supported, skip this step automatically
+  if (!supported) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <p className="text-sm text-gray-500 dark:text-slate-400">
+          Notifications are not supported in this browser.
+        </p>
+        <button
+          type="button"
+          onClick={onNext}
+          className="mt-4 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+        >
+          Continue
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col items-center text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-indigo-600 dark:text-indigo-400"
+          >
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">
+          Stay on track with reminders
+        </h2>
+        <p className="mt-2 max-w-sm text-sm text-gray-500 dark:text-slate-400">
+          Balance can show you gentle reminders when you open the app — like
+          which contacts are overdue or which life areas need attention.
+        </p>
+        <p className="mt-2 max-w-sm text-sm text-gray-500 dark:text-slate-400">
+          These are <strong className="text-gray-700 dark:text-slate-300">not</strong> background
+          push notifications. They only appear when you actively open the app.
+        </p>
+      </div>
+
+      {result === "granted" && (
+        <div className="rounded-lg bg-green-50 dark:bg-green-950 p-3 text-center text-sm text-green-700 dark:text-green-300">
+          Notifications enabled!
+        </div>
+      )}
+      {result === "denied" && (
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 p-3 text-center text-sm text-red-700 dark:text-red-300">
+          Permission denied. You can enable this later in your browser settings.
+        </div>
+      )}
+
+      {!result && (
+        <>
+          <button
+            type="button"
+            onClick={handleEnable}
+            disabled={requesting}
+            className="w-full rounded-lg bg-indigo-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50"
+          >
+            {requesting ? "Requesting..." : "Enable Reminders"}
+          </button>
+
+          {/* Navigation */}
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="flex-1 rounded-lg border border-gray-300 dark:border-slate-600 px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700"
+            >
+              Skip
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Step 7: All Set
 // ---------------------------------------------------------------------------
 
 function AllSetStep({
@@ -857,7 +996,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       {step === 2 && <BalanceTargetsStep onNext={goNext} onSkip={goNext} onBack={goBack} />}
       {step === 3 && <WeekStartDayStep onNext={goNext} onSkip={goNext} onBack={goBack} />}
       {step === 4 && <ThemeStep onNext={goNext} onSkip={goNext} onBack={goBack} />}
-      {step === 5 && <AllSetStep onFinish={onComplete} onBack={goBack} />}
+      {step === 5 && <NotificationStep onNext={goNext} onSkip={goNext} onBack={goBack} />}
+      {step === 6 && <AllSetStep onFinish={onComplete} onBack={goBack} />}
     </div>
   );
 }

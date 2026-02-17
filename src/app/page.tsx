@@ -19,9 +19,11 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { LocationPrompt } from "@/components/LocationPrompt";
 import { PlaceQuickCreate } from "@/components/PlaceQuickCreate";
 import { PartnerActivityFeed } from "@/components/PartnerActivityFeed";
+import { WelcomeBackBanner } from "@/components/WelcomeBackBanner";
 import { CHECK_IN_TYPE_LABELS } from "@/lib/constants";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 import { useLocation } from "@/hooks/useLocation";
+import { useReminders } from "@/hooks/useReminders";
 import type { CheckInType, WeekStartDay } from "@/types/models";
 
 // ---------------------------------------------------------------------------
@@ -206,11 +208,10 @@ export default function DashboardPage() {
     return map;
   }, [activities, weekStartTimestamp]);
 
-  // Calculate priority items
-  const priorities = useMemo(() => {
-    if (isLoading) return [];
-
-    const data: ScoringData = {
+  // Build scoring data for priority algorithm and reminders
+  const scoringData = useMemo<ScoringData | null>(() => {
+    if (isLoading) return null;
+    return {
       contacts: contacts ?? [],
       checkIns: checkIns ?? [],
       lifeAreas: lifeAreas ?? [],
@@ -219,12 +220,20 @@ export default function DashboardPage() {
       goals: goals ?? [],
       snoozedItems: snoozedItems ?? [],
     };
+  }, [isLoading, contacts, checkIns, lifeAreas, activities, householdTasks, goals, snoozedItems]);
 
-    return calculatePriorities(data, {
+  // Run on-open reminder check (welcome back banner + OS notifications)
+  const { welcomeBack } = useReminders({ data: scoringData, prefs });
+
+  // Calculate priority items
+  const priorities = useMemo(() => {
+    if (!scoringData) return [];
+
+    return calculatePriorities(scoringData, {
       weekStartDay: prefs?.weekStartDay ?? "monday",
       partnerDeviceId: prefs?.partnerDeviceId ?? null,
     }).slice(0, 7);
-  }, [isLoading, contacts, checkIns, lifeAreas, activities, householdTasks, goals, snoozedItems, prefs]);
+  }, [scoringData, prefs]);
 
   // Build summary stats for the greeting
   const summaryParts = useMemo(() => {
@@ -418,6 +427,9 @@ export default function DashboardPage() {
           </p>
         )}
       </section>
+
+      {/* Welcome back banner (shown after 24h+ absence) */}
+      {welcomeBack && <WelcomeBackBanner summary={welcomeBack} />}
 
       {/* Install prompt for mobile users */}
       <InstallPrompt />
