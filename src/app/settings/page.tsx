@@ -183,6 +183,33 @@ export default function SettingsPage() {
         )}
       </section>
 
+      {/* Saved Places section */}
+      <section className="rounded-xl border border-gray-200 bg-white p-4">
+        <h3 className="font-medium text-gray-900">Saved Places</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Manage your saved locations for proximity detection and visit tracking.
+        </p>
+        <Link
+          href="/settings/saved-places"
+          className="mt-3 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 active:bg-indigo-800"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          Manage Saved Places
+        </Link>
+      </section>
+
       {/* Data section */}
       <section className="rounded-xl border border-gray-200 bg-white p-4">
         <h3 className="font-medium text-gray-900">Data</h3>

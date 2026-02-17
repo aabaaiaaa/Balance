@@ -8,7 +8,8 @@ import {
   TIER_LABELS,
   TIER_ORDER,
 } from "@/lib/constants";
-import type { Contact, ContactTier } from "@/types/models";
+import { useLocation } from "@/hooks/useLocation";
+import type { Contact, ContactTier, LocationWithLabel, SavedPlace } from "@/types/models";
 
 interface ContactFormProps {
   /** Contact ID to edit. When undefined, the form creates a new contact. */
@@ -27,7 +28,14 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
     [contactId]
   );
 
+  const savedPlaces = useLiveQuery(
+    () => db.savedPlaces.filter((p) => p.deletedAt === null).toArray(),
+    []
+  );
+
   const [name, setName] = useState("");
+  const [contactLocation, setContactLocation] = useState<LocationWithLabel | null>(null);
+  const [showPlacePicker, setShowPlacePicker] = useState(false);
   const [tier, setTier] = useState<ContactTier>("close-friends");
   const [checkInFrequencyDays, setCheckInFrequencyDays] = useState(
     DEFAULT_CHECK_IN_FREQUENCIES["close-friends"]
@@ -38,6 +46,7 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [frequencyManuallySet, setFrequencyManuallySet] = useState(false);
+  const { loading: locationLoading, error: locationError, permission: locationPermission, requestPosition } = useLocation();
 
   // Populate form when editing an existing contact
   useEffect(() => {
@@ -47,6 +56,7 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
       setCheckInFrequencyDays(existingContact.checkInFrequencyDays);
       setPhoneNumber(existingContact.phoneNumber);
       setNotes(existingContact.notes);
+      setContactLocation(existingContact.location);
       setFrequencyManuallySet(true); // Don't auto-change frequency on edit
     }
   }, [existingContact]);
@@ -79,6 +89,22 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
     setFrequencyManuallySet(false);
   }, [tier]);
 
+  const handleSetCurrentLocation = useCallback(async () => {
+    const pos = await requestPosition();
+    if (pos) {
+      setContactLocation({ lat: pos.lat, lng: pos.lng, label: "" });
+    }
+  }, [requestPosition]);
+
+  const handlePickSavedPlace = useCallback((place: SavedPlace) => {
+    setContactLocation({ lat: place.lat, lng: place.lng, label: place.label });
+    setShowPlacePicker(false);
+  }, []);
+
+  const handleClearLocation = useCallback(() => {
+    setContactLocation(null);
+  }, []);
+
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
@@ -105,6 +131,7 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
           checkInFrequencyDays,
           phoneNumber: phoneNumber.trim(),
           notes: notes.trim(),
+          location: contactLocation,
           updatedAt: now,
           deviceId,
         });
@@ -116,7 +143,7 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
           lastCheckIn: null,
           phoneNumber: phoneNumber.trim(),
           notes: notes.trim(),
-          location: null,
+          location: contactLocation,
           updatedAt: now,
           deviceId,
           deletedAt: null,
@@ -137,6 +164,7 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
     checkInFrequencyDays,
     phoneNumber,
     notes,
+    contactLocation,
     isEditing,
     contactId,
     onComplete,
@@ -299,6 +327,83 @@ export function ContactForm({ contactId, onComplete, onCancel }: ContactFormProp
             rows={3}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none resize-none"
           />
+        </div>
+
+        {/* Their place */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Their place <span className="text-xs text-gray-400">(optional)</span>
+          </label>
+          {contactLocation ? (
+            <div className="mt-1 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
+              <div className="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-green-600 flex-shrink-0">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span className="text-sm text-green-800">
+                  {contactLocation.label || `${contactLocation.lat.toFixed(4)}, ${contactLocation.lng.toFixed(4)}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleClearLocation}
+                  className="ml-auto text-xs text-green-600 hover:text-green-800"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-1 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={handleSetCurrentLocation}
+                disabled={locationLoading || locationPermission === "unavailable"}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                {locationLoading ? "Getting..." : "Set to current location"}
+              </button>
+              {savedPlaces && savedPlaces.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowPlacePicker(!showPlacePicker)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  Pick from saved places
+                </button>
+              )}
+            </div>
+          )}
+          {locationError && (
+            <p className="mt-1 text-xs text-amber-600">{locationError}</p>
+          )}
+          {showPlacePicker && savedPlaces && savedPlaces.length > 0 && (
+            <div className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-gray-200 bg-white">
+              {savedPlaces.map((place) => (
+                <button
+                  key={place.id}
+                  type="button"
+                  onClick={() => handlePickSavedPlace(place)}
+                  className="flex w-full items-center gap-2 border-b border-gray-100 px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 last:border-b-0"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500 flex-shrink-0">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {place.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
