@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
+import { BalanceChart } from "@/components/BalanceChart";
 import { LifeAreaCard } from "@/components/LifeAreaCard";
 import { LifeAreaForm } from "@/components/LifeAreaForm";
 import { LifeAreaDetail } from "@/components/LifeAreaDetail";
@@ -103,6 +104,10 @@ export default function LifeAreasPage() {
           Track and balance the areas that matter to you.
         </p>
       </section>
+
+      {lifeAreas && lifeAreas.length > 0 && (
+        <BalanceChart lifeAreas={lifeAreas} hoursPerArea={hoursPerArea} />
+      )}
 
       {!lifeAreas || lifeAreas.length === 0 ? (
         <section className="rounded-xl border border-gray-200 bg-white p-4">

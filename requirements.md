@@ -111,7 +111,7 @@ This approach has no data size limitations — the QR codes only carry the small
 - **Description**: Tapping a life area card opens its detail view. Add a "Log activity" button: description (free text), duration in minutes, date (defaults to now), optional notes. Show a history of recent activities for that area (last 20). Include a weekly summary showing total time spent this week vs. the target. "This week" is calculated using the `weekStartDay` preference from UserPreferences (defaults to Monday).
 
 ### TASK-010: Build life area balance visualisation
-- **Status**: pending
+- **Status**: done
 - **Priority**: medium
 - **Dependencies**: TASK-009
 - **Description**: On the Life Areas tab, add a visual balance overview at the top: a simple bar chart or radar/spider chart showing time spent vs. target across all areas for the current week. Highlight areas that are significantly under their target. Use a lightweight chart library (e.g., Recharts) or simple CSS-based bars to keep bundle size small. Whichever approach is used, it must be fully bundled at build time with no runtime fetches of external assets — the visualisation must work offline.
