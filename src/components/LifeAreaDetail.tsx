@@ -5,6 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { LifeAreaIcon } from "@/components/LifeAreaIcon";
 import { ActivityForm } from "@/components/ActivityForm";
+import { HouseholdTaskList } from "@/components/HouseholdTaskList";
 import type { WeekStartDay } from "@/types/models";
 
 interface LifeAreaDetailProps {
@@ -75,6 +76,13 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
   const progressPercent = targetHours > 0 ? Math.min((hoursThisWeek / targetHours) * 100, 100) : 0;
   const isOnTrack = hoursThisWeek >= targetHours;
   const isLow = targetHours > 0 && hoursThisWeek < targetHours * 0.5;
+
+  // Show household tasks section for DIY/Household-type life areas
+  const isHouseholdArea = useMemo(() => {
+    if (!area) return false;
+    const lower = area.name.toLowerCase();
+    return lower.includes("diy") || lower.includes("household");
+  }, [area]);
 
   if (area === undefined) {
     return (
@@ -209,6 +217,11 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
         >
           Log Activity
         </button>
+      )}
+
+      {/* Household task list (shown only for DIY/Household-type life areas) */}
+      {isHouseholdArea && (
+        <HouseholdTaskList lifeAreaId={lifeAreaId} />
       )}
 
       {/* Activity history */}

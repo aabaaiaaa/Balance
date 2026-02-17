@@ -361,6 +361,83 @@ export const lifeAreaScorer: ItemScorer = {
   },
 };
 
+/**
+ * Household task scorer.
+ *
+ * Scores pending/in-progress household tasks by their user-set priority
+ * and how long they've been waiting (based on updatedAt as a proxy for
+ * creation time). In-progress tasks get a small boost.
+ *
+ * Priority weights: high = 3.0, medium = 2.0, low = 1.0
+ * Age factor: days waiting * 0.1 (capped at 2.0 to avoid runaway scores)
+ *
+ * Uses each task's own estimatedMinutes for time filtering in "I have
+ * free time" suggestions.
+ */
+export const householdTaskScorer: ItemScorer = {
+  type: "household-task",
+  score(data: ScoringData, ctx: ScoringContext): ScoredItem[] {
+    const snoozedSet = buildSnoozedSet(data.snoozedItems, ctx.now);
+    const items: ScoredItem[] = [];
+
+    // Find the DIY/Household life area name for display
+    const areaName = (() => {
+      for (const area of data.lifeAreas) {
+        if (area.deletedAt === null) {
+          const lower = area.name.toLowerCase();
+          if (lower.includes("diy") || lower.includes("household")) {
+            return area.name;
+          }
+        }
+      }
+      return "DIY/Household";
+    })();
+
+    const PRIORITY_WEIGHTS: Record<string, number> = {
+      high: 3.0,
+      medium: 2.0,
+      low: 1.0,
+    };
+
+    for (const task of data.householdTasks) {
+      if (task.deletedAt !== null) continue;
+      if (task.status === "done") continue;
+      if (task.id === undefined) continue;
+      if (isSnoozed(snoozedSet, "task", task.id)) continue;
+
+      const priorityWeight = PRIORITY_WEIGHTS[task.priority] ?? 2.0;
+      const daysWaiting = (ctx.now - task.updatedAt) / (1000 * 60 * 60 * 24);
+      const ageFactor = Math.min(daysWaiting * 0.1, 2.0);
+
+      let score = priorityWeight + ageFactor;
+
+      // In-progress tasks get a small boost
+      if (task.status === "in-progress") {
+        score += 0.5;
+      }
+
+      const daysRounded = Math.floor(daysWaiting);
+      const reason =
+        daysRounded <= 0
+          ? `${task.priority} priority task added today`
+          : `${task.priority} priority task waiting ${daysRounded} day${daysRounded === 1 ? "" : "s"}`;
+
+      items.push({
+        key: `household-task:${task.id}`,
+        type: "household-task",
+        title: task.title,
+        reason,
+        score,
+        itemId: task.id,
+        estimatedMinutes: task.estimatedMinutes,
+        lifeArea: areaName,
+      });
+    }
+
+    return items;
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Configurable time estimate defaults (in minutes)
 // ---------------------------------------------------------------------------
@@ -495,6 +572,7 @@ export function getFilteredSuggestions(
 
 registerScorer(contactScorer);
 registerScorer(lifeAreaScorer);
+registerScorer(householdTaskScorer);
 
 // ---------------------------------------------------------------------------
 // Core algorithm
