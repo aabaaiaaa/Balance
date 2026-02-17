@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import type { EnergyLevel } from "@/types/models";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type EnergyLevel = "energetic" | "normal" | "low";
+export type { EnergyLevel };
 
 export interface FreeTimeInputs {
   availableMinutes: number;

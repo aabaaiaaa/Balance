@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { FreeTimeFlow } from "@/components/FreeTimeFlow";
+import { FreeTimeSuggestions } from "@/components/FreeTimeSuggestions";
 import type { FreeTimeInputs } from "@/components/FreeTimeFlow";
 
 export default function DashboardPage() {
@@ -19,7 +20,6 @@ export default function DashboardPage() {
   const handleFreeTimeComplete = (inputs: FreeTimeInputs) => {
     setFreeTimeInputs(inputs);
     setShowFreeTimeFlow(false);
-    // Inputs are stored in state for the suggestion algorithm (TASK-014)
   };
 
   return (
@@ -43,33 +43,10 @@ export default function DashboardPage() {
         </section>
       ) : freeTimeInputs ? (
         <section className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-indigo-900">
-                {freeTimeInputs.availableMinutes >= 60
-                  ? `${Math.floor(freeTimeInputs.availableMinutes / 60)}h${freeTimeInputs.availableMinutes % 60 > 0 ? ` ${freeTimeInputs.availableMinutes % 60}m` : ""}`
-                  : `${freeTimeInputs.availableMinutes}m`}{" "}
-                free &middot;{" "}
-                {freeTimeInputs.energy === "energetic"
-                  ? "Feeling energetic"
-                  : freeTimeInputs.energy === "low"
-                    ? "Low energy"
-                    : "Normal energy"}
-              </p>
-              <p className="mt-0.5 text-xs text-indigo-700">
-                Suggestions will appear here once enabled.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setFreeTimeInputs(null);
-              }}
-              className="text-sm text-indigo-600 hover:text-indigo-700"
-            >
-              Clear
-            </button>
-          </div>
+          <FreeTimeSuggestions
+            inputs={freeTimeInputs}
+            onDone={() => setFreeTimeInputs(null)}
+          />
         </section>
       ) : (
         <button

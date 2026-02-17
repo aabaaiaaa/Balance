@@ -22,6 +22,7 @@
 import type {
   Contact,
   CheckIn,
+  CheckInType,
   LifeArea,
   Activity,
   HouseholdTask,
@@ -30,6 +31,7 @@ import type {
   SnoozedItemType,
   ContactTier,
   WeekStartDay,
+  EnergyLevel,
 } from "@/types/models";
 
 // ---------------------------------------------------------------------------
@@ -52,6 +54,10 @@ export interface ScoredItem {
   itemId: number;
   /** Estimated duration in minutes (for "I have free time" filtering). */
   estimatedMinutes?: number;
+  /** Life area name for display on suggestion cards. */
+  lifeArea?: string;
+  /** Sub-type hint (e.g. check-in type for contacts: "called", "texted"). */
+  subType?: string;
 }
 
 /** Read-only data snapshot passed to every scorer. */
@@ -268,6 +274,14 @@ export const contactScorer: ItemScorer = {
           ? `You checked in with ${contact.name} today`
           : `Last check-in with ${contact.name} was ${daysSinceRounded} day${daysSinceRounded === 1 ? "" : "s"} ago`;
 
+      // Suggest a check-in type — prefer "called" as the default,
+      // but use the most recent check-in type if available
+      const recentCheckIn = data.checkIns
+        .filter((ci) => ci.contactId === contact.id && ci.deletedAt === null)
+        .sort((a, b) => b.date - a.date)[0];
+      const suggestedType: CheckInType = recentCheckIn?.type ?? "called";
+      const estimate = getTimeEstimate("contact", suggestedType);
+
       items.push({
         key: `contact:${contact.id}`,
         type: "contact",
@@ -275,7 +289,9 @@ export const contactScorer: ItemScorer = {
         reason,
         score,
         itemId: contact.id,
-        estimatedMinutes: 15,
+        estimatedMinutes: estimate,
+        lifeArea: "People",
+        subType: suggestedType,
       });
     }
 
@@ -336,13 +352,142 @@ export const lifeAreaScorer: ItemScorer = {
         reason,
         score,
         itemId: area.id,
-        estimatedMinutes: 30,
+        estimatedMinutes: getTimeEstimate("life-area"),
+        lifeArea: area.name,
       });
     }
 
     return items;
   },
 };
+
+// ---------------------------------------------------------------------------
+// Configurable time estimate defaults (in minutes)
+// ---------------------------------------------------------------------------
+
+/**
+ * Default time estimates for item types/sub-types, used by the "I have free
+ * time" flow to filter suggestions by available time. These are configurable
+ * so they can be tuned without changing scorer logic.
+ */
+const timeEstimateDefaults: Record<string, number> = {
+  // Contact check-in types
+  "contact:called": 15,
+  "contact:texted": 5,
+  "contact:met-up": 60,
+  "contact:video-call": 30,
+  "contact:other": 15,
+  // Fallback for contacts without a specific sub-type
+  contact: 15,
+  // Life area activities (generic)
+  "life-area": 30,
+  // Household tasks use their own estimatedMinutes field, but fall back here
+  "household-task": 30,
+  // Goals default to a single work session
+  goal: 30,
+};
+
+/** Get the default time estimate for an item type and optional sub-type. */
+export function getTimeEstimate(type: string, subType?: string): number {
+  if (subType) {
+    const specific = timeEstimateDefaults[`${type}:${subType}`];
+    if (specific !== undefined) return specific;
+  }
+  return timeEstimateDefaults[type] ?? 30;
+}
+
+/** Override a time estimate default. */
+export function setTimeEstimateDefault(key: string, minutes: number): void {
+  timeEstimateDefaults[key] = minutes;
+}
+
+/** Get all current time estimate defaults (for debugging/display). */
+export function getTimeEstimateDefaults(): Record<string, number> {
+  return { ...timeEstimateDefaults };
+}
+
+// ---------------------------------------------------------------------------
+// Energy level filtering
+// ---------------------------------------------------------------------------
+
+/**
+ * Maps energy levels to item types/life areas that are appropriate.
+ * When energy is "low", high-effort activities are filtered out.
+ * When energy is "energetic", everything is available.
+ *
+ * Life areas whose names match these patterns will be excluded at low energy.
+ */
+const LOW_ENERGY_EXCLUDED_PATTERNS = [
+  "diy",
+  "household",
+];
+
+/**
+ * Check if a scored item is appropriate for the given energy level.
+ * - "energetic": everything is appropriate
+ * - "normal": everything is appropriate
+ * - "low": filters out high-effort items (DIY/Household tasks, met-up contacts)
+ */
+export function isEnergyAppropriate(
+  item: ScoredItem,
+  energy: EnergyLevel,
+): boolean {
+  if (energy !== "low") return true;
+
+  // At low energy, exclude in-person meet-ups (suggest texting/calling instead)
+  if (item.type === "contact" && item.subType === "met-up") return false;
+
+  // At low energy, exclude household tasks
+  if (item.type === "household-task") return false;
+
+  // At low energy, exclude DIY/Household life area activities
+  if (item.type === "life-area" && item.lifeArea) {
+    const lower = item.lifeArea.toLowerCase();
+    if (LOW_ENERGY_EXCLUDED_PATTERNS.some((p) => lower.includes(p))) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Free time suggestion filter
+// ---------------------------------------------------------------------------
+
+/** Options for filtering suggestions for the "I have free time" flow. */
+export interface FreeTimeFilterOptions extends PriorityOptions {
+  availableMinutes: number;
+  energy: EnergyLevel;
+  maxSuggestions?: number;
+}
+
+/**
+ * Get filtered suggestions for the "I have free time" flow.
+ *
+ * Runs the priority algorithm then filters by:
+ * 1. Items that fit within the available time window
+ * 2. Energy-appropriate suggestions
+ * 3. Weighted toward the most overdue/imbalanced areas (already sorted by score)
+ *
+ * Returns up to `maxSuggestions` items (default 5).
+ */
+export function getFilteredSuggestions(
+  data: ScoringData,
+  options: FreeTimeFilterOptions,
+): ScoredItem[] {
+  const { availableMinutes, energy, maxSuggestions = 5, ...priorityOptions } = options;
+
+  const allItems = calculatePriorities(data, priorityOptions);
+
+  return allItems
+    .filter((item) => {
+      const estimate = item.estimatedMinutes ?? getTimeEstimate(item.type, item.subType);
+      return estimate <= availableMinutes;
+    })
+    .filter((item) => isEnergyAppropriate(item, energy))
+    .slice(0, maxSuggestions);
+}
 
 // ---------------------------------------------------------------------------
 // Register built-in scorers

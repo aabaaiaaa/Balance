@@ -139,6 +139,7 @@ export interface SnoozedItem extends SyncFields {
 }
 
 export type WeekStartDay = "monday" | "sunday";
+export type EnergyLevel = "energetic" | "normal" | "low";
 export type Theme = "light" | "dark" | "system";
 
 export interface UserPreferences {
