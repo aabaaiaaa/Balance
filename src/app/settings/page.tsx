@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { LinkPartnerFlow } from "@/components/LinkPartnerFlow";
+import { BackupRestore } from "@/components/BackupRestore";
 
 export default function SettingsPage() {
   const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
@@ -185,9 +186,10 @@ export default function SettingsPage() {
       {/* Data section */}
       <section className="rounded-xl border border-gray-200 bg-white p-4">
         <h3 className="font-medium text-gray-900">Data</h3>
-        <p className="mt-1 text-sm text-gray-400">
-          Export, import, and manage your local data.
+        <p className="mt-1 mb-3 text-sm text-gray-500">
+          Export a full backup of your data or restore from a previous backup.
         </p>
+        <BackupRestore />
       </section>
 
       {/* About section */}
