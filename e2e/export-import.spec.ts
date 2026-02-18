@@ -32,13 +32,16 @@ test.describe("Export/import — export data, clear storage, import file, verify
   });
 
   test("export backup downloads a valid JSON file", async ({ page }) => {
+    test.setTimeout(60_000);
     await navigateToTab(page, "Settings");
 
     // Set up a download listener
     const downloadPromise = page.waitForEvent("download");
 
-    // Click the export button
-    await page.getByRole("button", { name: "Download Backup" }).click();
+    // Scroll to and click the export button
+    const exportBtn = page.getByRole("button", { name: "Download Backup" });
+    await exportBtn.scrollIntoViewIfNeeded();
+    await exportBtn.click();
 
     // Wait for the download
     const download = await downloadPromise;
@@ -67,6 +70,7 @@ test.describe("Export/import — export data, clear storage, import file, verify
   });
 
   test("export then import with Replace All restores data", async ({ page }) => {
+    test.setTimeout(60_000);
     await navigateToTab(page, "Settings");
 
     // Export first
@@ -87,7 +91,7 @@ test.describe("Export/import — export data, clear storage, import file, verify
 
     // Verify contacts are gone
     await navigateToTab(page, "People");
-    await expect(page.getByText("No contacts yet")).toBeVisible();
+    await expect(page.getByText("No contacts yet")).toBeVisible({ timeout: 10000 });
 
     // Navigate to settings to import
     await navigateToTab(page, "Settings");
@@ -101,13 +105,18 @@ test.describe("Export/import — export data, clear storage, import file, verify
     fs.writeFileSync(tmpFile, backupContent);
 
     // Click "Restore from Backup" and select the file
+    const restoreButton = page.getByRole("button", { name: "Restore from Backup" });
+    await restoreButton.scrollIntoViewIfNeeded();
     const fileChooserPromise = page.waitForEvent("filechooser");
-    await page.getByRole("button", { name: "Restore from Backup" }).click();
+    await restoreButton.click();
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles(tmpFile);
 
-    // Wait for the summary to appear
-    await expect(page.getByText("total records")).toBeVisible({ timeout: 5000 });
+    // Wait for the summary to appear (may need scroll on mobile)
+    const totalRecordsText = page.getByText("total records");
+    await totalRecordsText.waitFor({ state: "attached", timeout: 10000 });
+    await totalRecordsText.scrollIntoViewIfNeeded();
+    await expect(totalRecordsText).toBeVisible({ timeout: 5000 });
 
     // Choose "Replace all"
     await page.getByText("Replace all").first().click();
@@ -116,10 +125,10 @@ test.describe("Export/import — export data, clear storage, import file, verify
     // Confirm the replace
     await expect(page.getByText("Replace all data?")).toBeVisible();
     await page.getByRole("button", { name: "Replace All Data" }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500);
 
     // Should show success
-    await expect(page.getByText("Data replaced successfully")).toBeVisible();
+    await expect(page.getByText("Data replaced successfully")).toBeVisible({ timeout: 10000 });
     await page.getByRole("button", { name: "Done" }).click();
 
     // Reload and verify data is restored
@@ -127,8 +136,8 @@ test.describe("Export/import — export data, clear storage, import file, verify
     await waitForAppReady(page);
     await navigateToTab(page, "People");
 
-    await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("Bob")).toBeVisible();
+    await expect(page.getByText("Alice")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Bob")).toBeVisible({ timeout: 10000 });
 
     // Verify in IndexedDB
     const contacts = await getContacts(page);

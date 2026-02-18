@@ -221,6 +221,7 @@ export default function DashboardPage() {
   const [freeTimeInputs, setFreeTimeInputs] = useState<FreeTimeInputs | null>(null);
   const [quickAction, setQuickAction] = useState<QuickAction | null>(null);
   const [quickCreateLocation, setQuickCreateLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showAllPriorities, setShowAllPriorities] = useState(false);
   const { loading: imHereLoading, requestPosition } = useLocation();
 
   // Load all data needed for the dashboard
@@ -304,7 +305,7 @@ export default function DashboardPage() {
     return calculatePriorities(scoringData, {
       weekStartDay: prefs?.weekStartDay ?? "monday",
       partnerDeviceId: prefs?.partnerDeviceId ?? null,
-    }).slice(0, 7);
+    }).slice(0, 20);
   }, [scoringData, prefs]);
 
   // Build summary stats for the greeting
@@ -652,7 +653,7 @@ export default function DashboardPage() {
           </p>
         ) : (
           <div className="space-y-2">
-            {priorities.map((item) => (
+            {(showAllPriorities ? priorities : priorities.slice(0, 7)).map((item) => (
               <PriorityCard
                 key={item.key}
                 item={item}
@@ -661,6 +662,15 @@ export default function DashboardPage() {
                 onSnooze={handleSnooze}
               />
             ))}
+            {!showAllPriorities && priorities.length > 7 && (
+              <button
+                type="button"
+                onClick={() => setShowAllPriorities(true)}
+                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 py-2 text-sm text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Show {priorities.length - 7} more
+              </button>
+            )}
           </div>
         )}
       </section>

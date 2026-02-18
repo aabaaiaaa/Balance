@@ -129,32 +129,6 @@ export function PlaceQuickCreate({
 
   // ------ Step: Purpose — save actions ------
 
-  const handlePurposeSelect = useCallback(
-    (purpose: PlacePurpose) => {
-      setError(null);
-      switch (purpose) {
-        case "contact":
-          setStep({ type: "pick-contact" });
-          break;
-        case "activity":
-          setStep({ type: "pick-area" });
-          break;
-        case "diy":
-          if (hasDiyTasks && diyArea) {
-            setStep({ type: "diy-task" });
-          } else if (diyArea) {
-            // No household task support, just save linked to DIY area
-            handleSaveWithLifeArea(diyArea.id!);
-          }
-          break;
-        case "just-save":
-          handleJustSave();
-          break;
-      }
-    },
-    [hasDiyTasks, diyArea, handleSaveWithLifeArea, handleJustSave]
-  );
-
   const handleJustSave = useCallback(async () => {
     setSaving(true);
     try {
@@ -304,6 +278,32 @@ export function PlaceQuickCreate({
       setSaving(false);
     }
   }, [diyArea, savePlaceWithLinks, createTask, taskTitle, taskMinutes]);
+
+  const handlePurposeSelect = useCallback(
+    (purpose: PlacePurpose) => {
+      setError(null);
+      switch (purpose) {
+        case "contact":
+          setStep({ type: "pick-contact" });
+          break;
+        case "activity":
+          setStep({ type: "pick-area" });
+          break;
+        case "diy":
+          if (hasDiyTasks && diyArea) {
+            setStep({ type: "diy-task" });
+          } else if (diyArea) {
+            // No household task support, just save linked to DIY area
+            handleSaveWithLifeArea(diyArea.id!);
+          }
+          break;
+        case "just-save":
+          handleJustSave();
+          break;
+      }
+    },
+    [hasDiyTasks, diyArea, handleSaveWithLifeArea, handleJustSave]
+  );
 
   // ======== RENDER ========
 

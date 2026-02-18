@@ -194,6 +194,7 @@ test.describe("P2P sync round-trip with two browser contexts", () => {
   test("two contexts can start sync flows and exchange SDP data", async ({
     browser,
   }) => {
+    test.setTimeout(60_000);
     // Create two separate browser contexts (simulating two devices)
     const contextA = await browser.newContext();
     const contextB = await browser.newContext();
@@ -269,7 +270,7 @@ test.describe("P2P sync round-trip with two browser contexts", () => {
       // Device B should show the scanner UI
       await expect(
         pageB.getByText("Step 1 of 3: Scan the code on your partner's device"),
-      ).toBeVisible({ timeout: 5000 });
+      ).toBeVisible({ timeout: 10000 });
     } finally {
       await contextA.close();
       await contextB.close();

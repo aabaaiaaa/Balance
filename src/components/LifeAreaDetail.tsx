@@ -55,16 +55,17 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
     [lifeAreaId, weekStartTimestamp]
   );
 
-  // Fetch recent activities (last 20) for history
-  const recentActivities = useLiveQuery(
+  const [showAllActivities, setShowAllActivities] = useState(false);
+
+  // Fetch all activities for history
+  const allActivities = useLiveQuery(
     () =>
       db.activities
         .where("lifeAreaId")
         .equals(lifeAreaId)
         .filter((a) => a.deletedAt === null)
         .reverse()
-        .sortBy("date")
-        .then((results) => results.slice(0, 20)),
+        .sortBy("date"),
     [lifeAreaId]
   );
 
@@ -269,14 +270,14 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
       <section>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Recent Activities
-          {recentActivities && recentActivities.length > 0 && (
+          {allActivities && allActivities.length > 0 && (
             <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">
-              ({recentActivities.length})
+              ({allActivities.length})
             </span>
           )}
         </h3>
 
-        {!recentActivities || recentActivities.length === 0 ? (
+        {!allActivities || allActivities.length === 0 ? (
           <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
             <p className="text-sm text-gray-400 dark:text-slate-500">
               No activities yet. Tap the button above to log one.
@@ -284,7 +285,7 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
           </div>
         ) : (
           <div className="space-y-2">
-            {recentActivities.map((activity) => {
+            {(showAllActivities ? allActivities : allActivities.slice(0, 20)).map((activity) => {
               const placeName = getActivityPlaceName(activity);
               return (
                 <div
@@ -321,6 +322,15 @@ export function LifeAreaDetail({ lifeAreaId, onBack, onEdit }: LifeAreaDetailPro
                 </div>
               );
             })}
+            {!showAllActivities && allActivities.length > 20 && (
+              <button
+                type="button"
+                onClick={() => setShowAllActivities(true)}
+                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 py-2 text-sm text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Show {allActivities.length - 20} more
+              </button>
+            )}
           </div>
         )}
       </section>

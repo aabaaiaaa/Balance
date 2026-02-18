@@ -79,7 +79,7 @@ jest.mock("@/components/FreeTimeSuggestions", () => ({
   FreeTimeSuggestions: () => null,
 }));
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import DashboardPage from "@/app/page";
 
 // ---------------------------------------------------------------------------
@@ -198,6 +198,75 @@ describe("Dashboard", () => {
       await waitFor(() => {
         expect(screen.getByText(/1 contact overdue/)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("Show more priorities", () => {
+    it("shows first 7 priority cards and a show-more button when there are 15+ items", async () => {
+      const now = Date.now();
+      const DAY = 24 * 60 * 60 * 1000;
+
+      // Seed a life area so life-area scorer also generates items
+      await currentTestDb.lifeAreas.add({
+        name: "Self-care",
+        icon: "heart",
+        targetHoursPerWeek: 5,
+        updatedAt: now,
+        deviceId: "test-device-1",
+        deletedAt: null,
+      });
+
+      // Seed 15 overdue contacts to generate 15+ priority items
+      const names = [
+        "Alice", "Bob", "Carol", "Dave", "Eve", "Frank", "Grace",
+        "Hank", "Iris", "Jack", "Kate", "Leo", "Mia", "Nick", "Olivia",
+      ];
+      for (const name of names) {
+        await currentTestDb.contacts.add({
+          name,
+          tier: "close-friends",
+          checkInFrequencyDays: 7,
+          lastCheckIn: now - 30 * DAY, // very overdue
+          phoneNumber: "",
+          notes: "",
+          location: null,
+          updatedAt: now,
+          deviceId: "test-device-1",
+          deletedAt: null,
+        });
+      }
+
+      render(<DashboardPage />);
+
+      // Wait for priorities to load
+      await waitFor(() => {
+        expect(screen.getByText("Top Priorities")).toBeInTheDocument();
+      });
+
+      // Should show exactly 7 priority cards initially
+      await waitFor(() => {
+        const logButtons = screen.getAllByRole("button", { name: /^Log / });
+        expect(logButtons.length).toBe(7);
+      });
+
+      // Should show a "Show N more" button
+      const showMoreBtn = await waitFor(() => {
+        return screen.getByRole("button", { name: /Show \d+ more/ });
+      });
+      expect(showMoreBtn).toBeInTheDocument();
+
+      // Click it — all items should now render
+      fireEvent.click(showMoreBtn);
+
+      await waitFor(() => {
+        const logButtons = screen.getAllByRole("button", { name: /^Log / });
+        expect(logButtons.length).toBeGreaterThan(7);
+      });
+
+      // Show more button should be gone
+      expect(
+        screen.queryByRole("button", { name: /Show \d+ more/ })
+      ).not.toBeInTheDocument();
     });
   });
 

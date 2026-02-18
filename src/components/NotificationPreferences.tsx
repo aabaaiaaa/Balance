@@ -39,7 +39,7 @@ export function NotificationPreferences() {
   const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
   const [testSent, setTestSent] = useState(false);
   const [permissionState, setPermissionState] = useState<string | null>(null);
-  const testTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const testTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Clean up test notification timeout on unmount
   useEffect(() => {

@@ -130,21 +130,23 @@ test.describe("Offline — verify the app continues to function when offline", (
     // Go offline
     await context.setOffline(true);
 
-    // Try navigating — this depends on service worker being active
-    // With static export + npx serve, the service worker may or may not be registered
-    // We test that at minimum the current page still works
+    // The current page (Dashboard) should still show content from cache/memory
     await expect(page.locator("h1")).toContainText("Balance");
 
-    // Try clicking nav links — they may work if SW cached, or fail gracefully
+    // Try clicking nav links — they may work if SW cached, or fail gracefully.
+    // With `npx serve`, the service worker may not be registered, so navigation
+    // to a new route while offline may fail. That's acceptable — the key assertion
+    // is that the current page remains functional.
     try {
-      await navigateToTab(page, "People");
-      await page.waitForTimeout(1000);
-      // If navigation succeeded, the page should render
-      const hasContent = await page.locator("h2").isVisible().catch(() => false);
+      // Use a short timeout so we don't blow the overall test budget
+      await page.locator("nav").getByText("People", { exact: true }).click();
+      await page.locator("h1").filter({ hasText: "Balance" }).waitFor({ timeout: 5000 });
+      await page.waitForTimeout(500);
+      // If navigation succeeded, verify some content rendered
+      const hasContent = await page.locator("h2").isVisible();
       expect(hasContent).toBeTruthy();
     } catch {
       // Navigation may fail if service worker isn't active — that's acceptable
-      // The key test is that IndexedDB operations still work
     }
 
     // Go back online

@@ -31,15 +31,16 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
     [contactId]
   );
 
-  const recentCheckIns = useLiveQuery(
+  const [showAllCheckIns, setShowAllCheckIns] = useState(false);
+
+  const allCheckIns = useLiveQuery(
     () =>
       db.checkIns
         .where("contactId")
         .equals(contactId)
         .filter((c) => c.deletedAt === null)
         .reverse()
-        .sortBy("date")
-        .then((results) => results.slice(0, 10)),
+        .sortBy("date"),
     [contactId]
   );
 
@@ -202,14 +203,14 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
       <section>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Recent Check-ins
-          {recentCheckIns && recentCheckIns.length > 0 && (
+          {allCheckIns && allCheckIns.length > 0 && (
             <span className="ml-1.5 text-xs font-normal text-gray-400 dark:text-slate-500">
-              ({recentCheckIns.length})
+              ({allCheckIns.length})
             </span>
           )}
         </h3>
 
-        {!recentCheckIns || recentCheckIns.length === 0 ? (
+        {!allCheckIns || allCheckIns.length === 0 ? (
           <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
             <p className="text-sm text-gray-400 dark:text-slate-500">
               No check-ins yet. Tap the button above to log one.
@@ -217,7 +218,7 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
           </div>
         ) : (
           <div className="space-y-2">
-            {recentCheckIns.map((checkIn) => {
+            {(showAllCheckIns ? allCheckIns : allCheckIns.slice(0, 10)).map((checkIn) => {
               const placeName = getCheckInPlaceName(checkIn);
               return (
                 <div
@@ -247,6 +248,15 @@ export function ContactDetail({ contactId, onBack, onEdit }: ContactDetailProps)
                 </div>
               );
             })}
+            {!showAllCheckIns && allCheckIns.length > 10 && (
+              <button
+                type="button"
+                onClick={() => setShowAllCheckIns(true)}
+                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 py-2 text-sm text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Show {allCheckIns.length - 10} more
+              </button>
+            )}
           </div>
         )}
       </section>

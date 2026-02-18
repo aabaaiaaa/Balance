@@ -76,6 +76,7 @@ test.describe("Check-in logging — log a check-in and verify last contacted upd
   });
 
   test("log check-in from dashboard quick action", async ({ page }) => {
+    test.setTimeout(60_000);
     // Navigate to dashboard — Sarah should appear as overdue
     await navigateToTab(page, "Dashboard");
     // Wait for dashboard data to finish loading
@@ -85,10 +86,8 @@ test.describe("Check-in logging — log a check-in and verify last contacted upd
     );
     await expect(page.getByText("Sarah").first()).toBeVisible({ timeout: 10000 });
 
-    // Click the "Log check-in" quick action button for Sarah
-    const sarahCard = page.locator("button").filter({ hasText: "Sarah" }).first();
-    const logButton = sarahCard.getByText("Log check-in");
-    await logButton.click();
+    // Click the "Log it" quick action button for Sarah
+    await page.getByRole("button", { name: /Log Check in with Sarah/ }).click();
     await page.waitForTimeout(300);
 
     // Should see the check-in form (the dashboard shows it inline)

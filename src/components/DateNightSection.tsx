@@ -17,6 +17,7 @@ import { DateNightForm } from "@/components/DateNightForm";
 export function DateNightSection() {
   const [showForm, setShowForm] = useState(false);
   const [showIdeas, setShowIdeas] = useState(false);
+  const [showAllDateNights, setShowAllDateNights] = useState(false);
   const [newIdeaTitle, setNewIdeaTitle] = useState("");
   const [surpriseIdea, setSurpriseIdea] = useState<string | null>(null);
 
@@ -204,7 +205,7 @@ export function DateNightSection() {
         {/* Recent date nights */}
         {dateNights && dateNights.length > 0 && (
           <div className="mt-3 space-y-2">
-            {dateNights.slice(0, 10).map((dn) => (
+            {(showAllDateNights ? dateNights : dateNights.slice(0, 10)).map((dn) => (
               <div
                 key={dn.id}
                 className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-3"
@@ -235,6 +236,15 @@ export function DateNightSection() {
                 )}
               </div>
             ))}
+            {!showAllDateNights && dateNights.length > 10 && (
+              <button
+                type="button"
+                onClick={() => setShowAllDateNights(true)}
+                className="w-full rounded-lg border border-gray-200 dark:border-slate-700 py-2 text-sm text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Show {dateNights.length - 10} more
+              </button>
+            )}
           </div>
         )}
       </section>
