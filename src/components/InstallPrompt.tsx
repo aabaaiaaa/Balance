@@ -21,8 +21,12 @@ function isStandalone(): boolean {
 function shouldShowIOSPrompt(): boolean {
   if (typeof window === "undefined") return false;
   if (isStandalone()) return false;
-  const dismissedAt = localStorage.getItem(DISMISSED_KEY);
-  if (dismissedAt && Date.now() - Number(dismissedAt) < DISMISS_DURATION_MS) {
+  try {
+    const dismissedAt = localStorage.getItem(DISMISSED_KEY);
+    if (dismissedAt && Date.now() - Number(dismissedAt) < DISMISS_DURATION_MS) {
+      return false;
+    }
+  } catch {
     return false;
   }
   const isIOS =

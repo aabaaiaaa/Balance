@@ -29,7 +29,7 @@ async function buildSW() {
     // Navigation fallback for SPA-style routing
     navigateFallback: `${basePath}/index.html`,
     // Don't use the navigation fallback for non-page requests
-    navigateFallbackDenylist: [/^\/_next\//, /\/sw\.js$/],
+    navigateFallbackDenylist: [new RegExp('^' + (basePath || '') + '/_next/'), /\/sw\.js$/],
   });
 
   console.log(

@@ -14,7 +14,7 @@ export default function SyncPage() {
 
   return (
     <SyncFlow
-      onClose={() => router.back()}
+      onClose={() => router.push("/")}
     />
   );
 }

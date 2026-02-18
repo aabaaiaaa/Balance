@@ -71,14 +71,19 @@ function RemoteSyncSettings() {
   const [turnCredential, setTurnCredential] = useState("");
 
   // Sync local form state when prefs load
+  const configStun = config?.stunServer ?? "";
+  const configTurn = config?.turnServer ?? "";
+  const configTurnUser = config?.turnUsername ?? "";
+  const configTurnCred = config?.turnCredential ?? "";
+
   useEffect(() => {
     if (config) {
-      setStunServer(config.stunServer);
-      setTurnServer(config.turnServer);
-      setTurnUsername(config.turnUsername);
-      setTurnCredential(config.turnCredential);
+      setStunServer(configStun);
+      setTurnServer(configTurn);
+      setTurnUsername(configTurnUser);
+      setTurnCredential(configTurnCred);
     }
-  }, [config]);
+  }, [config, configStun, configTurn, configTurnUser, configTurnCred]);
 
   const handleSave = useCallback(async () => {
     const newConfig: RemoteSyncConfig = {
@@ -318,9 +323,13 @@ export default function SettingsPage() {
   }, []);
 
   const handleClearData = useCallback(async () => {
-    await deleteDatabase();
-    setShowClearDataConfirm(false);
-    window.location.reload();
+    try {
+      await deleteDatabase();
+      setShowClearDataConfirm(false);
+      window.location.reload();
+    } catch {
+      setShowClearDataConfirm(false);
+    }
   }, []);
 
   // Show the link partner flow full-screen

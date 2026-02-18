@@ -37,6 +37,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const mountedRef = useRef(true);
+  const handleDecodedTextRef = useRef<(decodedText: string) => void>(() => {});
 
   // Clean up on unmount
   useEffect(() => {
@@ -104,6 +105,11 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
     [expectedTotal, onScan, stopScanner],
   );
 
+  // Keep the ref in sync so the scanner always calls the latest callback
+  useEffect(() => {
+    handleDecodedTextRef.current = handleDecodedText;
+  }, [handleDecodedText]);
+
   const startScanning = useCallback(() => {
     // Check browser support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -136,7 +142,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
         await scanner.start(
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: 250, height: 250 } },
-          (decodedText) => handleDecodedText(decodedText),
+          (decodedText: string) => handleDecodedTextRef.current(decodedText),
           undefined,
         );
       } catch (err) {
@@ -176,7 +182,7 @@ export function QRScanner({ onScan, onCancel }: QRScannerProps) {
     return () => {
       cancelled = true;
     };
-  }, [state, handleDecodedText]);
+  }, [state]);
 
   const handleRetry = useCallback(() => {
     setErrorMessage(null);

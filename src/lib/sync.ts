@@ -128,7 +128,7 @@ async function queryChangedRecords(
   // Return records modified since the last sync
   return (await table
     .where("updatedAt")
-    .above(sinceTimestamp)
+    .aboveOrEqual(sinceTimestamp)
     .toArray()) as SyncableRecord[];
 }
 

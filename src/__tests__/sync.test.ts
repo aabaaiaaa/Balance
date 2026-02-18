@@ -43,6 +43,14 @@ function createMockTable(tableName: string) {
           ),
         ),
       })),
+      aboveOrEqual: jest.fn((timestamp: number) => ({
+        toArray: jest.fn(async () =>
+          (mockStore[tableName] || []).filter(
+            (r: Record<string, unknown>) =>
+              (r[field] as number) >= timestamp,
+          ),
+        ),
+      })),
     })),
     bulkPut: jest.fn(async (records: SyncableRecord[]) => {
       const store = mockStore[tableName] || [];
@@ -220,7 +228,7 @@ describe("buildSyncPayload", () => {
   it("returns only changed records since last sync", async () => {
     mockStore["contacts"] = [
       makeContact(1, 1000), // before cutoff
-      makeContact(2, 2000), // before cutoff
+      makeContact(2, 2000), // at cutoff (included)
       makeContact(3, 3000), // after cutoff
     ];
 
@@ -229,9 +237,10 @@ describe("buildSyncPayload", () => {
       (e) => e.entityType === "contacts",
     );
 
-    // Only record 3 (updatedAt=3000) is after timestamp 2000
-    expect(contactsEntity?.count).toBe(1);
-    expect(contactsEntity?.records[0].id).toBe(3);
+    // Records 2 (updatedAt=2000) and 3 (updatedAt=3000) are at or after timestamp 2000
+    expect(contactsEntity?.count).toBe(2);
+    expect(contactsEntity?.records[0].id).toBe(2);
+    expect(contactsEntity?.records[1].id).toBe(3);
   });
 
   it("calculates correct totalRecords across entity types", async () => {

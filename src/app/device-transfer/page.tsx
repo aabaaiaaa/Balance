@@ -14,7 +14,7 @@ export default function DeviceTransferPage() {
 
   return (
     <DeviceTransferFlow
-      onClose={() => router.back()}
+      onClose={() => router.push("/settings")}
     />
   );
 }

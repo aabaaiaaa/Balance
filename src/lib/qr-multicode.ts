@@ -12,26 +12,35 @@
 /** Maximum raw bytes per QR code payload (conservative). */
 const MAX_CHUNK_BYTES = 1800;
 
-/** Header overhead: "99/99|" = 6 chars max. */
-const HEADER_MAX_LENGTH = 6;
-
-const PAYLOAD_MAX_LENGTH = MAX_CHUNK_BYTES - HEADER_MAX_LENGTH;
+/**
+ * Compute the header length for a given index and total.
+ * Header format: "<index>/<total>|" e.g. "1/3|" = 4, "10/100|" = 8
+ */
+function headerLength(index: number, total: number): number {
+  return String(index).length + 1 + String(total).length + 1;
+}
 
 /**
  * Split a data string into QR-code-sized chunks with sequence headers.
  * Returns an array of strings, each safe to encode in a single QR code.
  */
 export function splitIntoChunks(data: string): string[] {
-  if (data.length <= PAYLOAD_MAX_LENGTH) {
+  // For a single chunk the header is "1/1|" = 4 chars
+  if (data.length <= MAX_CHUNK_BYTES - headerLength(1, 1)) {
     return [`1/1|${data}`];
   }
+
+  // Use worst-case header size for the estimated chunk count to compute payload per chunk
+  const estimatedChunks = Math.ceil(data.length / (MAX_CHUNK_BYTES - 6));
+  const worstHeader = headerLength(estimatedChunks, estimatedChunks);
+  const payloadPerChunk = MAX_CHUNK_BYTES - worstHeader;
 
   const chunks: string[] = [];
   let offset = 0;
 
   while (offset < data.length) {
-    chunks.push(data.slice(offset, offset + PAYLOAD_MAX_LENGTH));
-    offset += PAYLOAD_MAX_LENGTH;
+    chunks.push(data.slice(offset, offset + payloadPerChunk));
+    offset += payloadPerChunk;
   }
 
   return chunks.map((chunk, i) => `${i + 1}/${chunks.length}|${chunk}`);

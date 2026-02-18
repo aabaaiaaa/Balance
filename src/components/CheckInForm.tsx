@@ -77,7 +77,7 @@ export function CheckInForm({ contactId, onComplete, onCancel }: CheckInFormProp
     } finally {
       setSaving(false);
     }
-  }, [contactId, type, notes, date, onComplete]);
+  }, [contactId, type, notes, date, location, onComplete]);
 
   return (
     <div className="space-y-4">

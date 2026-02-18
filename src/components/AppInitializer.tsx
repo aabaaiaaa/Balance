@@ -64,7 +64,7 @@ export function AppInitializer({ children }: AppInitializerProps) {
   // Onboarding not complete — show the flow (without header/nav)
   if (!prefs.onboardingComplete && !onboardingDismissed) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
         <OnboardingFlow onComplete={handleOnboardingComplete} />
       </div>
     );

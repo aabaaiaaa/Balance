@@ -341,7 +341,7 @@ export class PeerConnection {
 
   /** Wait for ICE gathering to reach the "complete" state. */
   private waitForIceGathering(): Promise<void> {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       if (!this.pc) {
         resolve();
         return;
@@ -352,8 +352,13 @@ export class PeerConnection {
         return;
       }
 
+      const timeout = setTimeout(() => {
+        reject(new Error("ICE gathering timed out after 10 seconds"));
+      }, 10_000);
+
       this.pc.onicegatheringstatechange = () => {
         if (this.pc?.iceGatheringState === "complete") {
+          clearTimeout(timeout);
           resolve();
         }
       };
@@ -365,13 +370,19 @@ export class PeerConnection {
     return new Promise<void>((resolve, reject) => {
       if (!this.dataChannel) {
         // The data channel might arrive via ondatachannel later; wait a bit
+        const pollTimeout = setTimeout(() => {
+          clearInterval(checkInterval);
+          reject(new Error("Data channel did not open within 30 seconds"));
+        }, 30_000);
         const checkInterval = setInterval(() => {
           if (this.dataChannel?.readyState === "open") {
             clearInterval(checkInterval);
+            clearTimeout(pollTimeout);
             resolve();
           }
           if (this._state === "failed" || this._state === "closed") {
             clearInterval(checkInterval);
+            clearTimeout(pollTimeout);
             reject(new Error("Connection failed or closed while waiting"));
           }
         }, 100);

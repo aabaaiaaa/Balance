@@ -158,7 +158,7 @@ export function showItemNotification(item: ScoredItem): boolean {
     new Notification(item.title, {
       body: item.reason,
       tag: item.key, // Prevents duplicate notifications for the same item
-      icon: "/icons/icon-192x192.png",
+      icon: `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/icons/icon-192x192.png`,
     });
     return true;
   } catch {

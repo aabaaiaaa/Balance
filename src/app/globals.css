@@ -162,9 +162,3 @@ body {
   contain: layout style;
 }
 
-/* Defer rendering of off-screen list items for faster initial paint */
-.space-y-3 > *,
-.space-y-4 > * {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 80px;
-}

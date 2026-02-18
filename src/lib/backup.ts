@@ -106,6 +106,8 @@ export function validateBackupFile(data: unknown): BackupFile {
     throw new Error("Invalid backup file: missing entities array");
   }
 
+  const validEntityTypes = new Set<string>(BACKUP_ENTITIES);
+
   for (const entity of obj.entities) {
     if (
       !entity ||
@@ -116,6 +118,11 @@ export function validateBackupFile(data: unknown): BackupFile {
     ) {
       throw new Error(
         `Invalid backup file: malformed entity payload for "${entity?.entityType ?? "unknown"}"`
+      );
+    }
+    if (!validEntityTypes.has(entity.entityType)) {
+      throw new Error(
+        `Invalid backup file: unknown entity type "${entity.entityType}"`
       );
     }
   }
@@ -210,20 +217,24 @@ export function downloadBackup(backup: BackupFile): void {
 export async function importReplaceAll(backup: BackupFile): Promise<ImportResult> {
   let totalImported = 0;
 
-  // Clear all tables first
-  for (const entityName of BACKUP_ENTITIES) {
-    const table = getTable(entityName);
-    await table.clear();
-  }
+  const tables = BACKUP_ENTITIES.map((name) => getTable(name));
 
-  // Import all records
-  for (const ep of backup.entities) {
-    if (ep.count === 0) continue;
+  await db.transaction("rw", tables, async () => {
+    // Clear all tables first
+    for (const entityName of BACKUP_ENTITIES) {
+      const table = getTable(entityName);
+      await table.clear();
+    }
 
-    const table = getTable(ep.entityType);
-    await table.bulkPut(ep.records);
-    totalImported += ep.count;
-  }
+    // Import all records
+    for (const ep of backup.entities) {
+      if (ep.count === 0) continue;
+
+      const table = getTable(ep.entityType);
+      await table.bulkPut(ep.records);
+      totalImported += ep.count;
+    }
+  });
 
   return {
     mode: "replace",

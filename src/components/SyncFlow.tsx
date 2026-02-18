@@ -67,11 +67,15 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
 
   const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
   const peerRef = useRef<PeerConnection | null>(null);
+  const waitTimersRef = useRef<{ interval?: ReturnType<typeof setInterval>; timeout?: ReturnType<typeof setTimeout> }>({});
 
-  // Clean up peer connection on unmount
+  // Clean up peer connection and timers on unmount
   useEffect(() => {
+    const timers = waitTimersRef.current;
     return () => {
       peerRef.current?.close();
+      clearInterval(timers.interval);
+      clearTimeout(timers.timeout);
     };
   }, []);
 
@@ -205,9 +209,10 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
                 reject(new Error("Connection failed while waiting for partner."));
               }
             }, 200);
+            waitTimersRef.current.interval = interval;
 
             // Timeout after 60 seconds
-            setTimeout(() => {
+            const timeout = setTimeout(() => {
               clearInterval(interval);
               if (peer.state !== "open") {
                 reject(
@@ -217,6 +222,7 @@ export function SyncFlow({ onClose }: SyncFlowProps) {
                 );
               }
             }, 60_000);
+            waitTimersRef.current.timeout = timeout;
           });
 
         waitForOpen()

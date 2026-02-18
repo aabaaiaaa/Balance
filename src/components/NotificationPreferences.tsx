@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { DEFAULT_NOTIFICATION_TYPES } from "@/lib/constants";
@@ -39,6 +39,14 @@ export function NotificationPreferences() {
   const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
   const [testSent, setTestSent] = useState(false);
   const [permissionState, setPermissionState] = useState<string | null>(null);
+  const testTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Clean up test notification timeout on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(testTimeoutRef.current);
+    };
+  }, []);
 
   const notificationsEnabled = prefs?.notificationsEnabled ?? false;
   const notificationTypes =
@@ -115,7 +123,8 @@ export function NotificationPreferences() {
 
     showItemNotification(testItem);
     setTestSent(true);
-    setTimeout(() => setTestSent(false), 3000);
+    clearTimeout(testTimeoutRef.current);
+    testTimeoutRef.current = setTimeout(() => setTestSent(false), 3000);
   }, []);
 
   if (!prefs) return null;

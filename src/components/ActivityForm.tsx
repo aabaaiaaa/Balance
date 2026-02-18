@@ -78,7 +78,7 @@ export function ActivityForm({ lifeAreaId, onComplete, onCancel }: ActivityFormP
     } finally {
       setSaving(false);
     }
-  }, [lifeAreaId, description, durationMinutes, notes, date, onComplete]);
+  }, [lifeAreaId, description, durationMinutes, notes, date, location, onComplete]);
 
   return (
     <div className="space-y-4">

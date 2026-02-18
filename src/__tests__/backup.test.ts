@@ -75,7 +75,16 @@ jest.mock("@/lib/db", () => {
     tables[name] = createMockTable(name);
   }
 
-  return { db: tables };
+  return {
+    db: {
+      ...tables,
+      transaction: jest.fn(
+        async (_mode: string, _tables: unknown[], fn: () => Promise<void>) => {
+          await fn();
+        },
+      ),
+    },
+  };
 });
 
 // ---------------------------------------------------------------------------

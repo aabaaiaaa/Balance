@@ -374,8 +374,8 @@ export default function DashboardPage() {
     if (!snoozedType) return;
 
     try {
-      const prefs = await db.userPreferences.get("prefs");
-      const deviceId = prefs?.deviceId ?? "unknown";
+      const currentPrefs = await db.userPreferences.get("prefs");
+      const deviceId = currentPrefs?.deviceId ?? "unknown";
       const now = Date.now();
       const snoozedUntil = now + 24 * 60 * 60 * 1000; // 24 hours from now
 
@@ -483,7 +483,7 @@ export default function DashboardPage() {
           aria-hidden="true"
         />
         {/* Sheet content */}
-        <div className="relative z-10 w-full max-w-lg rounded-t-2xl sm:rounded-2xl bg-white dark:bg-card p-4 shadow-xl max-h-[85vh] overflow-y-auto">
+        <div className="relative z-10 w-full max-w-lg rounded-t-2xl sm:rounded-2xl bg-white dark:bg-card p-4 pb-20 sm:pb-4 shadow-xl max-h-[85vh] overflow-y-auto">
           <div className="mb-3 flex items-center gap-2">
             <span className="text-sm font-medium text-gray-500 dark:text-slate-400">
               {quickAction.type === "check-in"

@@ -152,7 +152,7 @@ export function PlaceQuickCreate({
           break;
       }
     },
-    [hasDiyTasks, diyArea]
+    [hasDiyTasks, diyArea, handleSaveWithLifeArea, handleJustSave]
   );
 
   const handleJustSave = useCallback(async () => {

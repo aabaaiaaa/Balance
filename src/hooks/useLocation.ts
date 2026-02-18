@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export interface LocationPosition {
   lat: number;
@@ -39,6 +39,26 @@ export function useLocation(): UseLocationReturn {
     }
     return "prompt";
   });
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.permissions) return;
+    let status: PermissionStatus | null = null;
+    const onChange = () => {
+      if (status) {
+        setPermission(status.state === "granted" ? "granted" : status.state === "denied" ? "denied" : "prompt");
+      }
+    };
+    navigator.permissions.query({ name: "geolocation" }).then((s) => {
+      status = s;
+      onChange();
+      s.addEventListener("change", onChange);
+    }).catch(() => { /* Permissions API not supported — keep default */ });
+    return () => {
+      if (status) {
+        status.removeEventListener("change", onChange);
+      }
+    };
+  }, []);
 
   const requestPosition = useCallback(async (): Promise<LocationPosition | null> => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {

@@ -236,6 +236,7 @@ export const contactScorer: ItemScorer = {
     for (const contact of data.contacts) {
       if (contact.deletedAt !== null) continue;
       if (contact.id === undefined) continue;
+      if (contact.checkInFrequencyDays <= 0) continue;
       if (isSnoozed(snoozedSet, "contact", contact.id)) continue;
 
       const daysSinceLast = contact.lastCheckIn

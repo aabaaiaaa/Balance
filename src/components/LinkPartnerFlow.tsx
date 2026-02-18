@@ -77,11 +77,15 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
 
   const peerRef = useRef<PeerConnection | null>(null);
   const roleRef = useRef<"initiator" | "joiner" | null>(null);
+  const waitTimersRef = useRef<{ interval?: ReturnType<typeof setInterval>; timeout?: ReturnType<typeof setTimeout> }>({});
 
-  // Clean up peer connection on unmount
+  // Clean up peer connection and timers on unmount
   useEffect(() => {
+    const timers = waitTimersRef.current;
     return () => {
       peerRef.current?.close();
+      clearInterval(timers.interval);
+      clearTimeout(timers.timeout);
     };
   }, []);
 
@@ -252,8 +256,9 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
                 );
               }
             }, 200);
+            waitTimersRef.current.interval = interval;
 
-            setTimeout(() => {
+            const timeout = setTimeout(() => {
               clearInterval(interval);
               if (peer.state !== "open") {
                 reject(
@@ -263,6 +268,7 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
                 );
               }
             }, 60_000);
+            waitTimersRef.current.timeout = timeout;
           });
 
         waitForOpen()
