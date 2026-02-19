@@ -422,11 +422,33 @@ describe("PeerConnection with mocked RTCPeerConnection", () => {
     pc.close();
   });
 
-  it("connection state 'failed' transitions to failed", async () => {
+  it("ICE 'failed' during signalling does not transition to failed", async () => {
     const pc = new PeerConnection();
     await pc.createOffer();
 
-    // Simulate connection failure
+    // Simulate ICE failure during signalling (before data channel opens).
+    // This is normal when the remote peer hasn't applied the answer yet.
+    mockPc.connectionState = "failed";
+    if (typeof mockPc.onconnectionstatechange === "function") {
+      mockPc.onconnectionstatechange({});
+    }
+
+    // Should stay "connecting" — let the connection timeout handle it
+    expect(pc.state).toBe("connecting");
+    pc.close();
+  });
+
+  it("ICE 'failed' after connection was open transitions to failed", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Open the data channel first
+    if (typeof mockDataChannel.onopen === "function") {
+      mockDataChannel.onopen({});
+    }
+    expect(pc.state).toBe("open");
+
+    // Now simulate connection failure (genuine disconnect)
     mockPc.connectionState = "failed";
     if (typeof mockPc.onconnectionstatechange === "function") {
       mockPc.onconnectionstatechange({});

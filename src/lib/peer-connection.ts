@@ -477,9 +477,22 @@ export class PeerConnection {
           // State moves to "open" when the data channel opens, not here
           break;
         case "disconnected":
+          // Disconnected is transient — the connection may recover.
+          // Don't transition to "failed"; let the connection timeout
+          // handle genuine failures.
+          break;
         case "failed":
-          this.setState("failed");
-          this.clearTimeout();
+          // During the signalling phase (before the remote peer has
+          // applied the answer SDP), the browser's ICE agent may report
+          // "failed" because connectivity checks can't succeed yet.
+          // Only treat this as terminal if the data channel was
+          // previously open (i.e. an established connection dropped).
+          if (this._state === "open") {
+            this.setState("failed");
+            this.clearTimeout();
+          }
+          // Otherwise, let the connection timeout handle it — the
+          // sender may still scan the answer and complete the handshake.
           break;
         case "closed":
           this.setState("closed");

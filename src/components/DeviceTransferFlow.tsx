@@ -364,10 +364,13 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
               if (peer.state === "open") {
                 clearInterval(interval);
                 resolve();
-              } else if (
-                peer.state === "failed" ||
-                peer.state === "closed"
-              ) {
+              } else if (peer.state === "closed") {
+                // Only treat explicit close as terminal. Don't check for
+                // "failed" — the browser's ICE agent may temporarily report
+                // failure during signalling (before the sender has scanned
+                // the answer QR). The connection recovers once the sender
+                // completes the handshake. The timeout below handles the
+                // case where the sender never scans.
                 clearInterval(interval);
                 reject(new Error("Connection failed while waiting for sender."));
               }

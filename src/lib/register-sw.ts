@@ -35,27 +35,74 @@ export async function checkForServiceWorkerUpdate(): Promise<boolean> {
 
   await registration.update();
 
+  // An update may already be waiting from a previous check.
   if (registration.waiting) {
     onUpdateCallback?.(registration);
     return true;
   }
 
-  // An update may still be installing — wait briefly for it to finish.
-  if (registration.installing) {
-    return new Promise<boolean>((resolve) => {
-      const installing = registration.installing!;
-      const timeout = setTimeout(() => resolve(false), 10_000);
-      installing.addEventListener("statechange", () => {
-        if (installing.state === "installed") {
-          clearTimeout(timeout);
-          onUpdateCallback?.(registration);
-          resolve(true);
+  // After registration.update(), the browser may still be downloading the
+  // new SW.  `installing` might already be set, or the `updatefound` event
+  // may fire shortly.  Wait for either case with a single helper.
+  return waitForUpdate(registration);
+}
+
+/**
+ * Wait for a service worker update to finish installing.
+ * Handles both the case where `installing` is already set and the case
+ * where `updatefound` hasn't fired yet (race after `registration.update()`).
+ * Times out after 10 seconds and returns false if no update materialises.
+ */
+function waitForUpdate(registration: ServiceWorkerRegistration): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    let settled = false;
+
+    const timeout = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        registration.removeEventListener("updatefound", onUpdateFound);
+        resolve(false);
+      }
+    }, 10_000);
+
+    function finish() {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      registration.removeEventListener("updatefound", onUpdateFound);
+      onUpdateCallback?.(registration);
+      resolve(true);
+    }
+
+    function waitForInstalled(sw: ServiceWorker) {
+      if (sw.state === "installed") {
+        finish();
+        return;
+      }
+      sw.addEventListener("statechange", () => {
+        if (sw.state === "installed") {
+          finish();
         }
       });
-    });
-  }
+    }
 
-  return false;
+    function onUpdateFound() {
+      const installing = registration.installing;
+      if (installing) {
+        waitForInstalled(installing);
+      }
+    }
+
+    // If already installing, wait for it directly.
+    if (registration.installing) {
+      waitForInstalled(registration.installing);
+      return;
+    }
+
+    // Otherwise wait for the `updatefound` event — the browser fires this
+    // asynchronously after `registration.update()` discovers a new SW.
+    registration.addEventListener("updatefound", onUpdateFound);
+  });
 }
 
 export function registerServiceWorker() {

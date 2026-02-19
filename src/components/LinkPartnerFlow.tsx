@@ -274,10 +274,9 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
               if (peer.state === "open") {
                 clearInterval(interval);
                 resolve();
-              } else if (
-                peer.state === "failed" ||
-                peer.state === "closed"
-              ) {
+              } else if (peer.state === "closed") {
+                // Only treat explicit close as terminal — see comment in
+                // DeviceTransferFlow for rationale.
                 clearInterval(interval);
                 reject(
                   new Error("Connection failed while waiting for partner."),
