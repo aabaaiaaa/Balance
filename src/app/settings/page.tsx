@@ -644,7 +644,7 @@ export default function SettingsPage() {
       {/* About section */}
       <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
         <h3 className="font-medium text-gray-900 dark:text-slate-100">About</h3>
-        <p className="mt-1 text-sm text-gray-400 dark:text-slate-500">Balance v0.1.0</p>
+        <p className="mt-1 text-sm text-gray-400 dark:text-slate-500">Balance v{process.env.NEXT_PUBLIC_APP_VERSION}</p>
       </section>
     </div>
   );
