@@ -162,7 +162,7 @@ export class PeerConnection {
   constructor(config: PeerConnectionConfig = {}) {
     this.config = {
       iceServers: config.iceServers ?? [],
-      connectionTimeoutMs: config.connectionTimeoutMs ?? 30_000,
+      connectionTimeoutMs: config.connectionTimeoutMs ?? 300_000,
     };
   }
 

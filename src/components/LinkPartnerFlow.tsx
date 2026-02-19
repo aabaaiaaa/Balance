@@ -74,10 +74,12 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [partnerDeviceId, setPartnerDeviceId] = useState<string | null>(null);
   const [linkRequest, setLinkRequest] = useState<LinkRequestMessage | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
 
   const peerRef = useRef<PeerConnection | null>(null);
   const roleRef = useRef<"initiator" | "joiner" | null>(null);
   const waitTimersRef = useRef<{ interval?: ReturnType<typeof setInterval>; timeout?: ReturnType<typeof setTimeout> }>({});
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Clean up peer connection and timers on unmount
   useEffect(() => {
@@ -88,6 +90,32 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
       clearTimeout(timers.timeout);
     };
   }, []);
+
+  // Countdown timer for show-offer / show-answer steps
+  useEffect(() => {
+    if (step !== "show-offer" && step !== "show-answer") {
+      setTimeRemaining(null);
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+      return;
+    }
+
+    const deadline = Date.now() + 300_000;
+    const update = () => {
+      const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      setTimeRemaining(remaining);
+    };
+    update();
+    countdownRef.current = setInterval(update, 1000);
+    return () => {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
+  }, [step]);
 
   // -----------------------------------------------------------------------
   // Helpers
@@ -263,11 +291,11 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
               if (peer.state !== "open") {
                 reject(
                   new Error(
-                    "Connection timed out. Make sure your partner scans the QR code.",
+                    "Connection timed out. Make sure your partner scans or pastes the code.",
                   ),
                 );
               }
-            }, 60_000);
+            }, 300_000);
             waitTimersRef.current.timeout = timeout;
           });
 
@@ -504,7 +532,12 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
 
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-slate-400">
             <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
-            Waiting for partner to scan...
+            Waiting for partner to scan or paste...
+            {timeRemaining !== null && (
+              <span className="tabular-nums">
+                ({Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, "0")})
+              </span>
+            )}
           </div>
 
           <button
@@ -575,7 +608,12 @@ export function LinkPartnerFlow({ onClose }: LinkPartnerFlowProps) {
 
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-slate-400">
             <div className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
-            Waiting for partner to scan...
+            Waiting for partner to scan or paste...
+            {timeRemaining !== null && (
+              <span className="tabular-nums">
+                ({Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, "0")})
+              </span>
+            )}
           </div>
         </div>
       )}

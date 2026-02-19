@@ -17,8 +17,8 @@ import type { RemoteSyncConfig } from "@/types/models";
 /** Default public STUN server used when no custom server is configured. */
 const DEFAULT_STUN_SERVER = "stun:stun.l.google.com:19302";
 
-/** Connection timeout for remote mode (longer than local to allow NAT traversal). */
-const REMOTE_CONNECTION_TIMEOUT_MS = 45_000;
+/** Connection timeout for remote mode (5 min to allow time for copy/paste signalling). */
+const REMOTE_CONNECTION_TIMEOUT_MS = 300_000;
 
 /**
  * Build a PeerConnectionConfig for remote network mode.
@@ -67,7 +67,7 @@ export function buildRemotePeerConfig(
 export function buildLocalPeerConfig(): PeerConnectionConfig {
   return {
     iceServers: [],
-    connectionTimeoutMs: 30_000,
+    connectionTimeoutMs: 300_000,
   };
 }
 
