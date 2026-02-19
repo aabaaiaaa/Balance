@@ -8,6 +8,7 @@ import { db, deleteDatabase } from "@/lib/db";
 import { BackupRestore } from "@/components/BackupRestore";
 import { useTheme } from "@/components/ThemeProvider";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
+import { checkForServiceWorkerUpdate } from "@/lib/register-sw";
 import type { Theme, WeekStartDay, RemoteSyncConfig } from "@/types/models";
 
 // Lazy-load the LinkPartnerFlow — only shown when user taps "Link Partner"
@@ -312,6 +313,7 @@ export default function SettingsPage() {
   const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
   const [showClearDataConfirm, setShowClearDataConfirm] = useState(false);
   const [showSyncHistory, setShowSyncHistory] = useState(false);
+  const [updateCheckStatus, setUpdateCheckStatus] = useState<"idle" | "checking" | "up-to-date" | "found">("idle");
 
   const handleUnlink = useCallback(async () => {
     await db.userPreferences.update("prefs", {
@@ -643,8 +645,35 @@ export default function SettingsPage() {
 
       {/* About section */}
       <section className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
-        <h3 className="font-medium text-gray-900 dark:text-slate-100">About</h3>
-        <p className="mt-1 text-sm text-gray-400 dark:text-slate-500">Balance v{process.env.NEXT_PUBLIC_APP_VERSION}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-slate-100">About</h3>
+            <p className="mt-1 text-sm text-gray-400 dark:text-slate-500">Balance v{process.env.NEXT_PUBLIC_APP_VERSION}</p>
+          </div>
+          <button
+            type="button"
+            disabled={updateCheckStatus === "checking"}
+            onClick={async () => {
+              setUpdateCheckStatus("checking");
+              try {
+                const found = await checkForServiceWorkerUpdate();
+                setUpdateCheckStatus(found ? "found" : "up-to-date");
+                if (!found) {
+                  setTimeout(() => setUpdateCheckStatus("idle"), 3000);
+                }
+              } catch {
+                setUpdateCheckStatus("up-to-date");
+                setTimeout(() => setUpdateCheckStatus("idle"), 3000);
+              }
+            }}
+            className="rounded-lg border border-gray-200 dark:border-slate-600 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-slate-300 transition-colors hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50"
+          >
+            {updateCheckStatus === "checking" && "Checking..."}
+            {updateCheckStatus === "up-to-date" && "Up to date"}
+            {updateCheckStatus === "found" && "Update found!"}
+            {updateCheckStatus === "idle" && "Check for updates"}
+          </button>
+        </div>
       </section>
     </div>
   );

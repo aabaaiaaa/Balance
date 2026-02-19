@@ -21,6 +21,43 @@ export function applyServiceWorkerUpdate(registration: ServiceWorkerRegistration
   waiting.postMessage({ type: "SKIP_WAITING" });
 }
 
+/**
+ * Manually check for a service worker update.
+ * Returns true if an update was found (waiting or installing), false otherwise.
+ */
+export async function checkForServiceWorkerUpdate(): Promise<boolean> {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    return false;
+  }
+
+  const registration = await navigator.serviceWorker.getRegistration();
+  if (!registration) return false;
+
+  await registration.update();
+
+  if (registration.waiting) {
+    onUpdateCallback?.(registration);
+    return true;
+  }
+
+  // An update may still be installing — wait briefly for it to finish.
+  if (registration.installing) {
+    return new Promise<boolean>((resolve) => {
+      const installing = registration.installing!;
+      const timeout = setTimeout(() => resolve(false), 10_000);
+      installing.addEventListener("statechange", () => {
+        if (installing.state === "installed") {
+          clearTimeout(timeout);
+          onUpdateCallback?.(registration);
+          resolve(true);
+        }
+      });
+    });
+  }
+
+  return false;
+}
+
 export function registerServiceWorker() {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
     return;
