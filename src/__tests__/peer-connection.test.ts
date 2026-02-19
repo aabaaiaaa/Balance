@@ -513,6 +513,57 @@ describe("PeerConnection with mocked RTCPeerConnection", () => {
     pc.close();
   });
 
+  it("buffers messages arriving before onMessage is registered", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Simulate receiving a message BEFORE any callback is registered
+    if (typeof mockDataChannel.onmessage === "function") {
+      mockDataChannel.onmessage({ data: "CHUNK:1:1:early message" });
+    }
+
+    // Now register the callback — it should receive the buffered message
+    const received: string[] = [];
+    pc.onMessage((data) => received.push(data));
+
+    expect(received).toEqual(["early message"]);
+    pc.close();
+  });
+
+  it("buffers multiple messages arriving before onMessage is registered", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Simulate receiving multiple messages before callback registration
+    if (typeof mockDataChannel.onmessage === "function") {
+      mockDataChannel.onmessage({ data: "CHUNK:1:1:first" });
+      mockDataChannel.onmessage({ data: "CHUNK:1:1:second" });
+    }
+
+    const received: string[] = [];
+    pc.onMessage((data) => received.push(data));
+
+    expect(received).toEqual(["first", "second"]);
+    pc.close();
+  });
+
+  it("buffers reassembled multi-chunk messages arriving before onMessage", async () => {
+    const pc = new PeerConnection();
+    await pc.createOffer();
+
+    // Simulate receiving a 2-chunk message before callback registration
+    if (typeof mockDataChannel.onmessage === "function") {
+      mockDataChannel.onmessage({ data: "CHUNK:1:2:hello " });
+      mockDataChannel.onmessage({ data: "CHUNK:2:2:world" });
+    }
+
+    const received: string[] = [];
+    pc.onMessage((data) => received.push(data));
+
+    expect(received).toEqual(["hello world"]);
+    pc.close();
+  });
+
   it("onMessage receives and reassembles chunked messages", async () => {
     const pc = new PeerConnection();
     await pc.createOffer();

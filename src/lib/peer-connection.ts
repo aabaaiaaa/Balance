@@ -158,6 +158,7 @@ export class PeerConnection {
   private dataChannel: RTCDataChannel | null = null;
   private messageCallbacks: MessageCallback[] = [];
   private chunkProgressCallbacks: ChunkProgressCallback[] = [];
+  private pendingMessages: string[] = [];
   private incomingChunks = new Map<number, string>();
   private expectedChunkTotal = 0;
   private timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -331,9 +332,19 @@ export class PeerConnection {
   /**
    * Register a callback for incoming messages.
    * Chunked messages are automatically reassembled before delivery.
+   * Any messages that arrived before the callback was registered are
+   * delivered immediately (in order).
    */
   onMessage(callback: MessageCallback): void {
     this.messageCallbacks.push(callback);
+
+    // Flush any messages that arrived before the callback was registered
+    if (this.pendingMessages.length > 0) {
+      const buffered = this.pendingMessages.splice(0);
+      for (const msg of buffered) {
+        callback(msg);
+      }
+    }
   }
 
   /**
@@ -364,6 +375,7 @@ export class PeerConnection {
     this.setState("closed");
     this.incomingChunks.clear();
     this.expectedChunkTotal = 0;
+    this.pendingMessages = [];
     this.chunkProgressCallbacks = [];
   }
 
@@ -558,6 +570,13 @@ export class PeerConnection {
 
   /** Deliver a fully reassembled message to all registered callbacks. */
   private deliverMessage(data: string): void {
+    if (this.messageCallbacks.length === 0) {
+      // No callbacks registered yet — buffer so it's delivered when
+      // onMessage() is called (fixes race between data arrival and
+      // callback registration).
+      this.pendingMessages.push(data);
+      return;
+    }
     for (const cb of this.messageCallbacks) {
       cb(data);
     }
