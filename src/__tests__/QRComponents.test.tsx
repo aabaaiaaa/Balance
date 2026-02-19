@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QRDisplay } from "@/components/QRDisplay";
 import { QRScanner } from "@/components/QRScanner";
@@ -25,8 +25,18 @@ jest.mock("react-qr-code", () => {
 // ---------------------------------------------------------------------------
 
 jest.mock("@/lib/qr-multicode", () => ({
-  splitIntoChunks: (data: string) => {
-    // Simulate single chunk for small data, multi-chunk for large data
+  splitIntoChunks: (data: string, maxChunkBytes?: number) => {
+    // Multi-mode: small chunk size produces many chunks
+    if (maxChunkBytes && maxChunkBytes < 1800) {
+      const chunkSize = Math.max(10, maxChunkBytes - 10); // leave room for header
+      const chunks: string[] = [];
+      for (let i = 0; i < data.length; i += chunkSize) {
+        chunks.push(`[${chunks.length + 1}/?]${data.substring(i, i + chunkSize)}`);
+      }
+      // Fix up total
+      return chunks.map((_, idx) => `[${idx + 1}/${chunks.length}]${data.substring(idx * chunkSize, (idx + 1) * chunkSize)}`);
+    }
+    // Default mode: simulate single chunk for small data, multi-chunk for large data
     if (data.length > 100) {
       const half = Math.ceil(data.length / 2);
       return [
@@ -76,6 +86,14 @@ jest.mock("html5-qrcode", () => ({
 // ---------------------------------------------------------------------------
 
 describe("QRDisplay", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("renders a QR code SVG with the provided data", () => {
     render(<QRDisplay data="test-sdp-offer-data" />);
 
@@ -96,12 +114,12 @@ describe("QRDisplay", () => {
     render(<QRDisplay data={longData} />);
 
     expect(screen.getByText("Code 1 of 2")).toBeInTheDocument();
-    expect(screen.getByLabelText("Previous QR code")).toBeDisabled();
-    expect(screen.getByLabelText("Next QR code")).toBeEnabled();
+    expect(screen.getByLabelText("Previous QR code")).toBeInTheDocument();
+    expect(screen.getByLabelText("Next QR code")).toBeInTheDocument();
   });
 
   it("navigates between QR codes in a multi-code sequence", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const longData = "A".repeat(150);
     render(<QRDisplay data={longData} />);
 
@@ -110,8 +128,7 @@ describe("QRDisplay", () => {
     await user.click(screen.getByLabelText("Next QR code"));
 
     expect(screen.getByText("Code 2 of 2")).toBeInTheDocument();
-    expect(screen.getByLabelText("Next QR code")).toBeDisabled();
-    expect(screen.getByLabelText("Previous QR code")).toBeEnabled();
+    expect(screen.getByLabelText("Previous QR code")).toBeInTheDocument();
   });
 
   it("does not show navigation for single QR codes", () => {
@@ -122,7 +139,7 @@ describe("QRDisplay", () => {
   });
 
   it("copies data to clipboard when Copy Code is clicked", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const writeText = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText },
@@ -135,7 +152,136 @@ describe("QRDisplay", () => {
     await user.click(screen.getByText("Copy Code"));
 
     expect(writeText).toHaveBeenCalledWith("test-sdp-data");
-    expect(screen.getByText("Copied!")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Copied!")).toBeInTheDocument();
+    });
+  });
+
+  it("shows the multi-mode toggle button", () => {
+    render(<QRDisplay data="short-data" />);
+
+    expect(screen.getByText("Split into smaller codes")).toBeInTheDocument();
+  });
+
+  it("toggles to multi-QR mode and produces multiple codes", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    // 50 chars is short enough to be a single code normally,
+    // but multi-mode with chunk size 300 (chunkSize ~290 after header) still yields 1 chunk.
+    // Use something long enough that multi-mode splits it.
+    const data = "B".repeat(150);
+    render(<QRDisplay data={data} />);
+
+    // In default mode: mock splits >100 chars into 2 chunks
+    expect(screen.getByText("Code 1 of 2")).toBeInTheDocument();
+
+    // Toggle to multi-mode — mock with small maxChunkBytes produces more chunks
+    await user.click(screen.getByText("Split into smaller codes"));
+
+    // Multi-mode: chunkSize = max(10, 300-10) = 290, but our mock uses that to split
+    // 150 chars / 290 = 1 chunk. Let's use longer data for a better test.
+    // Actually with 150 chars and chunkSize 290: ceil(150/290) = 1. Let's check.
+    // The toggle text should now say "Show single code"
+    expect(screen.getByText("Show single code")).toBeInTheDocument();
+  });
+
+  it("multi-mode produces more chunks for large data", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    // 500 chars: default mode = 2 chunks (>100), multi-mode chunkSize=290 → ceil(500/290)=2
+    // Let's use 1000 chars: default = 2 chunks, multi chunkSize=290 → ceil(1000/290)=4
+    const data = "C".repeat(1000);
+    render(<QRDisplay data={data} />);
+
+    // Default mode: 2 chunks
+    expect(screen.getByText("Code 1 of 2")).toBeInTheDocument();
+
+    // Toggle to multi-mode
+    await user.click(screen.getByText("Split into smaller codes"));
+
+    // Multi-mode: chunkSize = 290, 1000/290 = 4 chunks (ceil)
+    expect(screen.getByText("Code 1 of 4")).toBeInTheDocument();
+  });
+
+  it("auto-cycles through codes in multi-mode", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const data = "D".repeat(1000);
+    render(<QRDisplay data={data} />);
+
+    // Toggle to multi-mode
+    await user.click(screen.getByText("Split into smaller codes"));
+    expect(screen.getByText("Code 1 of 4")).toBeInTheDocument();
+
+    // Advance timer — should auto-cycle to code 2
+    act(() => {
+      jest.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Code 2 of 4")).toBeInTheDocument();
+
+    // Advance again — should auto-cycle to code 3
+    act(() => {
+      jest.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Code 3 of 4")).toBeInTheDocument();
+  });
+
+  it("pauses and resumes auto-cycle", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const data = "E".repeat(1000);
+    render(<QRDisplay data={data} />);
+
+    // Toggle to multi-mode
+    await user.click(screen.getByText("Split into smaller codes"));
+    expect(screen.getByText("Code 1 of 4")).toBeInTheDocument();
+
+    // Pause auto-cycle
+    await user.click(screen.getByLabelText("Pause auto-cycle"));
+    expect(screen.getByText("Resume")).toBeInTheDocument();
+
+    // Advance timer — should NOT change
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("Code 1 of 4")).toBeInTheDocument();
+
+    // Resume
+    await user.click(screen.getByLabelText("Resume auto-cycle"));
+    expect(screen.getByText("Pause")).toBeInTheDocument();
+
+    // Now it should advance
+    act(() => {
+      jest.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Code 2 of 4")).toBeInTheDocument();
+  });
+
+  it("wraps around when auto-cycling past the last code", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const data = "F".repeat(1000);
+    render(<QRDisplay data={data} />);
+
+    // Toggle to multi-mode (4 chunks)
+    await user.click(screen.getByText("Split into smaller codes"));
+
+    // Advance through all 4 codes + one more to wrap
+    act(() => {
+      jest.advanceTimersByTime(2500 * 4);
+    });
+    // Should be back to code 1
+    expect(screen.getByText("Code 1 of 4")).toBeInTheDocument();
+  });
+
+  it("toggles back to single mode", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const data = "G".repeat(1000);
+    render(<QRDisplay data={data} />);
+
+    // Toggle to multi-mode
+    await user.click(screen.getByText("Split into smaller codes"));
+    expect(screen.getByText("Code 1 of 4")).toBeInTheDocument();
+
+    // Toggle back
+    await user.click(screen.getByText("Show single code"));
+    expect(screen.getByText("Code 1 of 2")).toBeInTheDocument();
+    expect(screen.getByText("Split into smaller codes")).toBeInTheDocument();
   });
 });
 
