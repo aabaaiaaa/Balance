@@ -25,6 +25,8 @@ export interface PeerConnectionConfig {
 }
 
 export type MessageCallback = (data: string) => void;
+export type ChunkProgressCallback = (received: number, total: number) => void;
+export type SendProgressCallback = (sent: number, total: number) => void;
 
 // ---------------------------------------------------------------------------
 // SDP compression helpers (exported for unit testing)
@@ -148,10 +150,14 @@ export function reassembleChunkedPayload(
 // PeerConnection class
 // ---------------------------------------------------------------------------
 
+/** Buffered amount threshold for backpressure (64 KB). */
+const BUFFER_HIGH_WATER = 64 * 1024;
+
 export class PeerConnection {
   private pc: RTCPeerConnection | null = null;
   private dataChannel: RTCDataChannel | null = null;
   private messageCallbacks: MessageCallback[] = [];
+  private chunkProgressCallbacks: ChunkProgressCallback[] = [];
   private incomingChunks = new Map<number, string>();
   private expectedChunkTotal = 0;
   private timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -285,11 +291,57 @@ export class PeerConnection {
   }
 
   /**
+   * Send a large string payload with backpressure and progress reporting.
+   * Waits for the data channel buffer to drain between chunks so large
+   * payloads don't overwhelm the channel.
+   */
+  async sendWithProgress(data: string, onProgress?: SendProgressCallback): Promise<void> {
+    if (!this.dataChannel || this.dataChannel.readyState !== "open") {
+      throw new Error("Data channel is not open");
+    }
+
+    const dc = this.dataChannel;
+    const chunks = chunkPayload(data);
+    const total = chunks.length;
+
+    for (let i = 0; i < chunks.length; i++) {
+      // Backpressure: wait for buffer to drain if above threshold
+      while (dc.bufferedAmount > BUFFER_HIGH_WATER) {
+        await new Promise<void>((resolve) => {
+          // Use bufferedamountlow event if supported, otherwise poll
+          dc.bufferedAmountLowThreshold = BUFFER_HIGH_WATER;
+          const handler = () => {
+            dc.removeEventListener("bufferedamountlow", handler);
+            resolve();
+          };
+          dc.addEventListener("bufferedamountlow", handler);
+          // Safety fallback: poll in case the event doesn't fire
+          setTimeout(() => {
+            dc.removeEventListener("bufferedamountlow", handler);
+            resolve();
+          }, 100);
+        });
+      }
+
+      dc.send(chunks[i]);
+      onProgress?.(i + 1, total);
+    }
+  }
+
+  /**
    * Register a callback for incoming messages.
    * Chunked messages are automatically reassembled before delivery.
    */
   onMessage(callback: MessageCallback): void {
     this.messageCallbacks.push(callback);
+  }
+
+  /**
+   * Register a callback for incoming chunk progress.
+   * Called each time a chunk arrives, before reassembly completes.
+   */
+  onChunkProgress(callback: ChunkProgressCallback): void {
+    this.chunkProgressCallbacks.push(callback);
   }
 
   // -----------------------------------------------------------------------
@@ -312,6 +364,7 @@ export class PeerConnection {
     this.setState("closed");
     this.incomingChunks.clear();
     this.expectedChunkTotal = 0;
+    this.chunkProgressCallbacks = [];
   }
 
   // -----------------------------------------------------------------------
@@ -470,6 +523,11 @@ export class PeerConnection {
 
     this.expectedChunkTotal = chunk.total;
     this.incomingChunks.set(chunk.index, chunk.payload);
+
+    // Notify chunk progress listeners
+    for (const cb of this.chunkProgressCallbacks) {
+      cb(this.incomingChunks.size, chunk.total);
+    }
 
     if (this.incomingChunks.size === chunk.total) {
       const assembled = reassembleChunkedPayload(

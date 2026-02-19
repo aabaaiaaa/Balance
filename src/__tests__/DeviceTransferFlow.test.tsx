@@ -11,7 +11,9 @@ const mockAcceptOffer = jest.fn();
 const mockCompleteConnection = jest.fn();
 const mockClose = jest.fn();
 const mockSend = jest.fn();
+const mockSendWithProgress = jest.fn();
 const mockOnMessage = jest.fn();
+const mockOnChunkProgress = jest.fn();
 
 jest.mock("@/lib/peer-connection", () => ({
   PeerConnection: jest.fn().mockImplementation(() => ({
@@ -20,7 +22,9 @@ jest.mock("@/lib/peer-connection", () => ({
     completeConnection: mockCompleteConnection,
     close: mockClose,
     send: mockSend,
+    sendWithProgress: mockSendWithProgress,
     onMessage: mockOnMessage,
+    onChunkProgress: mockOnChunkProgress,
     state: "open",
   })),
 }));
@@ -78,7 +82,9 @@ beforeEach(() => {
   mockCompleteConnection.mockClear();
   mockClose.mockClear();
   mockSend.mockClear();
+  mockSendWithProgress.mockClear();
   mockOnMessage.mockClear();
+  mockOnChunkProgress.mockClear();
   mockBuildBackup.mockClear();
   mockValidateBackupFile.mockClear();
   mockImportReplaceAll.mockClear();
@@ -163,6 +169,7 @@ describe("DeviceTransferFlow", () => {
       mockCreateOffer.mockResolvedValue("offer-data");
       mockCompleteConnection.mockResolvedValue(undefined);
       mockBuildBackup.mockResolvedValue(mockBackup);
+      mockSendWithProgress.mockResolvedValue(undefined);
 
       // Simulate the receiver sending a "transfer-complete" reply
       mockOnMessage.mockImplementation((callback: (data: string) => void) => {
@@ -196,10 +203,11 @@ describe("DeviceTransferFlow", () => {
         expect(screen.getByText("Transfer Complete")).toBeInTheDocument();
       });
 
-      // Verify backup was built and sent
+      // Verify backup was built and sent via sendWithProgress
       expect(mockBuildBackup).toHaveBeenCalled();
-      expect(mockSend).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"transfer-backup"')
+      expect(mockSendWithProgress).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"transfer-backup"'),
+        expect.any(Function),
       );
 
       // Verify summary

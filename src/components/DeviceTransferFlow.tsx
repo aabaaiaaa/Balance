@@ -82,6 +82,8 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
   const [transferResult, setTransferResult] = useState<ImportResult | null>(null);
   const [recordsSent, setRecordsSent] = useState<number>(0);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [transferPhase, setTransferPhase] = useState<string>("");
+  const [chunkProgress, setChunkProgress] = useState<{ current: number; total: number } | null>(null);
 
   const prefs = useLiveQuery(() => db.userPreferences.get("prefs"));
   const peerRef = useRef<PeerConnection | null>(null);
@@ -98,9 +100,12 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
     };
   }, []);
 
-  // Countdown timer for show-offer / show-answer steps
+  // Countdown timer for show-offer / show-answer / transferring steps
   useEffect(() => {
-    if (step !== "show-offer" && step !== "show-answer") {
+    const isWaiting = step === "show-offer" || step === "show-answer";
+    const isTransferring = step === "transferring";
+
+    if (!isWaiting && !isTransferring) {
       setTimeRemaining(null);
       if (countdownRef.current) {
         clearInterval(countdownRef.current);
@@ -109,7 +114,8 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
       return;
     }
 
-    const deadline = Date.now() + 300_000;
+    const timeoutMs = isTransferring ? 120_000 : 300_000;
+    const deadline = Date.now() + timeoutMs;
     const update = () => {
       const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
       setTimeRemaining(remaining);
@@ -144,14 +150,24 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
   const runSenderTransfer = useCallback(
     async (peer: PeerConnection) => {
       setStep("transferring");
+      setChunkProgress(null);
       try {
+        setTransferPhase("Building backup...");
         const backup = await buildBackup();
+        setRecordsSent(backup.totalRecords);
+
+        setTransferPhase("Sending data...");
         const message: TransferBackupMessage = {
           type: "transfer-backup",
           backup,
         };
-        peer.send(JSON.stringify(message));
-        setRecordsSent(backup.totalRecords);
+        const payload = JSON.stringify(message);
+        await peer.sendWithProgress(payload, (sent, total) => {
+          setChunkProgress({ current: sent, total });
+        });
+
+        setTransferPhase("Waiting for confirmation...");
+        setChunkProgress(null);
 
         // Wait for the receiver's acknowledgement
         await new Promise<void>((resolve, reject) => {
@@ -194,7 +210,16 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
   const runReceiverTransfer = useCallback(
     async (peer: PeerConnection, mode: ImportMode) => {
       setStep("transferring");
+      setChunkProgress(null);
       try {
+        setTransferPhase("Waiting for data...");
+
+        // Track incoming chunk progress
+        peer.onChunkProgress((received, total) => {
+          setTransferPhase("Receiving data...");
+          setChunkProgress({ current: received, total });
+        });
+
         const result = await new Promise<ImportResult>((resolve, reject) => {
           const timeout = setTimeout(() => {
             reject(new Error("Transfer timed out waiting for data."));
@@ -203,6 +228,8 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
           peer.onMessage(async (data) => {
             clearTimeout(timeout);
             try {
+              setChunkProgress(null);
+              setTransferPhase("Validating data...");
               const msg = JSON.parse(data) as TransferMessage;
               if (msg.type !== "transfer-backup") {
                 reject(new Error("Unexpected message from sender."));
@@ -210,12 +237,14 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
               }
 
               const backup = validateBackupFile(msg.backup);
+              setTransferPhase(`Importing ${backup.totalRecords} records...`);
               const importResult =
                 mode === "replace"
                   ? await importReplaceAll(backup)
                   : await importMerge(backup);
 
               // Send acknowledgement
+              setTransferPhase("Sending confirmation...");
               const reply: TransferCompleteMessage = {
                 type: "transfer-complete",
                 recordsImported: importResult.totalImported,
@@ -394,6 +423,8 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
     setErrorMessage(null);
     setTransferResult(null);
     setRecordsSent(0);
+    setTransferPhase("");
+    setChunkProgress(null);
     setNetworkMode("local");
     setStep("choose-role");
   }, []);
@@ -768,13 +799,49 @@ export function DeviceTransferFlow({ onClose }: DeviceTransferFlowProps) {
             <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
               {role === "sender" ? "Sending data..." : "Receiving data..."}
             </p>
+            {timeRemaining !== null && (
+              <p className="text-xs tabular-nums text-gray-400 dark:text-slate-500">
+                Timeout in {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, "0")}
+              </p>
+            )}
           </div>
 
-          <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
-            <p className="text-sm text-gray-600 dark:text-slate-300">
+          <div className="space-y-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-card p-4">
+            {transferPhase && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-slate-300">Status</span>
+                <span className="font-medium text-gray-900 dark:text-slate-100">{transferPhase}</span>
+              </div>
+            )}
+
+            {recordsSent > 0 && role === "sender" && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-slate-300">Records</span>
+                <span className="font-medium text-gray-900 dark:text-slate-100">{recordsSent}</span>
+              </div>
+            )}
+
+            {chunkProgress && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-slate-300">Progress</span>
+                  <span className="tabular-nums font-medium text-gray-900 dark:text-slate-100">
+                    {chunkProgress.current} / {chunkProgress.total} chunks
+                  </span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-slate-700">
+                  <div
+                    className="h-1.5 rounded-full bg-indigo-500 transition-all"
+                    style={{ width: `${(chunkProgress.current / chunkProgress.total) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-gray-400 dark:text-slate-500">
               {role === "sender"
-                ? "Transferring your full dataset to the other device. Keep this screen open."
-                : `Waiting for data from sender (${importMode === "replace" ? "Replace All" : "Merge"} mode). Keep this screen open.`}
+                ? "Keep this screen open until the transfer completes."
+                : `Import mode: ${importMode === "replace" ? "Replace All" : "Merge"}. Keep this screen open.`}
             </p>
           </div>
         </div>
