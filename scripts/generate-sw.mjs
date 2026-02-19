@@ -13,7 +13,14 @@ async function buildSW() {
     swDest: resolve(rootDir, "out/sw.js"),
     globDirectory: resolve(rootDir, "out"),
     globPatterns: [
-      "**/*.{html,js,css,png,jpg,jpeg,svg,gif,ico,woff,woff2,ttf,eot,json,webmanifest,txt,wasm}",
+      // Precache all static assets EXCEPT .txt files. The .txt files are
+      // Next.js RSC payloads fetched during client-side navigation. They
+      // must NOT be precached because when a new SW installs, it overwrites
+      // them in the shared cache with new content that the still-running
+      // old JS cannot parse — breaking client-side navigation until the
+      // tab is closed and reopened. Instead, .txt files use runtime caching
+      // (see runtimeCaching below).
+      "**/*.{html,js,css,png,jpg,jpeg,svg,gif,ico,woff,woff2,ttf,eot,json,webmanifest,wasm}",
     ],
     // Do NOT use skipWaiting — we handle updates gracefully via the UI
     // by prompting the user when a new version is available.
@@ -26,10 +33,28 @@ async function buildSW() {
     // Prefix precache URLs with basePath so the service worker intercepts
     // requests at the correct paths when deployed to a subdirectory
     modifyURLPrefix: basePath ? { "": `${basePath}/` } : {},
-    // Navigation fallback for SPA-style routing
-    navigateFallback: `${basePath}/index.html`,
-    // Don't use the navigation fallback for non-page requests
-    navigateFallbackDenylist: [new RegExp('^' + (basePath || '') + '/_next/'), /\/sw\.js$/],
+    // Do NOT use navigateFallback. This is a multi-page static export where
+    // each route has its own precached HTML file. A catch-all fallback to
+    // /index.html would serve the dashboard for any route whose URL doesn't
+    // exactly match the precache (e.g. /people without trailing slash),
+    // breaking navigation when Next.js falls back to a hard page load.
+    //
+    // Runtime-cache the RSC payload .txt files so client-side navigation
+    // works offline after a route has been visited at least once.
+    runtimeCaching: [
+      {
+        // Match Next.js RSC payload files (.txt) used for client-side nav
+        urlPattern: /\.txt$/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "rsc-payloads",
+          expiration: {
+            maxEntries: 200,
+            maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+          },
+        },
+      },
+    ],
   });
 
   console.log(
