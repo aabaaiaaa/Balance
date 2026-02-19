@@ -19,7 +19,7 @@ export function UpdatePrompt() {
   if (!registration) return null;
 
   return (
-    <div className="fixed top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 animate-slide-down">
+    <div className="fixed top-16 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 animate-slide-down">
       <div className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-card px-4 py-3 shadow-lg">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
           <svg
