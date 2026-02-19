@@ -130,7 +130,6 @@ afterEach(() => {
 
 /** Import the module fresh (after globals are set up). */
 function loadModule() {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require("@/lib/register-sw") as typeof import("@/lib/register-sw");
 }
 
